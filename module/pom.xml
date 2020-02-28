@@ -1,0 +1,268 @@
+<?xml version="1.0"?>
+<!--
+    Copyright 2019 David MacCormack
+  
+    Licensed under the Apache License, Version 2.0 (the "License"); you may not
+    use this file except in compliance with the License. You may obtain a copy
+    of the License at
+ 
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.jsonurl</groupId>
+  <artifactId>parent</artifactId>
+  <version>1</version>
+  <packaging>pom</packaging>
+
+  <name>${project.groupId}:${project.artifactId}</name>
+  <url>https://www.jsonurl.org</url>
+  <inceptionYear>2019</inceptionYear>
+
+  <properties>
+    <jdk.minor.version>8</jdk.minor.version>
+    <jdk.version>1.${jdk.minor.version}</jdk.version>
+    <char.encoding>UTF-8</char.encoding>
+
+    <project.build.sourceEncoding>${char.encoding}</project.build.sourceEncoding>
+    <project.build.resourceEncoding>${char.encoding}</project.build.resourceEncoding>
+    <project.reporting.outputEncoding>${char.encoding}</project.reporting.outputEncoding>
+
+    <maven.compiler.source>${jdk.version}</maven.compiler.source>
+    <maven.compiler.target>${jdk.version}</maven.compiler.target>
+
+    <maven.compiler.plugin>3.8.1</maven.compiler.plugin>
+    <maven.jar.plugin>3.2.0</maven.jar.plugin>
+    <maven.source.plugin>3.2.1</maven.source.plugin>
+    <maven.surefire.plugin>2.22.2</maven.surefire.plugin>
+    <maven.javadoc.plugin>3.1.1</maven.javadoc.plugin>
+    <maven.checkstyle.plugin>3.1.1</maven.checkstyle.plugin>
+    <maven.gpg.plugin>1.6</maven.gpg.plugin>
+    <maven.site.plugin>3.8.2</maven.site.plugin>
+    <maven.doxia.plugin>[1.9,)</maven.doxia.plugin>
+    <maven.project.info.reports.plugin>2.9</maven.project.info.reports.plugin>
+
+    <junit.version>[5.4,)</junit.version>
+    <jsonurl.version>1.0.0-SNAPSHOT</jsonurl.version>
+    <jsonurl.description>
+      RFC8259 describes the JSON data model and interchange format,
+      which is widely used in application-level protocols including RESTful
+      APIs. It is common for applications to request resources via the HTTP
+      POST method, with JSON entities, however, POST is suboptimal for requests
+      which do not modify a resource's state. JSON->URL defines a text format
+      for the JSON data model suitable for use within an URI (as described by
+      RFC3986).
+    </jsonurl.description>
+    
+    <jsonurl.scm.path>jsonurl/jsonurl-java</jsonurl.scm.path>
+    <jsonurl.scm.base>scm:git:git@github.com:${jsonurl.scm.path}.git</jsonurl.scm.base>
+    <jsonurl.scm.url>https://github.com/${jsonurl.scm.path}</jsonurl.scm.url>
+
+    <checkstyle.config.location>../../config/checkstyle.xml</checkstyle.config.location>
+  </properties>
+
+  <description>
+	${jsonurl.description}
+	
+	This is the parent POM for the all jsonurl maven artifacts.
+  </description>
+
+  <licenses>
+    <license>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <name>Apache-2.0</name>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <organization>
+    <name>jsonurl.org</name>
+    <url>http://jsonurl.org</url>
+  </organization>
+  <developers>
+    <developer>
+      <id>dmaccormack</id>
+      <name>David MacCormack</name>
+    </developer>
+  </developers>
+  <issueManagement>
+    <url>https://github.com/jsonurl/jsonurl/issues</url>
+    <system>GitHub Issues</system>
+  </issueManagement>
+  <scm>
+    <url>${jsonurl.scm.url}/modules</url>
+    <connection>${jsonurl.scm.base}</connection>
+    <developerConnection>${jsonurl.scm.base}</developerConnection>
+  </scm>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>jsonurl-${project.artifactId}</finalName>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven.compiler.plugin}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>${maven.source.plugin}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>jar</goal>
+                <!--
+                <goal>test-jar</goal>
+                -->
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${maven.jar.plugin}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>test-jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>${maven.javadoc.plugin}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven.surefire.plugin}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <version>${maven.checkstyle.plugin}</version>
+          <configuration>
+            <configLocation>${checkstyle.config.location}</configLocation>
+            <encoding>${char.encoding}</encoding>
+            <consoleOutput>false</consoleOutput>
+            <failsOnError>true</failsOnError>
+            <linkXRef>false</linkXRef>
+            <includeTestSourceDirectory>true</includeTestSourceDirectory>
+          </configuration>
+          <executions>
+            <execution>
+              <id>validate</id>
+              <phase>validate</phase>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-gpg-plugin</artifactId>
+          <version>${maven.gpg.plugin}</version>
+          <executions>
+            <execution>
+              <id>sign-artifacts</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>sign</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>javadoc</id>
+      <activation>
+        <property>
+          <name>env.JAVA_HOME</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>checkstyle</id>
+      <activation>
+        <file>
+          <exists>${checkstyle.config.location}</exists>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-checkstyle-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    
+    <profile>
+      <id>gpg</id>
+      <activation>
+        <property>
+          <name>gpg.executable</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>
