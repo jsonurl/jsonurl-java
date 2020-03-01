@@ -121,7 +121,7 @@
   </dependencies>
 
   <build>
-    <finalName>jsonurl-${project.artifactId}</finalName>
+    <finalName>jsonurl-${project.artifactId}-${project.version}</finalName>
     <pluginManagement>
       <plugins>
         <plugin>
