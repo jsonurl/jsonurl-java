@@ -43,4 +43,13 @@
 	You likely wont depend on this directly unless you're implementing
 	JSON->URL with a new interface/library/framework.
   </description>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 </project>
