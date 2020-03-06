@@ -41,8 +41,8 @@
 
   <modules>
     <module>module</module>
-    <module>module/core</module>
-    <module>module/jsonorg</module>
-    <module>module/jsr374</module>
+    <module>module/jsonurl-core</module>
+    <module>module/jsonurl-jsonorg</module>
+    <module>module/jsonurl-jsr374</module>
   </modules>
 </project>

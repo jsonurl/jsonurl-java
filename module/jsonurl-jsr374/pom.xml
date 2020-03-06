@@ -26,7 +26,7 @@
     <version>1</version>
   </parent>
   
-  <artifactId>jsr374</artifactId>
+  <artifactId>jsonurl-jsr374</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
@@ -44,12 +44,12 @@
   <dependencies>
     <dependency>
       <groupId>org.jsonurl</groupId>
-      <artifactId>core</artifactId>
+      <artifactId>jsonurl-core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jsonurl</groupId>
-      <artifactId>core</artifactId>
+      <artifactId>jsonurl-core</artifactId>
       <version>${project.version}</version>
       <type>test-jar</type>
       <scope>test</scope>
