@@ -78,7 +78,7 @@ public abstract class AbstractParseTest<
         sb.append(PREFIX1).append(in).append(SUFFIX1);
         V parseResult = p.parse(sb.toString(), PREFIX1.length(), in.length());
 
-        if (out.equals(parseResult)) {
+        if (out.equals(parseResult) || out2 == null) {
             assertEquals(out, parseResult);
         } else {
             assertEquals(out2, parseResult);
@@ -215,7 +215,6 @@ public abstract class AbstractParseTest<
     @ParameterizedTest
     @Tag("parse")
     @Tag("string")
-    
     @CsvSource({
         //
         // INPUT,OUTPUT
@@ -229,6 +228,8 @@ public abstract class AbstractParseTest<
         "fals,",
         "hello+world,'hello world'",
         "hello%2Bworld,'hello+world'",
+        "y+%3D+mx+%2B+b,y = mx + b",
+        "a%3Db%26c%3Dd,a=b&c=d",
         // CHECKSTYLE:OFF
         "hello%F0%9F%8D%95world,'hello\uD83C\uDF55world'",
         // CHECKSTYLE:ON

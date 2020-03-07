@@ -683,7 +683,7 @@ public final class JsonUrl {
         }
 
         //
-        // a string that starts with a quote must be quoted
+        // figure out the most efficient way to safely encode the string
         //
         Encode.StringEncoding enc = Encode.getStringEncoding(s, start, end);
         
