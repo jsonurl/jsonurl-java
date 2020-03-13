@@ -33,8 +33,6 @@
 
   <name>${project.groupId}:${project.artifactId}</name>
   <description>
-	${jsonurl.description}
-	
 	This is the JSON->URL core library. It implements a parser, as defined
 	by the spec, with support for type parameters. Implementations for
 	specific APIs (e.g. JSR-374) leverage this and simply supply their own
