@@ -20,6 +20,7 @@ package org.jsonurl;
 import static org.jsonurl.CharUtil.digits;
 import static org.jsonurl.CharUtil.isDigit;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
@@ -33,9 +34,22 @@ import java.math.BigInteger;
  * @author David MacCormack
  * @since 2019-09-01
  */
-public class NumberBuilder implements NumberText {
+public class NumberBuilder implements NumberText, Serializable {
 
+    /**
+     * serialVersionUID.
+     */
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * The maximum number of digits I consider when parsing a
+     * {@link java.lang.Long Long}. 
+     */
     private static final int LONG_MAX_DIGITS = 18;
+    
+    /**
+     * Lookup table for exponent values.
+     */
     private static final long[] E = {
         1,                      // 0
         10,                     // 1
@@ -58,28 +72,89 @@ public class NumberBuilder implements NumberText {
         1000000000000000000L,   // 18
     };
 
-    public static final long MIN_LONG = -999999999999999999L;
-    public static final long MAX_LONG = 999999999999999999L;
-
-    private CharSequence text;
-    private int start;
-    private int stop;
-
-    private NumberText.Exponent exponentType = NumberText.Exponent.NONE;
-    private int intIndexStart = -1;
-    private int intIndexStop = -1;
-    private int decIndexStart = -1;
-    private int decIndexStop = -1;
-    private int expIndexStart = -1;
-    private int expIndexStop = -1;
+    /**
+     * the text that has been parsed.
+     */
+    private CharSequence text; // NOPMD - not a bean
     
+    /**
+     * the start index of {@link #text}.
+     */
+    private int start; // NOPMD - not a bean
+
+    /**
+     * the stop index of {@link #text}.
+     */
+    private int stop; // NOPMD - not a bean
+
+    /**
+     * The parsed exponent type.
+     */
+    private NumberText.Exponent exponentType = NumberText.Exponent.NONE;  // NOPMD - not a bean
+
+    /**
+     * The integer part start index. A result of calling
+     * {@link #parse(CharSequence, int, int)}.
+     */
+    private int intIndexStart = -1; // NOPMD - not a bean
+
+    /**
+     * The integer part stop index. A result of calling
+     * {@link #parse(CharSequence, int, int)}.
+     */
+    private int intIndexStop = -1; // NOPMD - not a bean
+
+    /**
+     * The decimal part start index. A result of calling
+     * {@link #parse(CharSequence, int, int)}.
+     */
+    private int decIndexStart = -1; // NOPMD - not a bean
+
+    /**
+     * The decimal part stop index. A result of calling
+     * {@link #parse(CharSequence, int, int)}.
+     */
+    private int decIndexStop = -1; // NOPMD - not a bean
+
+    /**
+     * The exponent part start index. A result of calling
+     * {@link #parse(CharSequence, int, int)}.
+     */
+    private int expIndexStart = -1; // NOPMD - not a bean
+
+    /**
+     * The exponent part stop index. A result of calling
+     * {@link #parse(CharSequence, int, int)}.
+     */
+    private int expIndexStop = -1; // NOPMD - not a bean
+
+    /**
+     * Create a new NumberBuilder.
+     *
+     * <p>This NumberBuilder will not have any text. You'll need to call
+     * {@link #parse(CharSequence, int, int)}.
+     */
     public NumberBuilder() {
+        // EMPTY
     }
 
+    /**
+     * Create a new NumberBuilder with the given text.
+     * @param s text
+     * @param start start index
+     * @param stop stop index
+     */
     public NumberBuilder(CharSequence s, int start, int stop) {
         parse(s, start, stop);
     }
-    
+
+    /**
+     * Create a new NumberBuilder with the given text.
+     *
+     * <p>This is a convenience for {@link
+     * #NumberBuilder(CharSequence, int, int)
+     * NumberBuilder(s, 0, s.length())}.
+     */
     public NumberBuilder(CharSequence s) {
         parse(s, 0, s.length());
     }
@@ -87,8 +162,9 @@ public class NumberBuilder implements NumberText {
     /**
      * Reset the internal state.
      */
+    @SuppressWarnings("PMD")
     public NumberBuilder reset() {
-        text = null;
+        text = null; 
         exponentType = NumberText.Exponent.NONE;
 
         start = stop = 
@@ -107,7 +183,10 @@ public class NumberBuilder implements NumberText {
         if (start == stop || s.charAt(start) != '.') {
             return false;
         }
-        if (++start == stop) {
+
+        start++;
+
+        if (start == stop) { 
             return false;
         }
 
@@ -122,6 +201,7 @@ public class NumberBuilder implements NumberText {
     /**
      * Calculate exponent string.
      */
+    @SuppressWarnings("PMD")
     private static final NumberText.Exponent getExponentType(
             CharSequence s,
             int start,
@@ -179,6 +259,7 @@ public class NumberBuilder implements NumberText {
      * @param stop an index
      * @return true if the CharSequence was successfully parsed
      */
+    @SuppressWarnings("PMD")
     public boolean parse(CharSequence s, int start, int stop) {
         int pos = this.start = start;
 
@@ -239,7 +320,13 @@ public class NumberBuilder implements NumberText {
 
         return pos == stop;
     }
-    
+
+    /**
+     * Determine if the given CharSequence is a valid JSON->URL number.
+     *
+     *<p>Convenience for {@link #isNumber(CharSequence, int, int)
+     * isNumber(s, 0, s.length())}.
+     */
     public static boolean isNumber(CharSequence s) {
         return isNumber(s, 0, s.length());
     }
@@ -252,6 +339,7 @@ public class NumberBuilder implements NumberText {
      * @param stop an index
      * @return true if the CharSequence is a JSON->URL number
      */
+    @SuppressWarnings("PMD")
     public static boolean isNumber(CharSequence s, int start, int stop) {
         int pos = start;
 
@@ -303,6 +391,9 @@ public class NumberBuilder implements NumberText {
         return pos == stop;
     }
 
+    /**
+     * Parse this NumberText as a J2SE double.
+     */
     public double toDouble() {
         return toDouble(this);
     }
@@ -343,7 +434,7 @@ public class NumberBuilder implements NumberText {
         CharSequence text = t.getText();
 
         if (!t.hasDecimalPart()) {
-            switch (t.getExponentType()) {
+            switch (t.getExponentType()) { //NOPMD - don't need default
             case NEGATIVE_VALUE:
                 break;
             case JUST_VALUE:
@@ -355,16 +446,15 @@ public class NumberBuilder implements NumberText {
                         t.getExponentStopIndex(),
                         0);
 
-                int intIndexStart = t.getIntegerStartIndex();
-                int intIndexStop = t.getIntegerStopIndex();
-                int start = t.getStartIndex();
+                final int intIndexStart = t.getIntegerStartIndex();
+                final int intIndexStop = t.getIntegerStopIndex();
                 int digitCount = (intIndexStop - intIndexStart) + expValue;
 
                 if (digitCount <= LONG_MAX_DIGITS) {
                     //
                     // this is the common case
                     //
-                    long value = parseLong(text, start, intIndexStop, 0);
+                    long value = parseLong(text, t.getStartIndex(), intIndexStop, 0);
                     value *= E[expValue];
                     return Long.valueOf(value);
                 }
@@ -372,7 +462,7 @@ public class NumberBuilder implements NumberText {
                 if (primitiveOnly) {
                     char[] s = toChars(
                             text,
-                            start,
+                            t.getStartIndex(),
                             t.getStopIndex());
 
                     return Double.valueOf(new String(s));
@@ -411,6 +501,7 @@ public class NumberBuilder implements NumberText {
      * @param stop stop index
      * @return an integer
      */
+    @SuppressWarnings("PMD")
     private static int parseInteger(
             CharSequence s,
             int start,
@@ -455,6 +546,7 @@ public class NumberBuilder implements NumberText {
      * @param stop stop index
      * @return a long
      */
+    @SuppressWarnings("PMD")
     private static long parseLong(
             CharSequence s,
             int start,
@@ -509,10 +601,10 @@ public class NumberBuilder implements NumberText {
                 text.getStopIndex());
     }
     
-
+    @SuppressWarnings("PMD")
     private static final char[] toChars(CharSequence s, int start, int stop) {
-        int len = stop - start;
-        char[] ret = new char[len];
+        final int len = stop - start;
+        final char[] ret = new char[len];
 
         for (int i = start, j = 0; i < stop; i++, j++) {
             ret[j] = s.charAt(i);

@@ -26,8 +26,10 @@ package org.jsonurl;
  */
 public class DoubleParseTest extends JavaValueFactoryParseTest {
 
+    /**
+     * Create a new DoubleParseTest.
+     */
     public DoubleParseTest() {
         super(JavaValueFactory.DOUBLE);
     }
-
 }

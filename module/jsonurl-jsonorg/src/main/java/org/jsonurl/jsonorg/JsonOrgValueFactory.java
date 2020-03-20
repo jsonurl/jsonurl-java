@@ -41,6 +41,9 @@ public abstract class JsonOrgValueFactory implements ValueFactory.TransparentBui
         Object,
         String> {
 
+    /**
+     * This represents the empty composite value.
+     */
     private static final Object EMPTY = new JSONObject();
     
     /**

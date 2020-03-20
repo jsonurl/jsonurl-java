@@ -19,7 +19,6 @@ package org.jsonurl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.jsonurl.JsonUrlStringBuilder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -32,18 +31,39 @@ import org.junit.jupiter.params.provider.ValueSource;
  * @since 2019-09-01
  */
 public abstract class AbstractWriteTest<V,C extends V,A extends C,J extends C> {
-    
 
+    /**
+     * Write the given value.
+     * @param out destination
+     * @param value value to write
+     */
     public abstract void write(
             JsonTextBuilder<?,?> out,
-            V value) throws Exception;
+            V value) throws Exception; //NOPMD - Exception is correct here
 
+    /**
+     * Create a new implementation-defined Array instance.
+     * @param s JSON->URL text
+     * @return a valid Array instance
+     */
     public abstract A newArray(String s);
 
+    /**
+     * Create a new implementation-defined Object instance.
+     * @param s JSON->URL text
+     * @return a valid Object instance
+     */
     public abstract J newObject(String s);
 
+    /**
+     * Create a new implementation-defined JSON->URL parser.
+     * @return a valid Parser instance
+     */
     public abstract Parser<V,C,?,A,?,J,?,?,?,?> newParser();
 
+    /**
+     * Create a string for the given implementation-defined value.
+     */
     public abstract String valueToString(V value);
 
     @ParameterizedTest

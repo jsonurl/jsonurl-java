@@ -107,7 +107,7 @@ final class CharUtil {
     /**
      * table for decoding URL-encoded strings.
      */
-    static final int[] HEXDECODE = {
+    private static final int[] HEXDECODE_TABLE = {
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -152,13 +152,13 @@ final class CharUtil {
         CHARBITS[' '] = IS_SPACE;
         
         for (int i = 'A'; i <= 'F'; i++) {
-            HEXDECODE[i] = 10 + (i - 'A');
+            HEXDECODE_TABLE[i] = 10 + (i - 'A');
         }
         for (int i = 'a'; i <= 'f'; i++) {
-            HEXDECODE[i] = 10 + (i - 'a');
+            HEXDECODE_TABLE[i] = 10 + (i - 'a');
         }
         for (int i = '0'; i <= '9'; i++) {
-            HEXDECODE[i] = i - '0';
+            HEXDECODE_TABLE[i] = i - '0';
         }
     }
 
@@ -167,7 +167,7 @@ final class CharUtil {
     }
 
     static final int hexDecode(char c) {
-        return c > 127 ? -1 : HEXDECODE[c];
+        return c > 127 ? -1 : HEXDECODE_TABLE[c];
     }
 
     static final int digits(CharSequence s, int pos, int stop) {

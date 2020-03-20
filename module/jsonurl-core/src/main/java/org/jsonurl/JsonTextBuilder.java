@@ -202,5 +202,9 @@ public interface JsonTextBuilder<A,R> {
         return beginObject().endObject();
     }
 
+    /**
+     * Build the result.
+     * @return a valid object
+     */
     public R build();
 }

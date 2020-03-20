@@ -27,6 +27,10 @@ package org.jsonurl.jsonp;
  * @since 2019-09-01
  */
 public class PrimitiveParseTest extends JsonpParseTest {
+
+    /**
+     * Create a new PrimitiveParseTest.
+     */
     public PrimitiveParseTest() {
         super(JsonpValueFactory.PRIMITIVE);
     }

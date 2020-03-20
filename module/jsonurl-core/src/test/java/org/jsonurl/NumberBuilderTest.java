@@ -17,11 +17,11 @@ package org.jsonurl;
  * under the License.
  */
 
-import java.io.IOException;
 
 // CHECKSTYLE:OFF
 import static org.junit.jupiter.api.Assertions.*;
 // CHECKSTYLE:ON
+
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -35,11 +35,28 @@ import org.junit.jupiter.params.provider.ValueSource;
  * @since 2019-09-01
  */
 class NumberBuilderTest {
+    /** Prefix used to test non-zero based start index. */
     private static final String PREFIX  = "prefix ";
-    private static final String SUFFIX = " suffix";
     
+    /** Suffix used to test non-zero based stop index. */
+    private static final String SUFFIX = " suffix";
+
+    /** Longs smaller than this will be parsed doubles. */
+    private static final long MIN_LONG = -999999999999999999L;
+
+    /** Longs bigger than this will be parsed doubles. */
+    private static final long MAX_LONG = 999999999999999999L;
+    
+    /** tag annotation. */
+    private static final String TAG_LONG = "long";
+
+    /** tag annotation. */
+    private static final String TAG_NUMBER = "number";
+
+    /** tag annotation. */
+    private static final String TAG_DOUBLE = "double";
+
     private NumberBuilder newNumberBuilder(String s) {
-        
         return new NumberBuilder(
                 PREFIX + s + SUFFIX,
                 PREFIX.length(),
@@ -47,40 +64,40 @@ class NumberBuilderTest {
     }
 
     @ParameterizedTest
-    @Tag("long")
-    @Tag("number")
+    @Tag(TAG_LONG)
+    @Tag(TAG_NUMBER)
     @ValueSource(longs = {
         0, -0,
         1, -1,
         123456, -123456,
         12345678905432132L,
-        NumberBuilder.MIN_LONG,
-        NumberBuilder.MIN_LONG + 1,
-        NumberBuilder.MAX_LONG,
-        NumberBuilder.MAX_LONG - 1,
+        MIN_LONG,
+        MIN_LONG + 1,
+        MAX_LONG,
+        MAX_LONG - 1,
     })
-    void testLong(long g) throws ParseException, IOException {
+    void testLong(long g) {
         assertEquals(
                 Long.valueOf(g),
                 newNumberBuilder(String.valueOf(g)).build(true));
     }
 
     @ParameterizedTest
-    @Tag("long")
-    @Tag("number")
+    @Tag(TAG_LONG)
+    @Tag(TAG_NUMBER)
     @ValueSource(strings = {
         "0", "-0",
         "1", "-1",
         "123456", "-123456",
         "12345678905432132",
     })
-    void testLong(String s) throws ParseException, IOException {
+    void testLong(String s) {
         assertEquals(Long.valueOf(s), newNumberBuilder(s).build(true)); 
     }
     
     @ParameterizedTest
-    @Tag("long")
-    @Tag("number")
+    @Tag(TAG_LONG)
+    @Tag(TAG_NUMBER)
     @CsvSource({
         //
         // INPUT,OUTPUT
@@ -92,13 +109,13 @@ class NumberBuilderTest {
         "'-2e+1',-20",
         "'4e+15',4000000000000000",
     })
-    void testLong(String in, long out) throws ParseException, IOException {
+    void testLong(String in, long out) {
         assertEquals(Long.valueOf(out), newNumberBuilder(in).build(true));
     }
     
     @ParameterizedTest
-    @Tag("double")
-    @Tag("number")
+    @Tag(TAG_DOUBLE)
+    @Tag(TAG_NUMBER)
     @ValueSource(strings = {
         "0.0", "-0.0",
         "1.1", "-1.1",
@@ -112,22 +129,22 @@ class NumberBuilderTest {
         
         "123456789012345678901"
     })
-    void testDouble(String s) throws ParseException, IOException {
+    void testDouble(String s) {
         assertEquals(
                 Double.valueOf(s),
                 newNumberBuilder(s).build(true)); 
     }
     
     @ParameterizedTest
-    @Tag("long")
-    @Tag("number")
+    @Tag(TAG_LONG)
+    @Tag(TAG_NUMBER)
     @ValueSource(longs = {
         Long.MIN_VALUE,
         Long.MAX_VALUE,
-        NumberBuilder.MAX_LONG + 1,
-        NumberBuilder.MIN_LONG - 1,
+        MAX_LONG + 1,
+        MIN_LONG - 1,
     })
-    void testDouble(long g) throws ParseException, IOException {
+    void testDouble(long g) {
         assertEquals(
                 Double.valueOf(g),
                 newNumberBuilder(String.valueOf(g)).build(true)); 

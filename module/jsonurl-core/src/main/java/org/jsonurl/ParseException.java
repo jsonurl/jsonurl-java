@@ -17,6 +17,9 @@ package org.jsonurl;
  * under the License.
  */
 
+/**
+ * An exception that occurs while parsing JSON->URL text.
+ */
 public class ParseException extends RuntimeException {
 
     /**
@@ -24,12 +27,24 @@ public class ParseException extends RuntimeException {
      */
     private static final long serialVersionUID = 1L;
 
+    /**
+     * the position in the input text.
+     */
     private int position;
 
+    /**
+     * Create a new ParseException.
+     * @param msg exception text
+     */
     public ParseException(String msg) {
         this(msg,-1);
     }
 
+    /**
+     * Create a new ParseException.
+     * @param msg exception text
+     * @param position the position in the input text
+     */
     public ParseException(String msg, int position) {
         super(msg);
         this.position = position;
@@ -39,10 +54,16 @@ public class ParseException extends RuntimeException {
         return position;
     }
 
+    /**
+     * Set the position of the exception.
+     */
     public void setPosition(int position) {
         this.position = position;
     }
 
+    /**
+     * Exception type description.
+     */
     protected String typeDescription() {
         return "parse error";
     }

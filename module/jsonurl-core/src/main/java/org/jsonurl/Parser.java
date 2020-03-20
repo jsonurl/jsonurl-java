@@ -61,6 +61,7 @@ import java.util.LinkedList;
  * @author David MacCormack
  * @since 2019-09-01
  */
+@SuppressWarnings("PMD")
 public class Parser<
         V,
         C extends V,
@@ -73,6 +74,9 @@ public class Parser<
         N extends V,
         S extends V> {
 
+    /**
+     * Parse state.
+     */
     private enum State {
         PAREN,
         IN_ARRAY,

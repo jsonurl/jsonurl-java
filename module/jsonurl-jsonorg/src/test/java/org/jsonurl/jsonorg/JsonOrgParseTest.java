@@ -43,6 +43,9 @@ abstract class JsonOrgParseTest extends AbstractParseTest<
     Object,
     String> {
 
+    /**
+     * Create a new JsonOrgParseTest.
+     */
     public JsonOrgParseTest(JsonOrgValueFactory factory) {
         super(factory);
     }

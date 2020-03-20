@@ -27,7 +27,18 @@ import org.json.JSONObject;
 import org.json.JSONString;
 import org.jsonurl.JsonTextBuilder;
 
-public class JsonUrlWriter {
+/**
+ * A utility class for serializing org.json objects, arrays, and values as JSON->URL text.
+ *
+ * @author jsonurl.org
+ * @author David MacCormack
+ * @since 2019-09-01
+ */
+public final class JsonUrlWriter {
+    
+    private JsonUrlWriter() {
+        // EMPTY
+    }
     
     private static final boolean isNull(Object in) {
         return in == null || in == JSONObject.NULL;
@@ -41,9 +52,10 @@ public class JsonUrlWriter {
      * @param out non-null JsonTextBuilder
      * @param in null or Java Object
      */
+    @SuppressWarnings("PMD")
     public static final <A,R> void write(
             JsonTextBuilder<A,R> out,
-            Object in) throws IOException, JSONException {
+            Object in) throws IOException {
 
         if (isNull(in)) {
             out.addNull();
@@ -54,7 +66,7 @@ public class JsonUrlWriter {
             try {
                 String s = ((JSONString)in).toJSONString();
                 out.add(s);
-            } catch (Exception e) {
+            } catch (Exception e) { //NOPMD - I want to re-throw as JSONException
                 throw new JSONException(e);
             }
             return;
@@ -118,26 +130,28 @@ public class JsonUrlWriter {
      */
     public static final <A,R> void write(
             JsonTextBuilder<A,R> out,
-            JSONObject in) throws IOException, JSONException {
+            JSONObject in) throws IOException {
         
         if (isNull(in)) {
             out.addNull();
             return;
         }
-        
-        boolean comma = false;
-        
+
         out.beginObject();
 
         //
         // this is the best we can do with the given interface
         //
-        for (Iterator<String> it = in.keys(); it.hasNext(); comma = true) {
+        boolean comma = false; // NOPMD - I need to track this
+
+        for (Iterator<String> it = in.keys(); it.hasNext();) { // NOPMD - not iterable
             String key = it.next();
             
             if (comma) {
                 out.valueSeparator();
             }
+
+            comma = true; // NOPMD - I need to track this
             
             out.addKey(key).nameSeparator();
             
@@ -157,22 +171,24 @@ public class JsonUrlWriter {
      */
     public static final <A,R> void write(
             JsonTextBuilder<A,R> out,
-            JSONArray in) throws IOException, JSONException {
+            JSONArray in) throws IOException {
         
         if (isNull(in)) {
             out.addNull();
             return;
         }
 
-        boolean comma = false;
-
         out.beginArray();
 
-        for (int i = 0, length = in.length(); i < length; i++, comma = true) {
+        boolean comma = false; // NOPMD - I need to track this
+
+        for (int i = 0, length = in.length(); i < length; i++) { // NOPMD
             if (comma) {
                 out.valueSeparator();
             }
-            
+
+            comma = true; // NOPMD - I need to track this
+
             write(out, in.get(i));
         }
 

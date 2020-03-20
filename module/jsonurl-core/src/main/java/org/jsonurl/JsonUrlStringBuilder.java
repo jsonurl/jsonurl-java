@@ -27,16 +27,34 @@ package org.jsonurl;
 public class JsonUrlStringBuilder extends
         JsonUrlTextAppender<StringBuilder,String> {
 
+    /**
+     * default StringBuilder size.
+     */
     private static final int DEFAULT_SIZE = 1 << 10;
 
+    /**
+     * Create a new JsonUrlStringBuilder.
+     *
+     * <p>This simply calls {@link #JsonUrlStringBuilder(int)
+     * JsonUrlStringBuilder(1024)}.
+     */
     public JsonUrlStringBuilder() {
         this(new StringBuilder(DEFAULT_SIZE));
     }
 
+    /**
+     * Create a new JsonUrlStringBuilder.
+     *
+     * <p>This simply calls {@link #JsonUrlStringBuilder(StringBuilder)
+     * JsonUrlStringBuilder(new StringBuilder(1024))}.
+     */
     public JsonUrlStringBuilder(int size) {
         this(new StringBuilder(size));
     }
 
+    /**
+     * Create a new JsonUrlStringBuilder.
+     */
     public JsonUrlStringBuilder(StringBuilder sb) {
         super(sb);
     }

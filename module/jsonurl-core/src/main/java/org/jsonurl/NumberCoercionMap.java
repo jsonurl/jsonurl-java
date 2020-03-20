@@ -55,8 +55,12 @@ import java.util.concurrent.atomic.LongAdder;
  *      <td>{@link java.lang.Double Double}</td></tr>
  * </table>
  */
-class NumberCoercionMap {
+final class NumberCoercionMap {
 
+    /**
+     * Static map of input type to coerced type.
+     */
+    @SuppressWarnings("PMD") // this is read-only
     private static final Map<Class<? extends Number>, Class<? extends Number>> MAP =
             new HashMap<>();
 
@@ -75,7 +79,15 @@ class NumberCoercionMap {
         MAP.put(DoubleAccumulator.class, Double.class);
         MAP.put(DoubleAdder.class, Double.class);
     }
+    
+    private NumberCoercionMap() {
+    }
 
+    /**
+     * Get the coerced type for the given input type.
+     * @param c a valid class
+     * @return a valid class
+     */
     public static final Class<? extends Number> getType(Class<? extends Number> c) {
         Class<? extends Number> ret = MAP.get(c);
         return ret == null ? BigDecimal.class : ret;

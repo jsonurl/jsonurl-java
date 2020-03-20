@@ -26,6 +26,9 @@ package org.jsonurl.jsonorg;
  */
 public class DoubleParseTest extends JsonOrgParseTest {
 
+    /**
+     * Create a new DoubleParseTest.
+     */
     public DoubleParseTest() {
         super(JsonOrgValueFactory.DOUBLE);
     }

@@ -27,5 +27,8 @@ import org.jsonurl.ValueFactory;
  * @since 2019-09-01
  */
 public interface JsonUrlServiceProvider {
-    public ValueFactory<?,?,?,?,?,?,?,?,?,?> newValueFactory();
+    /**
+     * create a new ValueFactory.
+     */
+    ValueFactory<?,?,?,?,?,?,?,?,?,?> newValueFactory();
 }

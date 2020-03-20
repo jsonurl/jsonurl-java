@@ -42,6 +42,9 @@ abstract class JavaValueFactoryParseTest extends AbstractParseTest<
         Object,
         String> {
 
+    /**
+     * Create a new JavaValueFactoryParseTest.
+     */
     public JavaValueFactoryParseTest(JavaValueFactory factory) {
         super(factory);
     }

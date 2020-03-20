@@ -248,6 +248,7 @@ public interface ValueFactory<
      * @param stop the stop index
      * @return a valid value or null
      */
+    @SuppressWarnings("PMD")
     default V getTrueFalseNull(
             CharSequence s,
             int start,

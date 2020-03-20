@@ -17,6 +17,9 @@ package org.jsonurl;
  * under the License.
  */
 
+/**
+ * A syntax error in JSON->URL text. 
+ */
 public class SyntaxException extends ParseException {
 
     /**
@@ -24,40 +27,60 @@ public class SyntaxException extends ParseException {
      */
     private static final long serialVersionUID = 1L;
 
-    static final String ERR_MSG_BADCHAR =
-            "invalid character";
-    static final String ERR_MSG_BADQSTR =
-            "non-terminated string literal";
-    static final String ERR_MSG_BADPCTENC =
-            "invalid percent-encoded sequence";
-    static final String ERR_MSG_BADUTF8 =
-            "invalid encoded UTF-8 sequence";
-    static final String ERR_MSG_NOTEXT =
-            "text missing";
-    static final String ERR_MSG_EXPECT_LITERAL =
-            "expected literal value";
-    static final String ERR_MSG_EXPECT_ARRAY =
-            "expected array";
-    static final String ERR_MSG_EXPECT_OBJECT =
-            "expected object";
-    static final String ERR_MSG_EXPECT_STRUCTCHAR =
-            "expected structural character";
-    static final String ERR_MSG_EXPECT_OBJVALUE =
-            "expected object value";
-    static final String ERR_MSG_STILLOPEN =
-            "unexpected end-of-input inside composite";
-    static final String ERR_MSG_EXTRACHARS =
-            "unexpected unexpected text after composite";
+    /** ERR_MSG_BADCHAR. */
+    static final String ERR_MSG_BADCHAR = "invalid character";
 
+    /** ERR_MSG_BADQSTR. */
+    static final String ERR_MSG_BADQSTR = "non-terminated string literal";
 
+    /** ERR_MSG_BADPCTENC. */
+    static final String ERR_MSG_BADPCTENC = "invalid percent-encoded sequence";
+
+    /** ERR_MSG_BADUTF8. */
+    static final String ERR_MSG_BADUTF8 = "invalid encoded UTF-8 sequence";
+
+    /** ERR_MSG_NOTEXT. */
+    static final String ERR_MSG_NOTEXT = "text missing";
+
+    /** ERR_MSG_EXPECT_LITERAL. */
+    static final String ERR_MSG_EXPECT_LITERAL = "expected literal value";
+
+    /** ERR_MSG_EXPECT_ARRAY. */
+    static final String ERR_MSG_EXPECT_ARRAY = "expected array";
+
+    /** ERR_MSG_EXPECT_OBJECT. */
+    static final String ERR_MSG_EXPECT_OBJECT = "expected object";
+
+    /** ERR_MSG_EXPECT_STRUCTCHAR. */
+    static final String ERR_MSG_EXPECT_STRUCTCHAR = "expected structural character";
+
+    /** ERR_MSG_EXPECT_OBJVALUE. */
+    static final String ERR_MSG_EXPECT_OBJVALUE = "expected object value";
+
+    /** ERR_MSG_STILLOPEN. */
+    static final String ERR_MSG_STILLOPEN = "unexpected end-of-input inside composite";
+
+    /** ERR_MSG_EXTRACHARS. */
+    static final String ERR_MSG_EXTRACHARS = "unexpected unexpected text after composite";
+
+    /**
+     * Create a new SyntaxException.
+     * @param msg exception message
+     */
     public SyntaxException(String msg) {
         super(msg);
     }
-    
+
+    /**
+     * Create a new LimitException.
+     * @param msg exception message
+     * @param position position in input where the exception occurred.
+     */
     public SyntaxException(String msg, int position) {
         super(msg, position);
     }
 
+    @Override
     protected String typeDescription() {
         return "syntax error";
     }

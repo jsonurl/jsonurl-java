@@ -48,14 +48,16 @@ public class JsonpWriteTest extends AbstractWriteTest<
 
     @Override
     public JsonArray newArray(String s) {
-        JsonReader r = Json.createReader(new StringReader(s));
-        return r.readArray();
+        try (JsonReader r = Json.createReader(new StringReader(s))) {
+            return r.readArray();
+        }
     }
 
     @Override
     public JsonObject newObject(String s) {
-        JsonReader r = Json.createReader(new StringReader(s));
-        return r.readObject();
+        try (JsonReader r = Json.createReader(new StringReader(s))) {
+            return r.readObject();
+        }
     }
 
     @Override
@@ -85,5 +87,4 @@ public class JsonpWriteTest extends AbstractWriteTest<
             throws Exception {
         JsonUrlWriter.write(out, value);
     }
-
 }

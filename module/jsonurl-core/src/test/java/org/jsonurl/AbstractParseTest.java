@@ -24,10 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import org.jsonurl.JsonUrl;
-import org.jsonurl.LimitException;
-import org.jsonurl.ParseException;
-import org.jsonurl.SyntaxException;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -44,6 +40,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  * @author David MacCormack
  * @since 2019-09-01
  */
+@SuppressWarnings("PMD")
 public abstract class AbstractParseTest<
         V,
         C extends V,
@@ -129,7 +126,6 @@ public abstract class AbstractParseTest<
     @ValueSource(strings = {
         "0", "-1", "123456", "-123456", "12345678905432132",
     })
-
     void testLong(String s) throws ParseException, IOException {
         M factoryValue = parseLong(s);
         parse(factoryValue, null, s);
@@ -265,7 +261,7 @@ public abstract class AbstractParseTest<
             "World: Hello!",
             "Hello (world)."
     })
-    void testMoreStrings(String s) throws ParseException, UnsupportedEncodingException {
+    void testMoreStrings(String s) throws UnsupportedEncodingException {
         String in = URLEncoder
                 //.encode(s, StandardCharsets.UTF_8)
                 .encode(s, "UTF-8")

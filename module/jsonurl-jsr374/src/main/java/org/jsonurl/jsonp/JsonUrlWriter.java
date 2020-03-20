@@ -27,7 +27,18 @@ import javax.json.JsonString;
 import javax.json.JsonValue;
 import org.jsonurl.JsonTextBuilder;
 
-public class JsonUrlWriter {
+/**
+ * A utility class for serializing javax.json objects, arrays, and values as JSON->URL text.
+ *
+ * @author jsonurl.org
+ * @author David MacCormack
+ * @since 2019-09-01
+ */
+public final class JsonUrlWriter {
+
+    private JsonUrlWriter() {
+        // EMPTY
+    }
     
     private static final boolean isNull(Object in) {
         return in == null || in == JsonValue.NULL;
@@ -43,7 +54,7 @@ public class JsonUrlWriter {
      */
     public static final <A,R> void write(
             JsonTextBuilder<A,R> out,
-            JsonValue in) throws IOException, JsonException {
+            JsonValue in) throws IOException {
 
         if (isNull(in)) {
             out.addNull();
@@ -94,14 +105,14 @@ public class JsonUrlWriter {
      */
     public static final <A,R> void write(
             JsonTextBuilder<A,R> out,
-            JsonObject in) throws IOException, JsonException {
+            JsonObject in) throws IOException {
         
         if (isNull(in)) {
             out.addNull();
             return;
         }
         
-        boolean comma = false;
+        boolean comma = false; // NOPMD - I need to track this
         
         out.beginObject();
         
@@ -114,7 +125,7 @@ public class JsonUrlWriter {
                 out.valueSeparator();
             }
             
-            comma = true;
+            comma = true; // NOPMD - I need to track this
             
             out.addKey(key).nameSeparator();
             
@@ -134,23 +145,23 @@ public class JsonUrlWriter {
      */
     public static final <A,R> void write(
             JsonTextBuilder<A,R> out,
-            JsonArray in) throws IOException, JsonException {
+            JsonArray in) throws IOException {
         
         if (isNull(in)) {
             out.addNull();
             return;
         }
 
-        boolean comma = false;
+        boolean comma = false; // NOPMD - I need to track this
 
         out.beginArray();
 
-        for (int i = 0, length = in.size(); i < length; i++) {
+        for (int i = 0, length = in.size(); i < length; i++) { // NOPMD
             if (comma) {
                 out.valueSeparator();
             }
             
-            comma = true;
+            comma = true; // NOPMD - I need to track this
 
             write(out, in.get(i));
         }

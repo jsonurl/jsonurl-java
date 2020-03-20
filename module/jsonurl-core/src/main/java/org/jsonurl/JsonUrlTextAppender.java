@@ -31,9 +31,12 @@ import java.math.BigInteger;
  * @since 2019-09-01
  */
 public abstract class JsonUrlTextAppender<A extends Appendable, R>
-        implements JsonTextBuilder<A, R>, Appendable {
+        implements JsonTextBuilder<A, R>, Appendable { 
 
-    protected A out;
+    /**
+     * Destination, provided in constructor.
+     */
+    protected final A out; // NOPMD - not a bean
 
     /**
      * Create a new JsonUrlTextAppender.

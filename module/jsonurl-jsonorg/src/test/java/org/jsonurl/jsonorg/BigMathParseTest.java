@@ -26,6 +26,9 @@ package org.jsonurl.jsonorg;
  */
 public class BigMathParseTest extends JsonOrgParseTest {
 
+    /**
+     * Create a new BigMathParseTest.
+     */
     public BigMathParseTest() {
         super(JsonOrgValueFactory.BIGMATH);
     }

@@ -48,7 +48,7 @@ public final class JsonUrl {
     /**
      * a namespace to hide private, parse-specific static fields and methods.
      */
-    static final class Parse {
+    static final class Parse { //NOPMD - internal utility class
 
         private static final int percentDecode(
                 CharSequence s,
@@ -75,6 +75,7 @@ public final class JsonUrl {
          * @return true if the string matches one of the following JSON->URL
          *      literal values: true, false, null.
          */
+        @SuppressWarnings("PMD")
         private static final String getTrueFalseNull(
                 CharSequence s,
                 int start,
@@ -126,6 +127,7 @@ public final class JsonUrl {
          * @see <a href="https://www.w3.org/International/unescape.java">
          * https://www.w3.org/International/unescape.java</a>
          */
+        @SuppressWarnings("PMD")
         private static final String string(
                 StringBuilder buf,
                 CharSequence s,
@@ -216,6 +218,7 @@ public final class JsonUrl {
          * @param start the start index
          * @param stop the stop index
          */
+        @SuppressWarnings("PMD")
         static final String literalToJavaString(
                 StringBuilder buf,
                 NumberBuilder num,
@@ -299,6 +302,10 @@ public final class JsonUrl {
      * a namespace to hide private, encode-specific static fields and methods.
      */
     static final class Encode {
+        
+        /**
+         * Enumeration of strings "types" based on what characters are in them.
+         */
         enum StringEncoding {
             SAFE_ASIS,
             NO_QUOTE_WITH_SPACE,
@@ -321,7 +328,8 @@ public final class JsonUrl {
             
             return false;
         }
-        
+
+        @SuppressWarnings("PMD")
         private static final StringEncoding getStringEncoding(
                 CharSequence s,
                 int start,
@@ -373,6 +381,7 @@ public final class JsonUrl {
         /**
          * Hex encode as UTF-8 .
          */
+        @SuppressWarnings("PMD")
         private static final void encode(
                 Appendable dest,
                 CharSequence s,
@@ -463,9 +472,9 @@ public final class JsonUrl {
      * @return the length of the literal value
      */
     public static final int parseLiteralLength(
-        CharSequence s,
-        int start,
-        int stop) {
+            CharSequence s,
+            int start,
+            int stop) {
         return parseLiteralLength(s, start, stop, null);
     }
 
@@ -487,6 +496,7 @@ public final class JsonUrl {
      * @param errmsg error message for thrown {@link SyntaxException}
      * @return the length of the literal value
      */
+    @SuppressWarnings("PMD")
     public static final int parseLiteralLength(
             CharSequence s,
             int start,
@@ -641,6 +651,7 @@ public final class JsonUrl {
      * @param end   length of source
      * @return dest
      */
+    @SuppressWarnings("PMD")
     public static <T extends Appendable> T appendLiteral(
             T dest,
             CharSequence s,

@@ -17,12 +17,20 @@ package org.jsonurl;
  * under the License.
  */
 
+/**
+ * A exception that occurs when a limit is exceeded.
+ */
 public class LimitException extends ParseException {
-    
+
+    @SuppressWarnings("PMD")
     static final String ERR_MSG_LIMIT_MAX_PARSE_CHARS =
             "input has too many characters";
+
+    @SuppressWarnings("PMD")
     static final String ERR_MSG_LIMIT_MAX_PARSE_VALUES =
             "input has too many values";
+
+    @SuppressWarnings("PMD")
     static final String ERR_MSG_LIMIT_MAX_PARSE_DEPTH =
             "input nesting is too deep";
 
@@ -31,10 +39,19 @@ public class LimitException extends ParseException {
      */
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Create a new LimitException.
+     * @param msg exception message
+     */
     public LimitException(String msg) {
         super(msg);
     }
 
+    /**
+     * Create a new LimitException.
+     * @param msg exception message
+     * @param position position in input where the exception occurred.
+     */
     public LimitException(String msg, int position) {
         super(msg, position);
     }

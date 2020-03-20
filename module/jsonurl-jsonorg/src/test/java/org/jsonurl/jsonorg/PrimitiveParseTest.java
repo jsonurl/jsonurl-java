@@ -26,6 +26,9 @@ package org.jsonurl.jsonorg;
  */
 public class PrimitiveParseTest extends JsonOrgParseTest {
 
+    /**
+     * Create a new PrimitiveParseTest.
+     */
     public PrimitiveParseTest() {
         super(JsonOrgValueFactory.PRIMITIVE);
     }

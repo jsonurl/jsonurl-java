@@ -26,8 +26,10 @@ package org.jsonurl;
  */
 public class PrimitiveParseTest extends JavaValueFactoryParseTest {
 
+    /**
+     * Create a new PrimitiveParseTest.
+     */
     public PrimitiveParseTest() {
         super(JavaValueFactory.PRIMITIVE);
     }
-
 }

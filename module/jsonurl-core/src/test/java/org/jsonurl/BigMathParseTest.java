@@ -26,8 +26,10 @@ package org.jsonurl;
  */
 public class BigMathParseTest extends JavaValueFactoryParseTest {
 
+    /**
+     * Create a new BigMathParseTest.
+     */
     public BigMathParseTest() {
         super(JavaValueFactory.BIGMATH);
     }
-
 }

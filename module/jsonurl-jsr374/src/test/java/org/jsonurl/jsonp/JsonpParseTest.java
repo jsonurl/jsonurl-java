@@ -51,6 +51,9 @@ abstract class JsonpParseTest extends AbstractParseTest<
         JsonValue,
         JsonString> {
 
+    /**
+     * Create a new JsonpParseTest.
+     */
     public JsonpParseTest(JsonpValueFactory factory) {
         super(factory);
     }

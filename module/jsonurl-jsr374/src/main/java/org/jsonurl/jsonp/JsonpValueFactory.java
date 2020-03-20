@@ -32,7 +32,12 @@ import org.jsonurl.NumberBuilder;
 import org.jsonurl.NumberText;
 import org.jsonurl.ValueFactory;
 
-
+/**
+ * A JSON->URL ValueFactory which uses the JSR-374 JSONP interface. 
+ * @author jsonurl.org
+ * @author David MacCormack
+ * @since 2019-09-01
+ */
 public abstract class JsonpValueFactory implements ValueFactory<
         JsonValue,
         JsonStructure,
@@ -74,7 +79,7 @@ public abstract class JsonpValueFactory implements ValueFactory<
         @Override
         public JsonNumber getNumber(NumberText text) {
             if (!text.hasDecimalPart()) {
-                switch (text.getExponentType()) {
+                switch (text.getExponentType()) { // NOPMD - don't want default
                 case NONE:
                     return Json.createValue(new BigInteger(text.toString()));
 

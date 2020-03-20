@@ -75,7 +75,7 @@ public interface JavaValueFactory extends ValueFactory.TransparentBuilder<
     /**
      * The null value.
      */
-    public static final String NULL = new String("null");
+    public static final String NULL = "null";
 
     /**
      * The empty composite value.
@@ -148,18 +148,21 @@ public interface JavaValueFactory extends ValueFactory.TransparentBuilder<
 
     /**
      * Get a java.lang.String from a java.lang.CharSequence
-     * @param s input
+     * @param cs input
      * @param start start index
      * @param stop stop index
      * @return a valid String
      */
-    public static String toJavaString(CharSequence s, int start, int stop) {
-        if (s instanceof String) {
-            if (start == 0 && stop == s.length()) {
-                return (String)s;
+    public static String toJavaString(CharSequence cs, int start, int stop) {
+        if (cs instanceof String) {
+            String s = (String)cs;
+
+            if (start == 0 && stop == cs.length()) {
+                return s;
             }
-            return ((String)s).substring(start, stop);
+            
+            return s.substring(start, stop);
         }
-        return s.subSequence(start, stop).toString();
+        return cs.subSequence(start, stop).toString();
     }
 }
