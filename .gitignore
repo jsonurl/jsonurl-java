@@ -20,4 +20,6 @@
 **/.classpath
 **/.checkstyle
 **/.settings/
+**/.pmd
+**/.ruleset
 
