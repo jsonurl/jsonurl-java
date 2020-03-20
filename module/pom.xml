@@ -48,6 +48,7 @@
     <maven.surefire.plugin>2.22.2</maven.surefire.plugin>
     <maven.javadoc.plugin>3.1.1</maven.javadoc.plugin>
     <maven.checkstyle.plugin>3.1.1</maven.checkstyle.plugin>
+    <maven.pmd.plugin>3.13.0</maven.pmd.plugin>
     <maven.gpg.plugin>1.6</maven.gpg.plugin>
     <maven.site.plugin>3.8.2</maven.site.plugin>
     <maven.doxia.plugin>[1.9,)</maven.doxia.plugin>
@@ -208,6 +209,29 @@
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-pmd-plugin</artifactId>
+          <version>${maven.pmd.plugin}</version>
+          <configuration>
+            <sourceEncoding>${char.encoding}</sourceEncoding>
+            <targetJdk>${jdk.version}</targetJdk>
+            <rulesets>
+              <ruleset>../../config/pmd-ruleset.xml</ruleset>
+            </rulesets>
+            <printFailingErrors>true</printFailingErrors>
+            <failOnViolation>true</failOnViolation>
+            <linkXRef>false</linkXRef>
+          </configuration>
+          <executions>
+            <execution>
+              <phase>validate</phase>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-gpg-plugin</artifactId>
           <version>${maven.gpg.plugin}</version>
           <executions>
@@ -265,6 +289,23 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-checkstyle-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>pmd</id>
+      <activation>
+        <file>
+          <exists>${basedir}/../../config/pmd-ruleset.xml</exists>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-pmd-plugin</artifactId>
           </plugin>
         </plugins>
       </build>
