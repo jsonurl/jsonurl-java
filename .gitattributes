@@ -14,3 +14,5 @@
 *.properties    text eol=lf
 *.xml           text eol=lf
 *.md            text eol=lf
+.gitattributes  text eol=lf
+.ignore         text eol=lf
