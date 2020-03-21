@@ -1,5 +1,5 @@
 # default to binary
-* binary
+#* binary
 
 # Java source
 *.java          text diff=java eol=lf
@@ -16,3 +16,12 @@
 *.md            text eol=lf
 .gitattributes  text eol=lf
 .ignore         text eol=lf
+
+# Binary
+*.class         binary
+*.so            binary
+*.dll           binary
+*.ear           binary
+*.war           binary
+*.jar           binary
+
