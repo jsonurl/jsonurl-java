@@ -57,8 +57,13 @@ public abstract class JsonpValueFactory implements ValueFactory<
         @Override
         public JsonNumber getNumber(NumberText text) {
             Number m = NumberBuilder.build(text, true);
-            return Json.createValue(
-                    m instanceof Long ? m.longValue() : m.doubleValue());
+
+            if (m instanceof Long) {
+                return Json.createValue(m.longValue());
+
+            } else {
+                return Json.createValue(m.doubleValue());
+            }
         }
     };
     

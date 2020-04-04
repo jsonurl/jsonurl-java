@@ -43,10 +43,12 @@
     <maven.compiler.source>${jdk.version}</maven.compiler.source>
     <maven.compiler.target>${jdk.version}</maven.compiler.target>
     <maven.compiler.plugin>3.8.1</maven.compiler.plugin>
+    <maven.surefire.plugin>2.22.2</maven.surefire.plugin>
     <maven.jar.plugin>3.2.0</maven.jar.plugin>
 
     <javax.json.version>1.1.4</javax.json.version>
     <jsonurl.version>1.0.0-SNAPSHOT</jsonurl.version>
+    <junit.version>[5.4,)</junit.version>
 
     <jsonurl.scm.path>jsonurl/jsonurl-java</jsonurl.scm.path>
     <jsonurl.scm.base>scm:git:git@github.com:${jsonurl.scm.path}.git</jsonurl.scm.base>
@@ -95,10 +97,23 @@
       <artifactId>javax.json-api</artifactId>
       <version>${javax.json.version}</version>
     </dependency>
+    
     <dependency>
       <groupId>org.glassfish</groupId>
       <artifactId>javax.json</artifactId>
       <version>${javax.json.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -109,6 +124,11 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>${maven.compiler.plugin}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven.surefire.plugin}</version>
         </plugin>
     </plugins>
   </build>
