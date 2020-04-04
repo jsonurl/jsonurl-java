@@ -57,7 +57,6 @@
     <nexus.url>https://oss.sonatype.org</nexus.url>
 
     <junit.version>[5.4,)</junit.version>
-    <jsonurl.version>1.0.0-SNAPSHOT</jsonurl.version>
     <jsonurl.description>
       RFC8259 describes the JSON data model and interchange format,
       which is widely used in application-level protocols including RESTful
