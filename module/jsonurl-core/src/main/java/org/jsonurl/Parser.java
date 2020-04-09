@@ -477,19 +477,6 @@ public class Parser<
                 throw new SyntaxException(ERR_MSG_EXPECT_STRUCTCHAR, pos);
 
             case IN_OBJECT:
-                if (c == '(') {
-                    stateStack.set(0, State.OBJECT_AFTER_ELEMENT);
-                    stateStack.push(State.PAREN);
-
-                    parseDepth = incrementLimit(
-                            ERR_MSG_LIMIT_MAX_PARSE_DEPTH,
-                            parseDepth,
-                            pos);
-
-                    pos++;
-                    continue;
-                }
-
                 litpos = pos;
                 litlen = parseLiteralLength(s, pos, stop, ERR_MSG_STILLOPEN);
                 pos += litlen;
