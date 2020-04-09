@@ -18,6 +18,7 @@ package org.jsonurl;
  */
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -92,6 +93,18 @@ public abstract class AbstractParseTest<
             assertEquals(out2, litResult);
         }
         assertEquals(in.length(), JsonUrl.parseLiteralLength(in));
+    }
+
+    @SuppressWarnings("unchecked")
+    private A parseArray(String jsonUrlText) {
+        Parser<V, C, ABT, A, JBT, J, B, M, N, S> p = new Parser<>(factory);
+        return (A)p.parse(jsonUrlText);
+    }
+
+    @SuppressWarnings("unchecked")
+    private J parseObject(String jsonUrlText) {
+        Parser<V, C, ABT, A, JBT, J, B, M, N, S> p = new Parser<>(factory);
+        return (J)p.parse(jsonUrlText);
     }
 
     @ParameterizedTest
@@ -332,9 +345,102 @@ public abstract class AbstractParseTest<
         assertTrue(new ParseException("a").toString().endsWith("a"));
         assertTrue(new SyntaxException("a").toString().endsWith("a"));
     }
+    
+    protected abstract boolean getBoolean(String key, J value);
+    
+    protected abstract String getString(String key, J value);
+
+    protected abstract boolean getNull(String key, J value);
+    
+    protected abstract boolean getEmptyComposite(String key, J value);
+    
+    protected abstract A getArray(String key, J value);
+
+    protected abstract A getArray(int index, A value);
+
+    protected abstract J getObject(String key, J value);
+
+    protected abstract J getObject(int index, A value);
+    
+    protected abstract M getNumber(int index, A value);
+    
+    protected abstract M getNumber(String key, J value);
 
     @Test
-    @Tag("failing")
-    void testFailing() throws ParseException {
+    void testJsonUrlText1() throws ParseException {
+        J parseResult = (J)parseObject(
+                "(true:true,false:false,null:null,empty:(),"
+                + "single:(0),nested:((1)),many:(-1,2.0,3e1,4e-2,5e+0))");
+
+        assertTrue(getBoolean("true", parseResult));
+        assertFalse(getBoolean("false", parseResult));
+        assertTrue(getNull("null", parseResult));
+        assertTrue(getEmptyComposite("empty", parseResult));
+
+        assertEquals(
+                factory.getNumber(new NumberBuilder("0")),
+                getNumber(0, getArray("single", parseResult)));
+        
+        assertEquals(
+                factory.getNumber(new NumberBuilder("-1")),
+                getNumber(0, getArray("many", parseResult)));
+        
+        assertEquals(
+                factory.getNumber(new NumberBuilder("2.0")),
+                getNumber(1, getArray("many", parseResult)));
+        
+        assertEquals(
+                factory.getNumber(new NumberBuilder("3e1")),
+                getNumber(2, getArray("many", parseResult)));
+        
+        assertEquals(
+                factory.getNumber(new NumberBuilder("4e-2")),
+                getNumber(3, getArray("many", parseResult)));
+        
+        assertEquals(
+                factory.getNumber(new NumberBuilder("5e+0")),
+                getNumber(4, getArray("many", parseResult)));
+        
+        assertEquals(
+                factory.getNumber(new NumberBuilder("1")),
+                getNumber(0, getArray(0, getArray("nested", parseResult))));
+    }
+
+    @Test
+    void testJsonUrlText2() throws ParseException {
+        A parseResult = parseArray("(1)");
+        
+        assertEquals(
+                factory.getNumber(new NumberBuilder("1")),
+                getNumber(0, parseResult));
+    }
+    
+    @Test
+    void testJsonUrlText3() throws ParseException {
+        A parseResult = parseArray("(1,(2))");
+
+        assertEquals(
+                factory.getNumber(new NumberBuilder("2")),
+                getNumber(0, getArray(1,parseResult)));
+    }
+
+    @Test
+    void testJsonUrlText4() throws ParseException {
+        A parseResult = parseArray("(1,(a:2),3)");
+
+        assertEquals(
+                factory.getNumber(new NumberBuilder("2")),
+                getNumber("a", getObject(1, parseResult)));
+    }
+
+    @Test
+    void testJsonUrlText5() throws ParseException {
+        J parseResult = parseObject("(age:64,name:(first:Fred))");
+
+        assertEquals(
+                "Fred",
+                getString("first", getObject("name", parseResult)));
     }
 }
+
+

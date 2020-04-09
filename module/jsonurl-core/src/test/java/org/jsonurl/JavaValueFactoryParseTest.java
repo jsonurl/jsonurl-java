@@ -48,4 +48,65 @@ abstract class JavaValueFactoryParseTest extends AbstractParseTest<
     public JavaValueFactoryParseTest(JavaValueFactory factory) {
         super(factory);
     }
+
+    @Override
+    protected boolean getBoolean(String key, Map<String,Object> value) {
+        Object ret = value.get(key);
+        
+        if (ret instanceof Boolean) {
+            return ((Boolean)ret).booleanValue();
+        }
+        
+        throw new IllegalArgumentException("value not boolean: " + ret);
+    }
+    
+    @Override
+    protected boolean getNull(String key, Map<String,Object> value) {
+        Object ret = value.get(key);
+        return factory.getNull() == ret;
+    }
+    
+    @Override
+    protected boolean getEmptyComposite(String key, Map<String,Object> value) {
+        return factory.isEmpty(value.get(key));
+    }
+
+    @SuppressWarnings("unchecked") //NOPMD
+    @Override
+    protected List<Object> getArray(String key, Map<String,Object> value) {
+        return (List<Object>)value.get(key);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected List<Object> getArray(int index, List<Object> value) {
+        return (List<Object>)value.get(index);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Map<String,Object> getObject(int index, List<Object> value) {
+        return (Map<String,Object>)value.get(index);
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Map<String,Object> getObject(String key, Map<String,Object> value) {
+        return (Map<String,Object>)value.get(key);
+    }
+
+    @Override
+    protected Number getNumber(int index, List<Object> value) {
+        return (Number)value.get(index);
+    }
+    
+    @Override
+    protected Number getNumber(String key, Map<String,Object> value) {
+        return (Number)value.get(key);
+    }
+
+    @Override
+    protected String getString(String key, Map<String,Object> value) {
+        return (String)value.get(key);
+    }
 }

@@ -57,4 +57,66 @@ abstract class JsonpParseTest extends AbstractParseTest<
     public JsonpParseTest(JsonpValueFactory factory) {
         super(factory);
     }
+    
+    @Override
+    protected JsonArray getArray(String key, JsonObject value) {
+        return (JsonArray)value.get(key);
+    }
+
+    @Override
+    protected JsonArray getArray(int index, JsonArray value) {
+        return (JsonArray)value.get(index);
+    }
+
+    @Override
+    protected JsonObject getObject(int index, JsonArray value) {
+        return (JsonObject)value.get(index);
+    }
+    
+    @Override
+    protected JsonObject getObject(String key, JsonObject value) {
+        return (JsonObject)value.get(key);
+    }
+
+    @Override
+    protected JsonNumber getNumber(int index, JsonArray value) {
+        return (JsonNumber)value.get(index);
+    }
+    
+    @Override
+    protected JsonNumber getNumber(String key, JsonObject value) {
+        return (JsonNumber)value.get(key);
+    }
+
+    @Override
+    protected String getString(String key, JsonObject value) {
+        JsonValue ret = value.get(key);
+        return ((JsonString)ret).getString();
+    }
+    
+    @Override
+    protected boolean getBoolean(String key, JsonObject value) {
+        Object ret = value.get(key);
+
+        if (ret == factory.getTrue()) {
+            return true;
+        }
+
+        if (ret == factory.getFalse()) {
+            return false;
+        }
+
+        throw new IllegalArgumentException("value not boolean: " + ret);
+    }
+    
+    @Override
+    protected boolean getNull(String key, JsonObject value) {
+        Object ret = value.get(key);
+        return factory.getNull() == ret;
+    }
+    
+    @Override
+    protected boolean getEmptyComposite(String key, JsonObject value) {
+        return factory.isEmpty(value.get(key));
+    }
 }
