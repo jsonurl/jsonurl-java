@@ -33,7 +33,7 @@ import org.jsonurl.NumberText;
 import org.jsonurl.ValueFactory;
 
 /**
- * A JSON->URL ValueFactory which uses the JSR-374 JSONP interface. 
+ * A JSON-&gt;URL ValueFactory which uses the JSR-374 JSONP interface. 
  * @author jsonurl.org
  * @author David MacCormack
  * @since 2019-09-01
@@ -52,6 +52,11 @@ public abstract class JsonpValueFactory implements ValueFactory<
 
     /**
      * A singleton instance of {@link JsonpValueFactory}.
+     * 
+     * <p>This factory uses
+     * {@link org.jsonurl.NumberBuilder#build(boolean)
+     * NumberBuilder.build(text,true)}
+     * to parse JSON-&gt;URL numbers.
      */
     public static final JsonpValueFactory PRIMITIVE = new JsonpValueFactory() {
         @Override
@@ -69,6 +74,10 @@ public abstract class JsonpValueFactory implements ValueFactory<
     
     /**
      * A singleton instance of {@link JsonpValueFactory}.
+     * 
+     * <p>This factory uses
+     * {@link java.lang.Double#valueOf(String) Double.valueOf(text)}
+     * to parse JSON-&gt;URL numbers.
      */
     public static final JsonpValueFactory DOUBLE = new JsonpValueFactory() {
         @Override
@@ -79,6 +88,11 @@ public abstract class JsonpValueFactory implements ValueFactory<
 
     /**
      * A singleton instance of {@link JsonpValueFactory}.
+     * 
+     * <p>This factory uses
+     * {@link java.math.BigInteger#BigInteger(String) new BigInteger()} or 
+     * {@link java.math.BigDecimal#BigDecimal(String) new BigDecimal()}
+     * to parse JSON-&gt;URL numbers.
      */
     public static final JsonpValueFactory BIGMATH = new JsonpValueFactory() {
         @Override

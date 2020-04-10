@@ -22,7 +22,8 @@ import org.json.JSONObject;
 import org.jsonurl.Parser;
 
 /**
- * A JSON->URL parser which uses classes from the {@link org.json} package.
+ * A JSON-&gt;URL parser which uses classes from the
+ * {@link org.json.JSONObject org.json} package.
  *
  * @author jsonurl.org
  * @author David MacCormack
@@ -41,8 +42,8 @@ public class JsonUrlParser extends Parser.TransparentBuilder<
     /**
      * Instantiate a new Parser.
      *
-     * <p>The returned parse uses the
-     * {@link JsonOrgValueFactory.PRIMITIVE} factory.
+     * <p>The returned parser uses the
+     * {@link JsonOrgValueFactory#PRIMITIVE PRIMITIVE} factory.
      */
     public JsonUrlParser() {
         this(JsonOrgValueFactory.PRIMITIVE);
@@ -51,6 +52,9 @@ public class JsonUrlParser extends Parser.TransparentBuilder<
     /**
      * Instantiate a new Parser.
      * @param factory a valid JsonOrgValueFactory
+     * @see JsonOrgValueFactory#PRIMITIVE
+     * @see JsonOrgValueFactory#DOUBLE
+     * @see JsonOrgValueFactory#BIGMATH
      */
     public JsonUrlParser(JsonOrgValueFactory factory) {
         super(factory);

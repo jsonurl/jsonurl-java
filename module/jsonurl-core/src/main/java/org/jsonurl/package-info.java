@@ -1,7 +1,7 @@
 /**
- * The JSON->URL interface.
+ * The JSON-&gt;URL interface.
  *
- * <p>This package defines the JSON->URL core classes and interfaces.
+ * <p>This package defines the JSON-&gt;URL core classes and interfaces.
  * 
  * @author jsonurl.org
  * @author David MacCormack

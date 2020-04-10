@@ -1,7 +1,7 @@
 /**
- * An implementation of the JSON->URL interface.
+ * An implementation of the JSON-&gt;URL interface.
  *
- * <p>This is an implementation of the JSON->URL interface based on
+ * <p>This is an implementation of the JSON-&gt;URL interface based on
  * the JSON-P interface defined by JSR-374.
  *
  * @author jsonurl.org

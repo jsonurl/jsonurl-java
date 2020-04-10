@@ -33,7 +33,7 @@ import org.jsonurl.JsonTextBuilder;
 import org.jsonurl.Parser;
 
 /**
- * Unit test for writing JSON->URL text.
+ * Unit test for writing JSON-&gt;URL text.
  *
  * @author jsonurl.org
  * @author David MacCormack

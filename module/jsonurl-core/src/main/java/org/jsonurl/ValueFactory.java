@@ -20,19 +20,19 @@ package org.jsonurl;
 /**
  * A ValueFactory allows {@link org.jsonurl.Parser Parser}
  * to be implementation independent. A ValueFactory provides
- * implementation-defined values for JSON->URL
+ * implementation-defined values for JSON-&gt;URL
  * objects, arrays, and literals.
  * 
- * @param V value type (any JSON value)
- * @param C composite type (array or object)
- * @param AB array builder type
- * @param A array type
- * @param JB object builder type
- * @param J object type
- * @param B boolean type
- * @param M number type
- * @param N null type
- * @param S string type
+ * @param <V> value type (any JSON value)
+ * @param <C> composite type (array or object)
+ * @param <ABT> array builder type
+ * @param <A> array type
+ * @param <JBT> object builder type
+ * @param <J> object type
+ * @param <B> boolean type
+ * @param <M> number type
+ * @param <N> null type
+ * @param <S> string type
  *
  * @author jsonurl.org
  * @author David MacCormack
@@ -110,7 +110,7 @@ public interface ValueFactory<
      *
      * <p>This is usually a singleton. It's a value which represents
      * the empty composite (i.e. array/object) as defined in the
-     * JSON->URL spec.
+     * JSON-&gt;URL spec.
      * @return a valid composite instance
      */
     public C getEmptyComposite();
@@ -215,7 +215,7 @@ public interface ValueFactory<
     /**
      * Get a number value for the given parsed text.
      *
-     * @param text the parsed text of a JSON->URL number literal 
+     * @param text the parsed text of a JSON-&gt;URL number literal 
      * @return a number object for the given text
      */
     public M getNumber(NumberText text);

@@ -25,9 +25,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
- * A NumberBuilder implements the builder pattern for JSON->URL numbers.
+ * A NumberBuilder implements the builder pattern for JSON-&gt;URL numbers.
  *
- * <p>An instance of this class may be used to parse JSON->URL number
+ * <p>An instance of this class may be used to parse JSON-&gt;URL number
  * values from text and create J2SE8 Numbers.
  *
  * @author jsonurl.org
@@ -322,7 +322,7 @@ public class NumberBuilder implements NumberText, Serializable {
     }
 
     /**
-     * Determine if the given CharSequence is a valid JSON->URL number.
+     * Determine if the given CharSequence is a valid JSON-&gt;URL number.
      *
      *<p>Convenience for {@link #isNumber(CharSequence, int, int)
      * isNumber(s, 0, s.length())}.
@@ -332,12 +332,12 @@ public class NumberBuilder implements NumberText, Serializable {
     }
 
     /**
-     * Determine if the given CharSequence is a valid JSON->URL number.
+     * Determine if the given CharSequence is a valid JSON-&gt;URL number.
      * 
      * @param s a valid CharSequence
      * @param start an index
      * @param stop an index
-     * @return true if the CharSequence is a JSON->URL number
+     * @return true if the CharSequence is a JSON-&gt;URL number
      */
     @SuppressWarnings("PMD")
     public static boolean isNumber(CharSequence s, int start, int stop) {

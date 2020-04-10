@@ -18,7 +18,7 @@ package org.jsonurl;
  */
 
 /**
- * NumberText provides access to a parsed JSON->URL number literal.
+ * NumberText provides access to a parsed JSON-&gt;URL number literal.
  *
  * <p>The text of a number is broken down into three parts: integer part,
  * decimal part, and exponent. These parts may be accessed via start and stop

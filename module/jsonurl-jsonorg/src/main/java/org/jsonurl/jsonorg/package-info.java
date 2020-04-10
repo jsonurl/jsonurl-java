@@ -1,7 +1,7 @@
 /**
- * An implementation of the JSON->URL interface.
+ * An implementation of the JSON-&gt;URL interface.
  *
- * <p>This is an implementation of the JSON->URL interface based on Douglas
+ * <p>This is an implementation of the JSON-&gt;URL interface based on Douglas
  * Crockford's original Java implementation of JSON.
  * 
  * @author jsonurl.org

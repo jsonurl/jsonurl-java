@@ -18,7 +18,7 @@ package org.jsonurl;
  */
 
 /**
- * A JsonUrlTextAppender that appends JSON->URL text to a StringBuilder.
+ * A JsonUrlTextAppender that appends JSON-&gt;URL text to a StringBuilder.
  *
  * @author jsonurl.org
  * @author David MacCormack

@@ -22,14 +22,14 @@ class Example1Test {
         JsonArray value = Main.getExampleValue();
 
         //
-        // turn that into JSON->URL text
+        // turn that into JSON-&gt;URL text
         //
         JsonUrlStringBuilder text = new JsonUrlStringBuilder();
         JsonUrlWriter.write(text, value);
         String jsonUrlText = text.build();
 
         //
-        // parse the JSON->URL text and build a JsonArray
+        // parse the JSON-&gt;URL text and build a JsonArray
         //
         JsonUrlParser p = new JsonUrlParser();
         JsonValue parsedValue = p.parse(jsonUrlText);

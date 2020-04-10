@@ -26,7 +26,7 @@ import org.jsonurl.ValueFactory;
 
 
 /**
- * A JSON->URL ValueFactory which uses classes from the org.json package.
+ * A JSON-&gt;URL ValueFactory which uses classes from the org.json package.
  * @author jsonurl.org
  * @author David MacCormack
  * @since 2019-09-01
@@ -48,6 +48,11 @@ public abstract class JsonOrgValueFactory implements ValueFactory.TransparentBui
     
     /**
      * A singleton instance of {@link JsonOrgValueFactory}.
+     * 
+     * <p>This factory uses
+     * {@link org.jsonurl.NumberBuilder#build(boolean)
+     * NumberBuilder.build(text,true)}
+     * to parse JSON-&gt;URL numbers.  
      */
     public static final JsonOrgValueFactory PRIMITIVE = new JsonOrgValueFactory() {
 
@@ -59,6 +64,10 @@ public abstract class JsonOrgValueFactory implements ValueFactory.TransparentBui
     
     /**
      * A singleton instance of {@link JsonOrgValueFactory}.
+     *
+     * <p>This factory uses
+     * {@link java.lang.Double#valueOf(String) Double.valueOf(text)}
+     * to parse JSON-&gt;URL numbers.
      */
     public static final JsonOrgValueFactory DOUBLE = new JsonOrgValueFactory() {
 
@@ -70,6 +79,11 @@ public abstract class JsonOrgValueFactory implements ValueFactory.TransparentBui
     
     /**
      * A singleton instance of {@link JsonOrgValueFactory}.
+     *
+     * <p>This factory uses
+     * {@link org.jsonurl.NumberBuilder#build(boolean)
+     * NumberBuilder.build(text,false)}
+     * to parse JSON-&gt;URL numbers.
      */
     public static final JsonOrgValueFactory BIGMATH = new JsonOrgValueFactory() {
         @Override

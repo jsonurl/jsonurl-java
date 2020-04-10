@@ -28,7 +28,7 @@ import javax.json.JsonValue;
 import org.jsonurl.JsonTextBuilder;
 
 /**
- * A utility class for serializing javax.json objects, arrays, and values as JSON->URL text.
+ * A utility class for serializing javax.json objects, arrays, and values as JSON-&gt;URL text.
  *
  * @author jsonurl.org
  * @author David MacCormack
@@ -45,7 +45,7 @@ public final class JsonUrlWriter {
     }
     
     /**
-     * Write the given JsonValue as JSON->URL text.
+     * Write the given JsonValue as JSON-&gt;URL text.
      * 
      * @param <A> Accumulator type
      * @param <R> Result type
@@ -96,7 +96,7 @@ public final class JsonUrlWriter {
     }
 
     /**
-     * Write the given JsonObject as JSON->URL text.
+     * Write the given JsonObject as JSON-&gt;URL text.
      * 
      * @param <A> Accumulator type
      * @param <R> Result type
@@ -136,7 +136,7 @@ public final class JsonUrlWriter {
     }
 
     /**
-     * Write the given JsonArray as JSON->URL text.
+     * Write the given JsonArray as JSON-&gt;URL text.
      * 
      * @param <A> Accumulator type
      * @param <R> Result type

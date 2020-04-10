@@ -34,10 +34,10 @@ import java.io.IOException;
 import java.nio.charset.MalformedInputException;
 
 /**
- * The reference implementation of JSON->URL.
+ * The reference implementation of JSON-&gt;URL.
  * 
  * <p>This class provides static methods for performing a number of
- * actions on JSON->URL text.
+ * actions on JSON-&gt;URL text.
  * 
  * @author jsonurl.org
  * @author David MacCormack
@@ -72,7 +72,7 @@ public final class JsonUrl {
         /**
          * parse true, false, and null literals.
          *
-         * @return true if the string matches one of the following JSON->URL
+         * @return true if the string matches one of the following JSON-&gt;URL
          *      literal values: true, false, null.
          */
         @SuppressWarnings("PMD")
@@ -208,7 +208,7 @@ public final class JsonUrl {
         /**
          * parse a literal value.
          * 
-         * <p>This will parse a literal value from JSON->URL text and return
+         * <p>This will parse a literal value from JSON-&gt;URL text and return
          * it as a java.lang.String (as opposed to a ValueFactory String).
          * It will perform input validation and string literal decoding.
          *
@@ -253,7 +253,7 @@ public final class JsonUrl {
         /**
          * parse a literal value
          * 
-         * <p>This will parse a literal value from JSON->URL text. You may use
+         * <p>This will parse a literal value from JSON-&gt;URL text. You may use
          * {@link org.jsonurl.JsonUrl#parseLiteralLength(CharSequence, int, int)
          * parseLiteralLength} to calculate the stop index.
          *

@@ -18,7 +18,7 @@ package org.jsonurl;
  */
 
 /**
- * An exception that occurs while parsing JSON->URL text.
+ * An exception that occurs while parsing JSON-&gt;URL text.
  */
 public class ParseException extends RuntimeException {
 
@@ -72,7 +72,7 @@ public class ParseException extends RuntimeException {
     public String toString() {
         StringBuilder sb = new StringBuilder(64);
 
-        sb.append("JSON->URL ")
+        sb.append("JSON-&gt;URL ")
             .append(typeDescription())
             .append(": ")
             .append(getMessage());
