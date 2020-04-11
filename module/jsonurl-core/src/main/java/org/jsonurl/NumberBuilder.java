@@ -20,7 +20,6 @@ package org.jsonurl;
 import static org.jsonurl.CharUtil.digits;
 import static org.jsonurl.CharUtil.isDigit;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
@@ -34,12 +33,7 @@ import java.math.BigInteger;
  * @author David MacCormack
  * @since 2019-09-01
  */
-public class NumberBuilder implements NumberText, Serializable {
-
-    /**
-     * serialVersionUID.
-     */
-    private static final long serialVersionUID = 1L;
+public class NumberBuilder implements NumberText {
 
     /**
      * The maximum number of digits I consider when parsing a
