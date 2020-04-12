@@ -295,7 +295,9 @@ public class NumberBuilder implements NumberText {
             decIndexStop = pos = digits(s, pos + 1, stop);
         }
 
-        switch (exponentType = getExponentType(s, pos, stop)) {
+        exponentType = getExponentType(s, pos, stop);
+
+        switch (exponentType) {
         case JUST_VALUE:
             expIndexStart = pos + 1;
             pos = expIndexStop = digits(s, expIndexStart, stop);

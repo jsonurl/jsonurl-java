@@ -150,7 +150,9 @@ public final class JsonUrl {
                 char c;
                 int b;
 
-                switch (c = s.charAt(i)) {
+                c = s.charAt(i);
+
+                switch (c) {
                 case '\'':
                     if (quoted) {
                         needEndQuote = false;
