@@ -416,6 +416,8 @@ public class Parser<
                     stateStack.pop();
                     pos++;
                     continue;
+                default:
+                    break;
                 }
                 throw new SyntaxException(ERR_MSG_EXPECT_STRUCTCHAR, pos);
 
@@ -473,6 +475,8 @@ public class Parser<
                     stateStack.pop();
                     pos++;
                     continue;
+                default:
+                    break;
                 }
                 throw new SyntaxException(ERR_MSG_EXPECT_STRUCTCHAR, pos);
 
