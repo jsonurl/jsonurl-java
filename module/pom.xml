@@ -76,7 +76,6 @@
     <checkstyle.config.location>../../config/checkstyle.xml</checkstyle.config.location>
     <pmd.config.location>../../config/pmd-ruleset.xml</pmd.config.location>
     <jacoco.minimum.coverage>0.40</jacoco.minimum.coverage>
-    <jacoco.report.dir>target/jacoco</jacoco.report.dir>
   </properties>
 
   <description>
@@ -245,21 +244,14 @@
             <execution>
               <id>prepare-agent</id>
               <goals><goal>prepare-agent</goal></goals>
-              <configuration>
-                <outputDirectory>${jacoco.report.dir}</outputDirectory>
-              </configuration>
             </execution>
             <execution>
               <id>test</id>
               <phase>test</phase>
               <goals><goal>report</goal><goal>check</goal></goals>
-              <configuration>
-                <outputDirectory>${jacoco.report.dir}</outputDirectory>
-              </configuration>
             </execution>
           </executions>
           <configuration>
-            <outputDirectory>${jacoco.report.dir}</outputDirectory>
             <rules>
               <rule>
                 <element>BUNDLE</element>
