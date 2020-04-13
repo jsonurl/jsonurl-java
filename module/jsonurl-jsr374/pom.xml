@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.jsonurl</groupId>
     <artifactId>parent</artifactId>
-    <version>1</version>
+    <version>1-SNAPSHOT</version>
   </parent>
   
   <artifactId>jsonurl-jsr374</artifactId>
