@@ -23,3 +23,8 @@
 **/.pmd
 **/.ruleset
 
+#
+# General
+#
+**/.*.swp
+
