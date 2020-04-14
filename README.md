@@ -5,6 +5,7 @@
 [![Build Status](https://travis-ci.com/jsonurl/jsonurl-java.svg?branch=master)](https://travis-ci.com/jsonurl/jsonurl-java)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=jsonurl_jsonurl-java&metric=alert_status)](https://sonarcloud.io/dashboard?id=jsonurl_jsonurl-java)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=jsonurl_jsonurl-java&metric=coverage)](https://sonarcloud.io/dashboard?id=jsonurl_jsonurl-java)
+[![Coveralls](https://coveralls.io/repos/github/jsonurl/jsonurl-java/badge.svg)](https://coveralls.io/github/jsonurl/jsonurl-java)
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=jsonurl_jsonurl-java&metric=ncloc)](https://sonarcloud.io/dashboard?id=jsonurl_jsonurl-java)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=jsonurl_jsonurl-java&metric=security_rating)](https://sonarcloud.io/dashboard?id=jsonurl_jsonurl-java)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=jsonurl_jsonurl-java&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=jsonurl_jsonurl-java)
