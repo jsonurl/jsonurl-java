@@ -25,7 +25,7 @@
   <parent>
     <groupId>org.jsonurl</groupId>
     <artifactId>parent</artifactId>
-    <version>1</version>
+    <version>1-SNAPSHOT</version>
     <relativePath>module</relativePath>
   </parent>
 

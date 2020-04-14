@@ -4,6 +4,8 @@ jdk:
   - openjdk8
   - openjdk11
 
+sudo: false
+
 addons:
   sonarcloud:
     organization: "jsonurl"
@@ -17,5 +19,6 @@ cache:
 
 script:
   # mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=jsonurl_jsonurl-java
-  - mvn -P jacoco clean compile test install sonar:sonar -Dsonar.projectKey=jsonurl_jsonurl-java
+  # mvn -P jacoco clean compile test install sonar:sonar -Dsonar.projectKey=jsonurl_jsonurl-java
+  - /bin/sh ./travis.sh
 
