@@ -7,10 +7,11 @@ on:
   push:
     branches: [ master ]
     paths-ignore:
-    - **.gitattributes
-    - **.gitignore
+    - '**.gitattributes'
+    - '**.gitignore'
     - '**.md'
 
+jobs:
   snyk:
     runs-on: ubuntu-latest
     steps:
