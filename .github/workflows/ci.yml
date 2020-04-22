@@ -1,17 +1,15 @@
 # This workflow will build a Java project with Maven
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
 
-name: build
+name: ci
 
 on:
   push:
-    branches: master
     paths-ignore:
     - '**.gitattributes'
     - '**.gitignore'
     - '**.md'
   pull_request:
-    branches: master
     paths-ignore:
     - '**.gitattributes'
     - '**.gitignore'
@@ -30,12 +28,21 @@ jobs:
       uses: actions/setup-java@master
       with:
         java-version: ${{ matrix.jdk }}
+    - name: Cache Maven dependencies
+      uses: actions/cache@master
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
     - name: Build with Maven
       run: mvn -P jacoco -B clean package --file pom.xml
 
   snyk:
     needs: build
-    if: github.event_name == 'push' && needs.build.result == 'success'
+    if: |
+        github.event_name == 'push'
+            && github.ref == 'master'
+            && needs.build.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -46,7 +53,10 @@ jobs:
 
   sonarcloud:
     needs: build
-    if: github.event_name == 'push' && needs.build.result == 'success'
+    if: |
+        github.event_name == 'push'
+            && github.ref == 'master'
+            && needs.build.result == 'success'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
