@@ -34,7 +34,7 @@ jobs:
       run: mvn -P jacoco -B clean package --file pom.xml
 
   snyk:
-    if: ${{ secrets.SNYK_TOKEN != '' && needs.build.result = 'success' }}
+    if: secrets.SNYK_TOKEN != '' && needs.build.result = 'success'
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -45,7 +45,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
   sonarcloud:
-    if: ${{ secrets.SONAR_TOKEN != '' && needs.build.result = 'success' }}
+    if: secrets.SONAR_TOKEN != '' && needs.build.result = 'success'
     needs: build
     runs-on: ubuntu-latest
     steps:
