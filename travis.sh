@@ -3,7 +3,7 @@
 MAVEN_DO_PROFILES=
 MAVEN_DO_PHASES=
 
-$JAVA_HOME/bin/java -version 2>&1 | egrep -qsi 'version[^0-9]+1\.8' && MAVEN_DO_PROFILES='-P jacoco,coveralls' && MAVEN_DO_PHASES='sonar:sonar coveralls:report'
+$JAVA_HOME/bin/java -version 2>&1 | egrep -qsi 'version[^0-9]+1\.8' && MAVEN_DO_PROFILES='-P jacoco' && MAVEN_DO_PHASES='sonar:sonar'
 
 
 mvn                                         \

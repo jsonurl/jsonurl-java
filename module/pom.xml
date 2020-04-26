@@ -54,7 +54,6 @@
     <maven.site.plugin>3.8.2</maven.site.plugin>
     <maven.doxia.plugin>[1.9,)</maven.doxia.plugin>
     <maven.project.info.reports.plugin>2.9</maven.project.info.reports.plugin>
-    <coveralls.plugin>4.3.0</coveralls.plugin>
     <nexus.staging.pluggin>1.6.8</nexus.staging.pluggin>
     <nexus.url>https://oss.sonatype.org</nexus.url>
 
@@ -291,18 +290,6 @@
             <autoReleaseAfterClose>false</autoReleaseAfterClose>
           </configuration>
         </plugin>
-        <plugin>
-          <groupId>org.eluder.coveralls</groupId>
-          <artifactId>coveralls-maven-plugin</artifactId>
-          <version>${coveralls.plugin}</version>
-          <dependencies>
-            <dependency>
-              <groupId>javax.xml.bind</groupId>
-              <artifactId>jaxb-api</artifactId>
-              <version>2.3.0</version>
-            </dependency>
-          </dependencies>
-        </plugin>
       </plugins>
     </pluginManagement>
   </build>
@@ -395,18 +382,6 @@
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    
-    <profile>
-      <id>coveralls</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.eluder.coveralls</groupId>
-            <artifactId>coveralls-maven-plugin</artifactId>
           </plugin>
         </plugins>
       </build>
