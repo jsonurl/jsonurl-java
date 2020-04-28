@@ -41,7 +41,7 @@ jobs:
     needs: build
     if: |
         github.event_name == 'push'
-            && github.ref == 'master'
+            && endsWith( github.ref, '/master' )
             && needs.build.result == 'success'
     runs-on: ubuntu-latest
     steps:
@@ -55,7 +55,7 @@ jobs:
     needs: build
     if: |
         github.event_name == 'push'
-            && github.ref == 'master'
+            && endsWith( github.ref, '/master' )
             && needs.build.result == 'success'
     runs-on: ubuntu-latest
     steps:
