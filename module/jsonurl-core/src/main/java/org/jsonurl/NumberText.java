@@ -21,7 +21,7 @@ package org.jsonurl;
  * NumberText provides access to a parsed JSON-&gt;URL number literal.
  *
  * <p>The text of a number is broken down into three parts: integer part,
- * decimal part, and exponent. These parts may be accessed via start and stop
+ * fractional part, and exponent. These parts may be accessed via start and stop
  * indexes into the original parsed text.
  *
  * @author jsonurl.org
@@ -56,14 +56,14 @@ public interface NumberText {
     public int getIntegerStopIndex();
 
     /**
-     * Get the start index of the number's decimal part.
+     * Get the start index of the number's fractional part.
      */
-    public int getDecimalStartIndex();
+    public int getFractionalStartIndex();
 
     /**
-     * Get the stop index of the number's decimal part.
+     * Get the stop index of the number's fractional part.
      */
-    public int getDecimalStopIndex();
+    public int getFractionalStopIndex();
 
     /**
      * Get the start index of the number's exponent part.
@@ -91,17 +91,25 @@ public interface NumberText {
     public Exponent getExponentType();
 
     /**
-     * Test if this NumberText has a decimal part.
+     * Test if this NumberText has a fractional part.
      */
-    default boolean hasDecimalPart() {
-        return this.getDecimalStopIndex() > this.getDecimalStartIndex();
+    default boolean hasFractionalPart() {
+        return this.getFractionalStopIndex() > this.getFractionalStartIndex();
     }
-
+    
     /**
-     * Test if this NumberText has an integer part and non-negative exponent.
+     * Test if this NumberText has an integer part.
+     */
+    default boolean hasIntegerPart() {
+        return this.getIntegerStopIndex() > this.getIntegerStartIndex();
+    }
+    
+    /**
+     * Test if this NumberText is an integer.
      */
     default boolean isInteger() {
-        return !hasDecimalPart()
-                && getExponentType() != Exponent.NEGATIVE_VALUE;
+        return hasIntegerPart()
+            && !hasFractionalPart()
+            && getExponentType() != Exponent.NEGATIVE_VALUE;
     }
 }

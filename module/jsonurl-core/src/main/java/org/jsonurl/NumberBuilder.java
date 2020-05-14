@@ -24,16 +24,68 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
- * A NumberBuilder implements the builder pattern for JSON-&gt;URL numbers.
+ * A NumberBuilder implements the builder pattern for JSON-&gt;URL number literals.
+ * An instance of this class may be used to parse JSON-&gt;URL number
+ * literals from text as Java SE values.
  *
- * <p>An instance of this class may be used to parse JSON-&gt;URL number
- * values from text and create J2SE8 Numbers.
+ * <h2>Single Use</h2>
+ * 
+ * <p>NumberBuilder may be single use, where the literal text is provided via
+ * a constructor followed by a call to a method to test and/or build a value.
+ * For example:
+ * <pre>
+ * // Example 1
+ * {@link java.lang.Number Number} n = new NumberBuilder("1.234").build();
+ * 
+ * // Example 2
+ * NumberBuilder nb = new NumberBuilder("1.234");
+ * if (!nb.isNumber()) {
+ *     // handle error
+ * }
+ * double d = new NumberBuilder().toDouble();
+ * </pre>
+ *
+ * <h2>Reuse</h2>
+ *
+ * <p>An instance of NumberBuilder may also be reused via a call to the
+ * {@link #reset()} method.
+ * <pre>
+ * NumberBuilder nb = new NumberBuilder();
+ * if (!nb.parse("1.234")) {
+ *     // handle the error
+ * }
+ *
+ * // equal to {@link java.lang.Double new Double("1.234")}
+ * {@link java.lang.Number Number} n = nb.build();
+ * 
+ * .
+ * .
+ * .
+ * 
+ * if (!nb.reset().parse("98765432100")) {
+ *     // handle the error
+ * }
+ *
+ * // equal to {@link java.lang.Long new Long("98765432100")}
+ * n = nb.build();
+ * </pre>
+ * 
+ * <h2>Static Methods</h2>
+ *
+ * <p>NumberBuilder also provides static methods to test literals without
+ * allocating an instance. They're useful if you want test validity but
+ * don't need access to the parsed value.
+ * <pre>
+ * boolean b = NumberBuilder.{@link #isNumber() isNumber("1234")};
+ * boolean b = NumberBuilder.{@link #isNumber() isNumber("abcd")};
+ * boolean b = NumberBuilder.{@link #isInteger() isInteger("1234.5")};
+ * </pre>
  *
  * @author jsonurl.org
  * @author David MacCormack
  * @since 2019-09-01
  */
-public class NumberBuilder implements NumberText {
+public class NumberBuilder implements NumberText { // NOPMD
 
     /**
      * The maximum number of digits I consider when parsing a
@@ -69,58 +121,58 @@ public class NumberBuilder implements NumberText {
     /**
      * the text that has been parsed.
      */
-    private CharSequence text; // NOPMD - not a bean
+    private CharSequence text;
     
     /**
      * the start index of {@link #text}.
      */
-    private int start; // NOPMD - not a bean
+    private int start;
 
     /**
      * the stop index of {@link #text}.
      */
-    private int stop; // NOPMD - not a bean
+    private int stop;
 
     /**
      * The parsed exponent type.
      */
-    private NumberText.Exponent exponentType = NumberText.Exponent.NONE;  // NOPMD - not a bean
+    private NumberText.Exponent exponentType = NumberText.Exponent.NONE;
 
     /**
      * The integer part start index. A result of calling
      * {@link #parse(CharSequence, int, int)}.
      */
-    private int intIndexStart = -1; // NOPMD - not a bean
+    private int intIndexStart = -1;
 
     /**
      * The integer part stop index. A result of calling
      * {@link #parse(CharSequence, int, int)}.
      */
-    private int intIndexStop = -1; // NOPMD - not a bean
+    private int intIndexStop = -1;
 
     /**
-     * The decimal part start index. A result of calling
+     * The fractional part start index. A result of calling
      * {@link #parse(CharSequence, int, int)}.
      */
-    private int decIndexStart = -1; // NOPMD - not a bean
+    private int fractIndexStart = -1;
 
     /**
-     * The decimal part stop index. A result of calling
+     * The fractional part stop index. A result of calling
      * {@link #parse(CharSequence, int, int)}.
      */
-    private int decIndexStop = -1; // NOPMD - not a bean
+    private int fractIndexStop = -1;
 
     /**
      * The exponent part start index. A result of calling
      * {@link #parse(CharSequence, int, int)}.
      */
-    private int expIndexStart = -1; // NOPMD - not a bean
+    private int expIndexStart = -1;
 
     /**
      * The exponent part stop index. A result of calling
      * {@link #parse(CharSequence, int, int)}.
      */
-    private int expIndexStop = -1; // NOPMD - not a bean
+    private int expIndexStop = -1;
 
     /**
      * Create a new NumberBuilder.
@@ -154,19 +206,31 @@ public class NumberBuilder implements NumberText {
     }
 
     /**
-     * Reset the internal state.
+     * Reset the instance for reuse. You may reliably call
+     * {@link #parse(CharSequence, int, int)} again after calling this
+     * method.
      */
-    @SuppressWarnings("PMD")
     public NumberBuilder reset() {
-        text = null; 
+        reset(false);
+        return this;
+    }
+
+    /**
+     * Reset internal state.
+     * @param leaveText if true then do not touch {@link #start}, {@link #stop},
+     *      or {@link #text}.
+     */
+    private void reset(boolean leaveText) {
+        if (!leaveText) {
+            text = null; // NOPMD - yes, really.
+            start = stop = -1;
+        }
+
         exponentType = NumberText.Exponent.NONE;
 
-        start = stop = 
-                intIndexStart = intIndexStop =
-                decIndexStart = decIndexStop =
-                expIndexStart = expIndexStop = -1;
-
-        return this;
+        intIndexStart = intIndexStop =
+            fractIndexStart = fractIndexStop =
+            expIndexStart = expIndexStop = -1;
     }
     
     private static final boolean hasFract(
@@ -291,8 +355,8 @@ public class NumberBuilder implements NumberText {
         intIndexStop = pos;
 
         if (hasFract(pos, stop, s)) {
-            decIndexStart = pos + 1;
-            decIndexStop = pos = digits(s, pos + 1, stop);
+            fractIndexStart = pos + 1;
+            fractIndexStop = pos = digits(s, pos + 1, stop);
         }
 
         exponentType = getExponentType(s, pos, stop);
@@ -313,22 +377,52 @@ public class NumberBuilder implements NumberText {
 
         this.text = s;
         this.stop = stop;
+        
+        boolean isNumber = pos == stop;
 
-        return pos == stop;
+        if (!isNumber) {
+            reset(false);
+        }
+
+        return isNumber;
     }
 
     /**
-     * Determine if the given CharSequence is a valid JSON-&gt;URL number.
+     * Determine if the given CharSequence is a valid JSON-&gt;URL number literal.
      *
-     *<p>Convenience for {@link #isNumber(CharSequence, int, int)
-     * isNumber(s, 0, s.length())}.
+     *<p>Convenience for {@link #isNumber(CharSequence, int, int, boolean)
+     * isNumber(s, 0, s.length(), false)}.
      */
     public static boolean isNumber(CharSequence s) {
-        return isNumber(s, 0, s.length());
+        return isNumber(s, 0, s.length(), false);
+    }
+    
+    /**
+     * Determine if the given CharSequence is a valid JSON-&gt;URL number literal.
+     *
+     *<p>Convenience for {@link #isNumber(CharSequence, int, int, boolean)
+     * isNumber(s, 0, s.length(), isInteger)}.
+     */
+    public static boolean isNumber(CharSequence s, boolean isInteger) {
+        return isNumber(s, 0, s.length(), isInteger);
+    }
+    
+    /**
+     * Determine if the given CharSequence is a valid JSON-&gt;URL number literal.
+     *
+     * <p>Convenience for {@link #isNumber(CharSequence, int, int, boolean)}
+     * isNumber(s, 0, stop, false)}.
+     * @param s a valid CharSequence
+     * @param start an index
+     * @param stop an index
+     * @return true if the CharSequence is a JSON-&gt;URL number
+     */
+    public static boolean isNumber(CharSequence s, int start, int stop) {
+        return isNumber(s, start, stop, false);
     }
 
     /**
-     * Determine if the given CharSequence is a valid JSON-&gt;URL number.
+     * Determine if the given CharSequence is a valid JSON-&gt;URL number literal.
      * 
      * @param s a valid CharSequence
      * @param start an index
@@ -336,7 +430,12 @@ public class NumberBuilder implements NumberText {
      * @return true if the CharSequence is a JSON-&gt;URL number
      */
     @SuppressWarnings("PMD")
-    public static boolean isNumber(CharSequence s, int start, int stop) {
+    public static boolean isNumber(
+            CharSequence s,
+            int start,
+            int stop,
+            boolean isInteger) {
+
         int pos = start;
 
         char c = s.charAt(start);
@@ -369,14 +468,21 @@ public class NumberBuilder implements NumberText {
         }
 
         if (hasFract(pos, stop, s)) {
+            if (isInteger) {
+                return false;
+            }
             pos = digits(s, pos + 1, stop);
         }
+
+        boolean isNegExp = false;
 
         switch (getExponentType(s, pos, stop)) {
         case JUST_VALUE:
             pos = digits(s, pos + 1, stop);
             break;
         case NEGATIVE_VALUE:
+            isNegExp = true;
+            // fall-through
         case POSITIVE_VALUE:
             pos = digits(s, pos + 2, stop);
             break;
@@ -384,7 +490,37 @@ public class NumberBuilder implements NumberText {
             break;
         }
 
-        return pos == stop;
+        return pos == stop && (!isInteger || !isNegExp); 
+    }
+
+    /**
+     * Determine if this text represents a valid JSON-&gt;URL number literal.
+     *
+     * <p>This is the result of calling {@link #parse(CharSequence, int, int)}.
+     * @return true if this text represents is a JSON-&gt;URL number literal
+     */
+    public boolean isNumber() {
+        return this.intIndexStop > this.intIndexStart;
+    }
+
+    /**
+     * Determine if the given CharSequence is a valid JSON-&gt;URL number literal.
+     *
+     *<p>Convenience for {@link #isNumber(CharSequence, int, int, boolean)
+     * isNumber(s, 0, s.length(), true)}.
+     */
+    public static boolean isInteger(CharSequence s) {
+        return isNumber(s, 0, s.length(), true);
+    }
+
+    /**
+     * Determine if the given CharSequence is a valid JSON-&gt;URL number literal.
+     *
+     *<p>Convenience for {@link #isNumber(CharSequence, int, int, boolean)
+     * isNumber(s, start, stop, true)}.
+     */
+    public static boolean isInteger(CharSequence s, int start, int stop) {
+        return isNumber(s, start, stop, true);
     }
 
     /**
@@ -403,7 +539,26 @@ public class NumberBuilder implements NumberText {
                 t.getStartIndex(),
                 t.getStopIndex());
 
-        return Double.valueOf(new String(s));
+        return Double.parseDouble(new String(s));
+    }
+
+    /**
+     * Parse the given NumberText as a {@link java.math.BigDecmial}.
+     */
+    public static final BigDecimal toBigDecimal(NumberText t) {
+        char[] s = toChars(
+                t.getText(),
+                t.getStartIndex(),
+                t.getStopIndex());
+
+        return new BigDecimal(new String(s));
+    }
+
+    /**
+     * Parse the given NumberText as a {@link java.math.BigDecmial}.
+     */
+    public BigDecimal toBigDecimal() {
+        return toBigDecimal(this);
     }
 
     /**
@@ -418,73 +573,79 @@ public class NumberBuilder implements NumberText {
 
     /**
      * Build a {@link java.lang.Number Number} from the given NumberText.
+     *
+     * <p>The benefit of this method (over {@link #toDouble(NumberText)} or
+     * {@link #toBigDecimal(NumberText)}) is that it has the logic to return
+     * an Object tailored to the value itself. For example, if the value
+     * can be represented as a {@link Long} then it will be.
+     *
      * @param t a valid NumberText
-     * @param primitiveOnly if true, the returned Number will be an
-     * {@link java.lang.Integer Integer}, {@link java.lang.Long Long}, or
+     * @param primitiveOnly if true, the returned Number will be a
+     * {@link java.lang.Long Long} or
      * {@link java.lang.Double Double}. Otherwise, it may be a
      * {@link java.math.BigInteger BigInteger} or
      * {@link java.math.BigDecimal BigDecimal}. 
      * @return an instance of java.lang.Number
      */
     public static final Number build(NumberText t, boolean primitiveOnly) {
-        CharSequence text = t.getText();
-
-        if (!t.hasDecimalPart()) {
-            switch (t.getExponentType()) { //NOPMD - don't need default
+        if (!t.hasFractionalPart()) {
+            switch (t.getExponentType()) {
             case NEGATIVE_VALUE:
                 break;
             case JUST_VALUE:
             case POSITIVE_VALUE:
             case NONE:
-                int expValue = parseInteger(
-                        text,
-                        t.getExponentStartIndex(),
-                        t.getExponentStopIndex(),
-                        0);
-
-                final int intIndexStart = t.getIntegerStartIndex();
-                final int intIndexStop = t.getIntegerStopIndex();
-                int digitCount = (intIndexStop - intIndexStart) + expValue;
-
-                if (digitCount <= LONG_MAX_DIGITS) {
-                    //
-                    // this is the common case
-                    //
-                    long value = parseLong(text, t.getStartIndex(), intIndexStop, 0);
-                    value *= E[expValue];
-                    return Long.valueOf(value);
-                }
-
-                if (primitiveOnly) {
-                    char[] s = toChars(
-                            text,
-                            t.getStartIndex(),
-                            t.getStopIndex());
-
-                    return Double.valueOf(new String(s));
-                }
-
-                char[] s = toChars(
-                        text,
-                        intIndexStart,
-                        intIndexStop);
-
-                BigInteger ret = new BigInteger(new String(s));
-
-                return ret.pow(expValue);
+                return toNonFractional(t, primitiveOnly);
             }
         }
 
+        return primitiveOnly ? toDouble(t) : toBigDecimal(t);
+    }
+    
+    /**
+     * Build a non-fractional number from the given NumberText.
+     */
+    private static final Number toNonFractional(
+            NumberText t,
+            boolean primitiveOnly) {
+
+        final CharSequence text = t.getText();
+
+        final int expValue = parseInteger(
+            text,
+            t.getExponentStartIndex(),
+            t.getExponentStopIndex(),
+            0);
+
+        final int intIndexStart = t.getIntegerStartIndex();
+        final int intIndexStop = t.getIntegerStopIndex();
+        int digitCount = (intIndexStop - intIndexStart) + expValue;
+    
+        if (digitCount <= LONG_MAX_DIGITS) {
+            //
+            // this is the common case
+            //
+            long value = parseLong(text, t.getStartIndex(), intIndexStop, 0);
+            value *= E[expValue];
+            return Long.valueOf(value);
+        }
+    
+        if (primitiveOnly) {
+            return toDouble(t);
+        }
+    
         char[] s = toChars(
                 text,
                 t.getStartIndex(),
-                t.getStopIndex());
-
-        if (primitiveOnly) {
-            return Double.valueOf(new String(s));
+                intIndexStop);
+    
+        BigInteger ret = new BigInteger(new String(s));
+    
+        if (expValue > 0) {
+            ret = ret.multiply(BigInteger.TEN.pow(expValue));
         }
-
-        return new BigDecimal(s);
+    
+        return ret;
     }
     
     /**
@@ -492,6 +653,9 @@ public class NumberBuilder implements NumberText {
      *
      * <p>This is similar to {@link java.lang.Integer#parseInt(String)},
      * however, it accepts a bounded CharSequence and default value.
+     *
+     * <p>Since this private, and I will never call this with a +/-
+     * prefix, I've removed that logic.
      * @param s a non-null character sequence
      * @param start start index
      * @param stop stop index
@@ -509,27 +673,13 @@ public class NumberBuilder implements NumberText {
         }
 
         int ret = 0;
-        boolean isneg = false;
-
-        char c = s.charAt(start);
-        
-        switch (c) {
-        case '-':
-            isneg = true;
-            // fall through
-        case '+':
-            start++;
-            break;
-        default:
-            break;
-        }
         
         for (int i = start; i < stop; i++) {
-            c = s.charAt(i);
+            char c = s.charAt(i);
             ret = ret * 10 + (c - '0');
         }
 
-        return isneg ? -ret : ret;
+        return ret;
     }
     
     /**
@@ -609,6 +759,14 @@ public class NumberBuilder implements NumberText {
         return ret;
     }
 
+    /**
+     * Return a string representation of the given NumberText.
+     * @param text a valid NumberText
+     * @return a valid String
+     */
+    public static String toString(NumberText text) {
+        return String.valueOf(toChars(text));
+    }
 
     @Override
     public String toString() {
@@ -631,13 +789,13 @@ public class NumberBuilder implements NumberText {
     }
 
     @Override
-    public int getDecimalStartIndex() {
-        return this.decIndexStart;
+    public int getFractionalStartIndex() {
+        return this.fractIndexStart;
     }
 
     @Override
-    public int getDecimalStopIndex() {
-        return this.decIndexStop;
+    public int getFractionalStopIndex() {
+        return this.fractIndexStop;
     }
 
     @Override
