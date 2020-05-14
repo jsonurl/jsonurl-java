@@ -17,12 +17,14 @@ package org.jsonurl.jsonorg;
  * under the License.
  */
 
+import java.util.EnumSet;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsonurl.JavaValueFactory;
 import org.jsonurl.NumberBuilder;
 import org.jsonurl.NumberText;
 import org.jsonurl.ValueFactory;
+import org.jsonurl.ValueType;
 
 
 /**
@@ -93,16 +95,6 @@ public abstract class JsonOrgValueFactory implements ValueFactory.TransparentBui
     };
 
     @Override
-    public Class<JSONObject> getObjectClass() {
-        return JSONObject.class;
-    }
-
-    @Override
-    public Class<JSONArray> getArrayClass() {
-        return JSONArray.class;
-    }
-
-    @Override
     public JSONArray newArrayBuilder() {
         return new JSONArray();
     }
@@ -145,5 +137,32 @@ public abstract class JsonOrgValueFactory implements ValueFactory.TransparentBui
     @Override
     public String getString(CharSequence s, int start, int stop) {
         return JavaValueFactory.toJavaString(s, start, stop);
+    }
+    
+    @Override
+    public boolean isValid(EnumSet<ValueType> types, Object value) {
+        if (value instanceof String) {
+            return types.contains(ValueType.STRING);
+        }
+        if (value instanceof Number) {
+            return types.contains(ValueType.NUMBER);
+        }
+        if (value instanceof Boolean) {
+            return types.contains(ValueType.BOOLEAN);
+        }
+        if (value instanceof JSONArray) {
+            return types.contains(ValueType.ARRAY);
+        }
+        if (value instanceof JSONObject) {
+            return types.contains(ValueType.OBJECT);
+        }
+        if (isNull(value)) {
+            return types.contains(ValueType.NULL);
+        }
+        if (isEmpty(value)) {
+            return types.contains(ValueType.OBJECT)
+                || types.contains(ValueType.ARRAY);
+        }
+        return false;
     }
 }

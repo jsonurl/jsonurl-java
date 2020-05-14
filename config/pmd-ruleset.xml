@@ -28,7 +28,11 @@
    <rule ref="category/java/bestpractices.xml/JUnit4TestShouldUseBeforeAnnotation"/>
    <rule ref="category/java/bestpractices.xml/JUnit4TestShouldUseTestAnnotation"/>
    <rule ref="category/java/bestpractices.xml/JUnitAssertionsShouldIncludeMessage"/>
+
+   <!-- disable
    <rule ref="category/java/bestpractices.xml/JUnitTestContainsTooManyAsserts"/>
+   -->
+
    <rule ref="category/java/bestpractices.xml/JUnitTestsShouldIncludeAssert"/>
    <rule ref="category/java/bestpractices.xml/JUnitUseExpected"/>
    <rule ref="category/java/bestpractices.xml/LooseCoupling"/>
@@ -214,7 +218,11 @@
    <rule ref="category/java/errorprone.xml/AvoidMultipleUnaryOperators"/>
    <rule ref="category/java/errorprone.xml/AvoidUsingOctalValues"/>
    <rule ref="category/java/errorprone.xml/BadComparison"/>
+
+   <!-- way too many false positives
    <rule ref="category/java/errorprone.xml/BeanMembersShouldSerialize"/>
+   -->
+
    <rule ref="category/java/errorprone.xml/BrokenNullCheck"/>
    <rule ref="category/java/errorprone.xml/CallSuperFirst"/>
    <rule ref="category/java/errorprone.xml/CallSuperLast"/>

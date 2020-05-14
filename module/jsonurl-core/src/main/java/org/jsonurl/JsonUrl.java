@@ -56,7 +56,8 @@ public final class JsonUrl {
                 int len) {
 
             if (off + 2 > len) {
-                return 0;
+                // return 0;
+                throw new SyntaxException(ERR_MSG_BADPCTENC, off);
             }
 
             int c1 = hexDecode(s.charAt(off));

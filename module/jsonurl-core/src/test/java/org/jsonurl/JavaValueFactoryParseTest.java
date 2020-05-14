@@ -16,9 +16,11 @@ package org.jsonurl;
  * specific language governing permissions and limitations
  * under the License.
  */
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.Test;
 
 /**
  * Abstract base class for parser tests.
@@ -108,5 +110,26 @@ abstract class JavaValueFactoryParseTest extends AbstractParseTest<
     @Override
     protected String getString(String key, Map<String,Object> value) {
         return (String)value.get(key);
+    }
+    
+    @Test
+    void testMisc() {
+        String test = "Hello, World!";
+
+        assertEquals(
+            test,
+            JavaValueFactory.toJavaString(test, 0, test.length()),
+            test);
+        
+        assertEquals(
+            test.substring(1),
+            JavaValueFactory.toJavaString(test, 1, test.length()),
+            test);
+        
+        assertEquals(
+            test.substring(1),
+            JavaValueFactory.toJavaString(
+                new StringBuilder(test), 1, test.length()),
+            test);
     }
 }

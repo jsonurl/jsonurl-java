@@ -23,16 +23,16 @@ import static org.jsonurl.JsonUrl.parseLiteralLength;
 import static org.jsonurl.LimitException.ERR_MSG_LIMIT_MAX_PARSE_CHARS;
 import static org.jsonurl.LimitException.ERR_MSG_LIMIT_MAX_PARSE_DEPTH;
 import static org.jsonurl.LimitException.ERR_MSG_LIMIT_MAX_PARSE_VALUES;
-import static org.jsonurl.SyntaxException.ERR_MSG_EXPECT_ARRAY;
 import static org.jsonurl.SyntaxException.ERR_MSG_EXPECT_LITERAL;
-import static org.jsonurl.SyntaxException.ERR_MSG_EXPECT_OBJECT;
 import static org.jsonurl.SyntaxException.ERR_MSG_EXPECT_OBJVALUE;
 import static org.jsonurl.SyntaxException.ERR_MSG_EXPECT_STRUCTCHAR;
+import static org.jsonurl.SyntaxException.ERR_MSG_EXPECT_TYPE;
 import static org.jsonurl.SyntaxException.ERR_MSG_EXTRACHARS;
 import static org.jsonurl.SyntaxException.ERR_MSG_NOTEXT;
 import static org.jsonurl.SyntaxException.ERR_MSG_STILLOPEN;
 
 import java.util.Deque;
+import java.util.EnumSet;
 import java.util.LinkedList;
 
 /**
@@ -50,7 +50,9 @@ import java.util.LinkedList;
  *
  * @param V value type (any JSON value)
  * @param C composite type (array or object)
+ * @param ABT array builder type
  * @param A array type
+ * @param JBT object builder type
  * @param J object type
  * @param B boolean type
  * @param M number type
@@ -87,9 +89,9 @@ public class Parser<
     }
 
     /**
-     * A ValueFactory with transparent array and object builders.
+     * A {@code Parser} with transparent array and object builders.
      *
-     * <p>A ValueFactory whose JSON array and JSON array builder are the
+     * <p>A {@code Parser} whose JSON array and JSON array builder are the
      * same instance of the same class, and whose JSON object and JSON object
      * builder are the same instance of the same class. 
      *
@@ -124,12 +126,20 @@ public class Parser<
         public TransparentBuilder(ValueFactory<V,C,A,A,J,J,B,M,N,S> factory) {
             super(factory);
         }
-
     }
 
     public static final int DEFAULT_MAX_PARSE_CHARS = 1 << 13;
     public static final int DEFAULT_MAX_PARSE_DEPTH = 1 << 4;
     public static final int DEFAULT_MAX_PARSE_VALUES = 1 << 10;
+    
+    private static final EnumSet<ValueType> TYPE_VALUE_ANY =
+        EnumSet.allOf(ValueType.class);
+
+    private static final EnumSet<ValueType> TYPE_VALUE_OBJECT =
+        EnumSet.of(ValueType.OBJECT);
+
+    private static final EnumSet<ValueType> TYPE_VALUE_ARRAY =
+        EnumSet.of(ValueType.ARRAY);
 
     private StringBuilder buf = new StringBuilder(64);
     private int maxParseDepth = DEFAULT_MAX_PARSE_DEPTH;
@@ -174,12 +184,64 @@ public class Parser<
     /**
      * Parse a character sequence.
      *
+     * <p>This is equivalent to {@link #parseObject(CharSequence, int, int)
+     * parseObject(s, 0, s.length())}.
+     * @return a factory-typed JSON Object
+     */
+    @SuppressWarnings("unchecked")
+    public J parseObject(CharSequence s) {
+        return (J)parse(s, 0, s.length(), TYPE_VALUE_OBJECT);
+    }
+
+    /**
+     * Parse a character sequence.
+     *
+     * <p>Parse the given JSON-&gt;URL text and return an object.
+     * @param s the text to be parsed
+     * @param off offset of the first character to be parsed
+     * @param length the number of characters to be parsed
+     * @return a factory-typed JSON Object  
+     */
+    @SuppressWarnings("unchecked")
+    public J parseObject(CharSequence s, int off, int length) {
+        return (J)parse(s, off, length, TYPE_VALUE_OBJECT);
+    }
+
+    /**
+     * Parse a character sequence.
+     *
+     * <p>This is equivalent to {@link #parseArray(CharSequence, int, int)
+     * parseObject(s, 0, s.length())}.
+     * @return a factory-typed JSON Object  
+     */
+    @SuppressWarnings("unchecked")
+    public A parseArray(CharSequence s) {
+        return (A)parse(s, 0, s.length(), TYPE_VALUE_ARRAY);
+    }
+
+    /**
+     * Parse a character sequence.
+     *
+     * <p>Parse the given JSON-&gt;URL text and return an array.
+     * @param s the text to be parsed
+     * @param off offset of the first character to be parsed
+     * @param length the number of characters to be parsed
+     * @return a factory-typed JSON Object  
+     */
+    @SuppressWarnings("unchecked")
+    public A parseArray(CharSequence s, int off, int length) {
+        return (A)parse(s, off, length, TYPE_VALUE_ARRAY);
+    }
+
+    /**
+     * Parse a character sequence.
+     *
      * <p>This simply calls {@link #parse(CharSequence, int, int)
      * parse(s,0,s.length())}.
      * @see #parse(CharSequence, int, int)
      */
     public V parse(CharSequence s) {
-        return parse(s, 0, s.length(), null);
+        return parse(s, 0, s.length(), (EnumSet<ValueType>)null);
     }
 
     /**
@@ -192,15 +254,51 @@ public class Parser<
      * @return a factory-typed value  
      */
     public V parse(CharSequence s, int off, int length) {
-        return parse(s, off, length, null);
+        return parse(s, off, length, (EnumSet<ValueType>)null);
+    }
+    
+    /**
+     * Parse a character sequence. Simple calls
+     * {@link #parse(CharSequence, int, int, EnumSet)
+     * parse(s, off, length, EnumSet.of(canReturn))}.
+     */
+    public V parse(CharSequence s, int off, int length, ValueType canReturn) {
+        return parse(s, off, length, EnumSet.of(canReturn));
     }
 
-    private V parse(CharSequence s, int off, int length, Class<?> clazz) {
+    /**
+     * Parse a character sequence. Simple calls
+     * {@link #parse(CharSequence, int, int, EnumSet)
+     * parse(s, off, length, EnumSet.of(canReturn))}.
+     */
+    public V parse(CharSequence s, ValueType canReturn) {
+        return parse(s, 0, s.length(), EnumSet.of(canReturn));
+    }
+
+    /**
+     * Parse a character sequence.
+     *
+     * <p>Parse the given JSON-&gt;URL text and return a typed value.
+     * @param s the text to be parsed
+     * @param off offset of the first character to be parsed
+     * @param length the number of characters to be parsed
+     * @param canReturn set of allowed return types
+     * @return a factory-typed value
+     */
+    public V parse(
+            CharSequence s,
+            int off,
+            int length,
+            EnumSet<ValueType> canReturn) {
+
         if (length == 0) {
             throw new SyntaxException(ERR_MSG_NOTEXT, 0);
         }
         if (length >= this.maxParseChars) {
             throw new LimitException(ERR_MSG_LIMIT_MAX_PARSE_CHARS);
+        }
+        if (canReturn == null) {
+            canReturn = TYPE_VALUE_ANY;
         }
 
         NumberBuilder numb = new NumberBuilder();
@@ -208,8 +306,6 @@ public class Parser<
         char c = s.charAt(off);
 
         if (c != '(') {
-            checkType(clazz, null, factory);
-
             //
             // not composite; parse as a single literal value
             //
@@ -225,7 +321,14 @@ public class Parser<
                 throw new SyntaxException(ERR_MSG_EXPECT_LITERAL);
             }
 
-            return literal(buf, numb, s, off, off + length, factory);
+            V ret = literal(buf, numb, s, off, off + length, factory);
+
+            if (!factory.isValid(canReturn, ret)) {
+                throw new SyntaxException(
+                    String.format("%s: %s", ERR_MSG_EXPECT_TYPE, canReturn));
+            }
+
+            return ret;
         }
 
         LinkedList<State> stateStack = new LinkedList<>();
@@ -235,6 +338,7 @@ public class Parser<
         int parseDepth = 1;
         int parseValueCount = 0;
         final int stop = off + length;
+        boolean isDoneTypeCheck = false;
 
         stateStack.push(State.PAREN);
 
@@ -253,6 +357,16 @@ public class Parser<
                     // found two back-to-back open parens. We know the first,
                     // paren is starting an array.
                     //
+                    if (!isDoneTypeCheck) {
+                        if (!canReturn.contains(ValueType.ARRAY)) {
+                            throw new SyntaxException(
+                                String.format("%s: %s",
+                                    ERR_MSG_EXPECT_TYPE,
+                                    canReturn));
+                        }
+                        isDoneTypeCheck = true;
+                    }
+
                     parseValueCount = incrementLimit(
                             ERR_MSG_LIMIT_MAX_PARSE_VALUES,
                             parseValueCount,
@@ -274,16 +388,30 @@ public class Parser<
                     // found open paren followed by close paren; the empty
                     // composite value.
                     //
+                    if (!isDoneTypeCheck) {
+                        if (!ValueType.containsComposite(canReturn)) {
+                            throw new SyntaxException(
+                                String.format("%s: %s",
+                                    ERR_MSG_EXPECT_TYPE,
+                                    canReturn),
+                                pos);
+                        }
+                        isDoneTypeCheck = true;
+                    }
+
                     if (--parseDepth == 0) {
                         if (pos + 1 != stop) {
                             throw new SyntaxException(ERR_MSG_EXTRACHARS, pos);   
                         }
-                        if (valueStack.isEmpty()) {
-                            return emptyValue;
-                        }
 
-                        return checkType(clazz, valueStack.peek(), factory);
+                        //
+                        // In theory should return valueStack.peek() here, 
+                        // but if parseDepth is zero here then I know I can
+                        // simply return the emptyValue.
+                        //
+                        return emptyValue;
                     }
+
                     parseValueCount = incrementLimit(
                             ERR_MSG_LIMIT_MAX_PARSE_VALUES,
                             parseValueCount,
@@ -318,6 +446,16 @@ public class Parser<
                     //
                     // multi-element array
                     //
+                    if (!isDoneTypeCheck) {
+                        if (!canReturn.contains(ValueType.ARRAY)) {
+                            throw new SyntaxException(
+                                String.format("%s: %s",
+                                    ERR_MSG_EXPECT_TYPE,
+                                    canReturn));
+                        }
+                        isDoneTypeCheck = true;
+                    }
+
                     parseValueCount = incrementLimit(
                             ERR_MSG_LIMIT_MAX_PARSE_VALUES,
                             parseValueCount,
@@ -332,14 +470,24 @@ public class Parser<
                     //
                     // single element array
                     //
+                    if (!isDoneTypeCheck) {
+                        if (!canReturn.contains(ValueType.ARRAY)) {
+                            throw new SyntaxException(
+                                String.format("%s: %s",
+                                    ERR_MSG_EXPECT_TYPE,
+                                    canReturn),
+                                pos);
+                        }
+                        isDoneTypeCheck = true;
+                    }
+
                     ABT sea = factory.newArrayBuilder();
                     factory.add(sea, literal(buf, numb, s, litpos, pos, factory));
                     valueStack.push(factory.newArray(sea));
 
                     if (--parseDepth == 0) {
                         if (pos + 1 == stop) {
-                            return checkType(clazz, valueStack.peek(), factory);
-
+                            return valueStack.peek();
                         }
                         throw new SyntaxException(ERR_MSG_EXTRACHARS, pos);
                     }
@@ -351,6 +499,16 @@ public class Parser<
                     //
                     // key name for object
                     //
+                    if (!isDoneTypeCheck) {
+                        if (!canReturn.contains(ValueType.OBJECT)) {
+                            throw new SyntaxException(
+                                String.format("%s: %s",
+                                    ERR_MSG_EXPECT_TYPE,
+                                    canReturn));
+                        }
+                        isDoneTypeCheck = true;
+                    }
+
                     stateStack.set(0, State.OBJECT_HAVE_KEY);
                     builderStack.push(factory.newObjectBuilder());
                     keyStack.push(literalToJavaString(buf, numb, s, litpos, pos));
@@ -409,7 +567,7 @@ public class Parser<
 
                     if (--parseDepth == 0) {
                         if (pos + 1 == stop) {
-                            return checkType(clazz, valueStack.peek(), factory);
+                            return valueStack.peek();
                         }
                         throw new SyntaxException(ERR_MSG_EXTRACHARS, pos);
                     }
@@ -468,7 +626,7 @@ public class Parser<
 
                     if (--parseDepth == 0) {
                         if (pos + 1 == stop) {
-                            return checkType(clazz, valueStack.peek(), factory);
+                            return valueStack.peek();
                         }
                         throw new SyntaxException(ERR_MSG_EXTRACHARS, pos);
                     }
@@ -496,28 +654,6 @@ public class Parser<
                 continue;
             }
         }
-    }
-    
-    private static final <V> V checkType(
-            Class<?> expect,
-            V got,
-            ValueFactory<V,?,?,?,?,?,?,?,?,?> factory) {
-        if (expect == null) {
-            return got;
-        }
-
-        Class<?> clazz = got == null ? null : got.getClass();
-        if (expect == clazz) {
-            return got;
-        }
-        if (expect.isAssignableFrom(factory.getObjectClass())) {
-            throw new SyntaxException(ERR_MSG_EXPECT_OBJECT);
-        }
-        if (expect.isAssignableFrom(factory.getArrayClass())) {
-            throw new SyntaxException(ERR_MSG_EXPECT_ARRAY);
-        }
-
-        return got;
     }
 
     public void setMaxParseChars(int maxParseChars) {

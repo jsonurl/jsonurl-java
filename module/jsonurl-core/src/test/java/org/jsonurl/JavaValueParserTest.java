@@ -32,5 +32,4 @@ class JavaValueParserTest {
         assertNotNull(new JavaValueParser());
         assertNotNull(new JavaValueParser(JavaValueFactory.PRIMITIVE));
     }
-
 }

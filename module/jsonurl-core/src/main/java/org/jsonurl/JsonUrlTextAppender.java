@@ -36,7 +36,7 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R>
     /**
      * Destination, provided in constructor.
      */
-    protected final A out; // NOPMD - not a bean
+    protected final A out;
 
     /**
      * Create a new JsonUrlTextAppender.

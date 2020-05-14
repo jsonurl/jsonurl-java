@@ -19,6 +19,7 @@ package org.jsonurl.jsonp;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.EnumSet;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
@@ -31,6 +32,7 @@ import javax.json.JsonValue;
 import org.jsonurl.NumberBuilder;
 import org.jsonurl.NumberText;
 import org.jsonurl.ValueFactory;
+import org.jsonurl.ValueType;
 
 /**
  * A JSON-&gt;URL ValueFactory which uses the JSR-374 JSONP interface. 
@@ -97,7 +99,7 @@ public abstract class JsonpValueFactory implements ValueFactory<
     public static final JsonpValueFactory BIGMATH = new JsonpValueFactory() {
         @Override
         public JsonNumber getNumber(NumberText text) {
-            if (!text.hasDecimalPart()) {
+            if (!text.hasFractionalPart()) {
                 switch (text.getExponentType()) { // NOPMD - don't want default
                 case NONE:
                     return Json.createValue(new BigInteger(text.toString()));
@@ -115,16 +117,6 @@ public abstract class JsonpValueFactory implements ValueFactory<
             return Json.createValue(new BigDecimal(text.toString()));
         }
     };
-    
-    @Override
-    public Class<?> getObjectClass() {
-        return JsonObject.class;
-    }
-
-    @Override
-    public Class<?> getArrayClass() {
-        return JsonArray.class;
-    }
 
     @Override
     public JsonStructure getEmptyComposite() {
@@ -184,5 +176,32 @@ public abstract class JsonpValueFactory implements ValueFactory<
     @Override
     public JsonObjectBuilder newObjectBuilder() {
         return Json.createObjectBuilder();
+    }
+    
+    @Override
+    public boolean isValid(EnumSet<ValueType> types, JsonValue value) {
+        if (value instanceof JsonString) {
+            return types.contains(ValueType.STRING);
+        }
+        if (value instanceof JsonNumber) {
+            return types.contains(ValueType.NUMBER);
+        }
+        if (value == JsonValue.FALSE || value == JsonValue.TRUE) {
+            return types.contains(ValueType.BOOLEAN);
+        }
+        if (value instanceof JsonArray) {
+            return types.contains(ValueType.ARRAY);
+        }
+        if (value instanceof JsonObject) {
+            return types.contains(ValueType.OBJECT);
+        }
+        if (JsonValue.NULL == value) {
+            return types.contains(ValueType.NULL);
+        }
+        if (isEmpty(value)) {
+            return types.contains(ValueType.OBJECT)
+                || types.contains(ValueType.ARRAY);
+        }
+        return false;
     }
 }

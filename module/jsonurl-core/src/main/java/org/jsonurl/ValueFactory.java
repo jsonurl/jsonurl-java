@@ -1,5 +1,7 @@
 package org.jsonurl;
 
+import java.util.EnumSet;
+
 /*
  * Copyright 2019 David MacCormack
  * 
@@ -91,20 +93,6 @@ public interface ValueFactory<
         }
     }
 
-    /**
-     * get the runtime Class for object.
-     *
-     * @return the runtime Class for object
-     */
-    public Class<?> getObjectClass();
-    
-    /**
-     * get the runtime Class for array.
-     *
-     * @return the runtime Class for array
-     */
-    public Class<?> getArrayClass();
-    
     /**
      * get the empty composite value.
      *
@@ -202,7 +190,7 @@ public interface ValueFactory<
      * @return a valid string whose text is the given character sequence
      */
     public S getString(CharSequence s, int start, int stop);
-    
+
     /**
      * get a JSON string value.
      *
@@ -231,6 +219,25 @@ public interface ValueFactory<
     }
 
     /**
+     * Test if the given {@code value} has the given {@code type}.
+     * This simply calls {@link #isValid(EnumSet, V)
+     * isValid(EnumSet.of(type), value)}. 
+     * @param type allowed type
+     * @param value value to test
+     */
+    default boolean isValid(ValueType type, V value) {
+        return isValid(EnumSet.of(type), value);
+    }
+
+    /**
+     * Test if the type of the given {@code value} is present in {@code types}. 
+     * @param types set of allowed types
+     * @param value value to test
+     * @return true if the type of value is in the given types set.
+     */
+    public boolean isValid(EnumSet<ValueType> types, V value);
+
+    /**
      * Test if the given object is the empty value.
      *
      * @param obj a Java Object
@@ -239,7 +246,29 @@ public interface ValueFactory<
     default boolean isEmpty(Object obj) {
         return obj == getEmptyComposite();
     }
+
+    /**
+     * Test if the given object is the null value.
+     *
+     * @param obj a Java Object
+     * @return true if obj is the null value; false otherwise.
+     */
+    default boolean isNull(Object obj) {
+        return obj == getNull();
+    }
     
+    /*
+     * Get a true, false, or null value for the given text. This simply calls
+     * {@link #getTrueFalseNull(CharSequence, int, int)
+     * getTrueFalseNull(s, 0, s.length())}.
+     *
+     * @param s the text
+     * @return a valid value or null
+     *
+    default V getTrueFalseNull(CharSequence s) {
+        return getTrueFalseNull(s, 0, s.length());
+    }*/
+
     /**
      * get a true, false, or null value for the given text.
      *

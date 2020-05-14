@@ -50,6 +50,9 @@ public class SyntaxException extends ParseException {
 
     /** ERR_MSG_EXPECT_OBJECT. */
     static final String ERR_MSG_EXPECT_OBJECT = "expected object";
+    
+    /** ERR_MSG_EXPECT_TYPE. */
+    static final String ERR_MSG_EXPECT_TYPE = "expected type";
 
     /** ERR_MSG_EXPECT_STRUCTCHAR. */
     static final String ERR_MSG_EXPECT_STRUCTCHAR = "expected structural character";
@@ -61,7 +64,7 @@ public class SyntaxException extends ParseException {
     static final String ERR_MSG_STILLOPEN = "unexpected end-of-input inside composite";
 
     /** ERR_MSG_EXTRACHARS. */
-    static final String ERR_MSG_EXTRACHARS = "unexpected unexpected text after composite";
+    static final String ERR_MSG_EXTRACHARS = "unexpected text after composite";
 
     /**
      * Create a new SyntaxException.

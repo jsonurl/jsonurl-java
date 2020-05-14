@@ -19,6 +19,7 @@ package org.jsonurl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,16 +84,6 @@ public interface JavaValueFactory extends ValueFactory.TransparentBuilder<
     public static final Map<String,Object> EMPTY = Collections.emptyMap();
 
     @Override
-    default Class<?> getObjectClass() {
-        return Map.class;
-    }
-
-    @Override
-    default Class<?> getArrayClass() {
-        return List.class;
-    }
-
-    @Override
     default Object getEmptyComposite() {
         return EMPTY;
     }
@@ -140,10 +131,36 @@ public interface JavaValueFactory extends ValueFactory.TransparentBuilder<
     default String getString(CharSequence s, int start, int stop) {
         return toJavaString(s, start, stop);
     }
-    
+
     @Override
     default String getString(String s) {
         return s;
+    }
+
+    @Override
+    default boolean isValid(EnumSet<ValueType> types, Object value) {
+        if (isNull(value)) {
+            return types.contains(ValueType.NULL);
+        }
+        if (isEmpty(value)) {
+            return ValueType.containsComposite(types);
+        }
+        if (value instanceof String) {
+            return types.contains(ValueType.STRING);
+        }
+        if (value instanceof Number) {
+            return types.contains(ValueType.NUMBER);
+        }
+        if (value instanceof Boolean) {
+            return types.contains(ValueType.BOOLEAN);
+        }
+        if (value instanceof List) {
+            return types.contains(ValueType.ARRAY);
+        }
+        if (value instanceof Map) {
+            return types.contains(ValueType.OBJECT);
+        }
+        return false;
     }
 
     /**
