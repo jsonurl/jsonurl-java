@@ -589,7 +589,7 @@ public class NumberBuilder implements NumberText { // NOPMD
      */
     public static final Number build(NumberText t, boolean primitiveOnly) {
         if (!t.hasFractionalPart()) {
-            switch (t.getExponentType()) {
+            switch (t.getExponentType()) { //NOPMD - no default
             case NEGATIVE_VALUE:
                 break;
             case JUST_VALUE:
