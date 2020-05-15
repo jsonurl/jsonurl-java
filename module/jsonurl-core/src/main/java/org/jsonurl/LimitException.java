@@ -21,16 +21,15 @@ package org.jsonurl;
  * A exception that occurs when a limit is exceeded.
  */
 public class LimitException extends ParseException {
-
-    @SuppressWarnings("PMD")
+    /** ERR_MSG_LIMIT_MAX_PARSE_CHARS. */
     static final String ERR_MSG_LIMIT_MAX_PARSE_CHARS =
             "input has too many characters";
 
-    @SuppressWarnings("PMD")
+    /** ERR_MSG_LIMIT_MAX_PARSE_VALUES. */
     static final String ERR_MSG_LIMIT_MAX_PARSE_VALUES =
             "input has too many values";
 
-    @SuppressWarnings("PMD")
+    /** ERR_MSG_LIMIT_MAX_PARSE_DEPTH. */
     static final String ERR_MSG_LIMIT_MAX_PARSE_DEPTH =
             "input nesting is too deep";
 
