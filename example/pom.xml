@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+<!--
+    Copyright 2019 David MacCormack
+  
+    Licensed under the Apache License, Version 2.0 (the "License"); you may not
+    use this file except in compliance with the License. You may obtain a copy
+    of the License at
+ 
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <!--
+    This POM intentionally does not reference the module parent POM,
+    and its artifacts will not published on Maven Central. The point of it is
+    to serve as a standalone example of how to use JSON->URL and as a smoke
+    test for staged artifacts.
+    
+    If it is of use to anyone else I expect that to be developers browsing the
+    source in git. 
+  -->  
+  <groupId>org.jsonurl</groupId>
+  <artifactId>example-parent</artifactId>
+  <version>1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <properties>
+    <jdk.minor.version>8</jdk.minor.version>
+    <jdk.version>1.${jdk.minor.version}</jdk.version>
+    <char.encoding>UTF-8</char.encoding>
+
+    <project.build.sourceEncoding>${char.encoding}</project.build.sourceEncoding>
+    <project.build.resourceEncoding>${char.encoding}</project.build.resourceEncoding>
+    <project.reporting.outputEncoding>${char.encoding}</project.reporting.outputEncoding>
+
+    <maven.compiler.source>${jdk.version}</maven.compiler.source>
+    <maven.compiler.target>${jdk.version}</maven.compiler.target>
+    <maven.compiler.plugin>3.8.1</maven.compiler.plugin>
+    <maven.surefire.plugin>2.22.2</maven.surefire.plugin>
+    <maven.jar.plugin>3.2.0</maven.jar.plugin>
+
+    <jsonurl.version>1.0.0-SNAPSHOT</jsonurl.version>
+    <junit.version>[5.4,)</junit.version>
+
+    <jsonurl.scm.path>jsonurl/jsonurl-java</jsonurl.scm.path>
+    <jsonurl.scm.base>scm:git:git@github.com:${jsonurl.scm.path}.git</jsonurl.scm.base>
+    <jsonurl.scm.url>https://github.com/${jsonurl.scm.path}</jsonurl.scm.url>
+
+    <javax.json.version>1.1.4</javax.json.version>
+  </properties>
+
+  <name>${project.groupId}:${project.artifactId}</name>
+  <description>
+    The parent POM for JSON-&gt;URL examples.
+  </description>
+  <licenses>
+    <license>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <name>Apache-2.0</name>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <organization>
+    <name>jsonurl.org</name>
+    <url>http://jsonurl.org</url>
+  </organization>
+  <developers>
+    <developer>
+      <id>dmaccormack</id>
+      <name>David MacCormack</name>
+    </developer>
+  </developers>
+  <issueManagement>
+    <url>${jsonurl.scm.url}/issues</url>
+    <system>GitHub Issues</system>
+  </issueManagement>
+  <scm>
+    <url>${jsonurl.scm.url}/modules</url>
+    <connection>${jsonurl.scm.base}</connection>
+    <developerConnection>${jsonurl.scm.base}</developerConnection>
+  </scm>
+  
+  <modules>
+    <module>example1</module>
+    <module>example2</module>
+  </modules>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  
+  <build>
+    <plugins>
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven.compiler.plugin}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven.surefire.plugin}</version>
+        </plugin>
+    </plugins>
+  </build>
+</project>
