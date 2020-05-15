@@ -54,7 +54,7 @@ public abstract class AbstractParseTest<
         M extends V,
         N extends V,
         S extends V> {
-    
+
     protected ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory;
     
     private static final String PREFIX1 = "prefix 1";
@@ -72,17 +72,15 @@ public abstract class AbstractParseTest<
     
     private void parse(
             ValueType allow,
-            Object out,
-            Object out2,
-            String in) {
-        parse(EnumSet.of(allow), out, out2, in, true);
+            String in,
+            Object out) {
+        parse(EnumSet.of(allow), in, out, true);
     }
 
     private void parse(
             EnumSet<ValueType> allow,
-            Object out,
-            Object out2,
             String in,
+            Object out,
             boolean isLiteral) {
 
         StringBuilder sb = new StringBuilder(1 << 10);
@@ -95,7 +93,7 @@ public abstract class AbstractParseTest<
         V parseResult = newParser().parse(
             sb.toString(), PREFIX1.length(), in.length());
 
-        Object parseCompare = out.equals(parseResult) ? out : out2;
+        Object parseCompare = out; //out.equals(parseResult) || out2 == null ? out : out2;
         assertEquals(parseCompare, parseResult);
 
         if (allow != null) {
@@ -112,7 +110,7 @@ public abstract class AbstractParseTest<
             V litResult = JsonUrl.parseLiteral(
                 sb.toString(), PREFIX2.length(), in.length(), factory);
     
-            Object litCompare = out.equals(litResult) ? out : out2;
+            Object litCompare = out; //out.equals(litResult) ? out : out2;
             assertEquals(litCompare, litResult);
     
             if (allow != null) {
@@ -160,8 +158,8 @@ public abstract class AbstractParseTest<
         "'4e17',400000000000000000",
     })
     void testLong(String in, String out) throws ParseException, IOException {
-        M factoryValue = parseLong(out);
-        parse(ValueType.NUMBER, factoryValue, null, in);
+        M factoryValue = getFactoryLong(out);
+        parse(ValueType.NUMBER, in, factoryValue);
 
         Long nativeValue = Long.valueOf(out);
         String txt = new JsonUrlStringBuilder().add(nativeValue).build();
@@ -176,15 +174,15 @@ public abstract class AbstractParseTest<
         "0", "-1", "123456", "-123456", "12345678905432132",
     })
     void testLong(String s) throws ParseException, IOException {
-        M factoryValue = parseLong(s);
-        parse(ValueType.NUMBER, factoryValue, null, s);
+        M factoryValue = getFactoryLong(s);
+        parse(ValueType.NUMBER, s, factoryValue);
 
         Long nativeValue = Double.valueOf(s).longValue();
         String txt = new JsonUrlStringBuilder().add(nativeValue).build();
         assertLong(s, txt, factoryValue);
     }
 
-    M parseLong(String s) {
+    private M getFactoryLong(String s) {
         return factory.getNumber(new NumberBuilder(s));
     }
 
@@ -200,38 +198,38 @@ public abstract class AbstractParseTest<
         "156.911e+2", "-276.833e+4",
     })
     void testDouble(String s) throws ParseException, IOException {
-        M factoryValue = parseDouble(s);
-        parse(ValueType.NUMBER, factoryValue, null, s);
+        M factoryValue = getFactoryDouble(s);
+        parse(ValueType.NUMBER, s, factoryValue);
 
         Number nativeValue = Double.valueOf(s);
 
+        //
+        // test JsonUrlStringBuilder
+        //
         String txt = new JsonUrlStringBuilder().add(nativeValue).build();
         assertEquals(String.valueOf(nativeValue), txt);
-
-        //
-        // I'd like to do the following but differences in the way the
-        // string is printed (WRT scientific notation) causes it to fail. 
-        //
-        // assertEquals(factoryValue, JsonUrl.parseLiteral(txt, factory));
         
         //
-        // so I'm just checking that parseLiteral() eventually calls
-        // factory.getNumber() like I expect
+        // test that parseLiteral eventually returns the same value that I
+        // get directly from the factory
         //
         assertEquals(factoryValue, JsonUrl.parseLiteral(s, factory));
-        assertEquals(nativeValue, new NumberBuilder(s).toDouble());
+
+        //
+        // test that parse and parse literal return the same value.
+        // If I simply try to compare the strings/text then the differences
+        // in scientific notation (e.g. 100 vs. 1e2) and stripped zeros
+        // after the decmial point (e.g. 1.0 vs 1) case some tests to fail.
+        // So I'm passing this through Double.valueOf to account for those
+        // differences.
+        //
+        assertEquals(
+            Double.valueOf(factoryValue.toString()),
+            Double.valueOf(JsonUrl.parseLiteral(txt, factory).toString()));
     }
 
-    M parseDouble(String s) {
+    private M getFactoryDouble(String s) {
         return factory.getNumber(new NumberBuilder(s));
-    }
-    
-    @ParameterizedTest
-    @ValueSource(strings = {
-        "t", "tr", "tru",
-    })
-    void testTrueFalseNull(String s) {
-        //assertNull(factory.getTrueFalseNull(s));
     }
 
     @ParameterizedTest
@@ -239,8 +237,8 @@ public abstract class AbstractParseTest<
     @Tag("boolean")
     @ValueSource(strings = { "true", "false" })
     void testBoolean(String s) throws ParseException, IOException {
-        B factoryValue = parseBoolean(s);
-        parse(ValueType.BOOLEAN, factoryValue, null, s);
+        B factoryValue = getFactoryBoolean(s);
+        parse(ValueType.BOOLEAN, s, factoryValue);
 
         Boolean nativeValue = Boolean.valueOf(s);
         String txt = new JsonUrlStringBuilder().add(nativeValue).build();
@@ -248,7 +246,7 @@ public abstract class AbstractParseTest<
         assertEquals(factoryValue, JsonUrl.parseLiteral(txt, factory));
     }
 
-    B parseBoolean(String s) {
+    private B getFactoryBoolean(String s) {
         return factory.getBoolean(Boolean.parseBoolean(s));
     }
 
@@ -259,7 +257,7 @@ public abstract class AbstractParseTest<
     void testNull(String s) throws ParseException, IOException {
         N factoryValue = factory.getNull();
         factory.isValid(ValueType.NULL, factoryValue);
-        parse(ValueType.NULL, factoryValue, null, s);
+        parse(ValueType.NULL, s, factoryValue);
 
         String txt = new JsonUrlStringBuilder().addNull().build();
         assertEquals(String.valueOf(s), txt);
@@ -275,14 +273,14 @@ public abstract class AbstractParseTest<
     @Tag("parse")
     @Tag("empty")
     @ValueSource(strings = { "()" })
-    void testEmpty(String s) throws ParseException, IOException {
+    void testEmptyComposite(String s) throws ParseException, IOException {
         V factoryValue = factory.getEmptyComposite();
         factory.isValid(ValueType.OBJECT, factoryValue);
         factory.isValid(ValueType.ARRAY, factoryValue);
 
         parse(
             EnumSet.of(ValueType.OBJECT, ValueType.ARRAY),
-            factoryValue, null, s, false);
+            s, factoryValue, false);
 
         String txt = new JsonUrlStringBuilder().addEmptyComposite().build();
         assertEquals(String.valueOf(s), txt);
@@ -320,16 +318,12 @@ public abstract class AbstractParseTest<
     })
     void testString2(String in, String out) throws ParseException, IOException {
         String nativeValue = out == null ? in : out;
-        S factoryValue = parseString(nativeValue); 
-        parse(ValueType.STRING, factoryValue, null, in);
+        S factoryValue = getFactoryString(nativeValue); 
+        parse(ValueType.STRING, in, factoryValue);
 
         String txt = new JsonUrlStringBuilder().add(nativeValue).build();
         assertEquals(in, txt);
         assertEquals(factoryValue, JsonUrl.parseLiteral(txt, factory));
-    }
-
-    S parseString(String s) {
-        return factory.getString(s);
     }
 
     @ParameterizedTest
@@ -342,29 +336,60 @@ public abstract class AbstractParseTest<
             "Hello, World!",
             "World: Hello!",
             "Hello (world).",
+    })
+    void testStringsWithStructCharsQuotedAndEncoded(String s)
+            throws UnsupportedEncodingException {
+
+        S value = getFactoryString(s);
+
+        //
+        // encoded
+        //
+        parse(ValueType.STRING, urlEncodeAndEscapeStructChars(s), value);
+
+        //
+        // quoted
+        //
+        String in = urlEncode(s).replace("'", "%27");
+        parse(ValueType.STRING, "'" + in + "'", value);
+    }
+    
+    @ParameterizedTest
+    @Tag("parse")
+    @Tag("string")
+    @Tag("autostring")
+    @ValueSource(strings = {
+            "hello",
+            "Bob's House",
             "t", "tr", "tru", "True", "tRue", "trUe", "truE",
             "f", "fa", "fal", "fals", "False", "fAlse", "faLse", "falSe", "falsE",
             "n", "nu", "nul", "Null", "nUll", "nuLl", "nulL",
     })
     void testString(String s) throws UnsupportedEncodingException {
-        String in = URLEncoder
-                //.encode(s, StandardCharsets.UTF_8)
-                .encode(s, "UTF-8")
-                .replace("'", "%27");
+        String in = urlEncode(s).replace("%27", "'");
+        parse(ValueType.STRING, in, getFactoryString(s));
+    }
 
-        S value = parseString(s);
+    private S getFactoryString(String s) {
+        return factory.getString(s);
+    }
+    
+    private static final String urlEncode(String s)
+            throws UnsupportedEncodingException {
 
-        parse(ValueType.STRING, value, null, "'" + in + "'");
+        return URLEncoder
+            //.encode(s, StandardCharsets.UTF_8)
+            .encode(s, "UTF-8");
+    }
 
-        in = URLEncoder
-                //.encode(s, StandardCharsets.UTF_8)
-                .encode(s, "UTF-8")
-                .replace("(", "%28")
-                .replace(")", "%29")
-                .replace(",", "%2C")
-                .replace(":", "%3A");
+    private static final String urlEncodeAndEscapeStructChars(String s)
+            throws UnsupportedEncodingException {
 
-        parse(ValueType.STRING, value, null, in);
+        return urlEncode(s)
+            .replace("(", "%28")
+            .replace(")", "%29")
+            .replace(",", "%2C")
+            .replace(":", "%3A");
     }
 
     @Test
@@ -544,26 +569,19 @@ public abstract class AbstractParseTest<
             SyntaxException.class,
             () -> newParser().parseArray(text));
     }
-    
+
+    // CHECKSTYLE:OFF
     protected abstract boolean getBoolean(String key, J value);
-    
     protected abstract String getString(String key, J value);
-
     protected abstract boolean getNull(String key, J value);
-    
     protected abstract boolean getEmptyComposite(String key, J value);
-    
     protected abstract A getArray(String key, J value);
-
     protected abstract A getArray(int index, A value);
-
     protected abstract J getObject(String key, J value);
-
     protected abstract J getObject(int index, A value);
-    
     protected abstract M getNumber(int index, A value);
-    
     protected abstract M getNumber(String key, J value);
+    // CHECKSTYLE:ON
 
     @Test
     void testJsonUrlText1() throws ParseException {

@@ -114,6 +114,8 @@ abstract class JavaValueFactoryParseTest extends AbstractParseTest<
     
     @Test
     void testMisc() {
+        super.testMisc();
+
         String test = "Hello, World!";
 
         assertEquals(
