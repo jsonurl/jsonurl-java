@@ -39,11 +39,11 @@ public final class JsonUrlWriter {
     private JsonUrlWriter() {
         // EMPTY
     }
-    
+
     private static final boolean isNull(Object in) {
         return in == null || in == JsonValue.NULL;
     }
-    
+
     /**
      * Write the given JsonValue as JSON-&gt;URL text.
      * 
