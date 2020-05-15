@@ -220,7 +220,7 @@ public interface ValueFactory<
 
     /**
      * Test if the given {@code value} has the given {@code type}.
-     * This simply calls {@link #isValid(EnumSet, V)
+     * This simply calls {@link #isValid(EnumSet, Object)
      * isValid(EnumSet.of(type), value)}. 
      * @param type allowed type
      * @param value value to test

@@ -543,7 +543,7 @@ public class NumberBuilder implements NumberText { // NOPMD
     }
 
     /**
-     * Parse the given NumberText as a {@link java.math.BigDecmial}.
+     * Parse the given NumberText as a {@link java.math.BigDecimal}.
      */
     public static final BigDecimal toBigDecimal(NumberText t) {
         char[] s = toChars(
@@ -555,7 +555,7 @@ public class NumberBuilder implements NumberText { // NOPMD
     }
 
     /**
-     * Parse the given NumberText as a {@link java.math.BigDecmial}.
+     * Parse the given NumberText as a {@link java.math.BigDecimal}.
      */
     public BigDecimal toBigDecimal() {
         return toBigDecimal(this);
