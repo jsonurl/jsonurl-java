@@ -26,6 +26,56 @@ however, POST is suboptimal for requests which do not modify a resource's
 state. JSON->URL defines a text format for the JSON data model suitable for use
 within a URL/URI (as described by RFC3986).
 
+## Usage
+The core library defines a [generic][java-generic] [JSON->URL parser][parser]
+and includes an implementation based Java SE data types (e.g.
+[java.util.Map][java-map], [java.util.List][java-list], etc).
+There are two additional modules, distributed as separate artifacts, which
+implement a parser based on JSR-374 and Douglas Crockford's Java API.
+
+Java SE API example:
+
+```java
+import org.jsonurl.JavaValueParser;
+
+JavaValueParser p = new JavaValueParser();
+Map obj = p.parseObject( "(Hello:World!)" );
+System.out.println(obj.get("Hello")) // World!
+```
+
+[Json.org][jsonorg-parser] example:
+
+```java
+import org.jsonurl.jsonorg.JsonUrlParser;
+
+JsonUrlParser p = new JsonUrlParser();
+JSONObject obj = p.parseObject( "(Hello:World!)" );
+System.out.println(obj.get("Hello")) // World!
+```
+
+[JSR-374][jsr374-parser] example:
+
+```java
+import org.jsonurl.jsonp.JsonUrlParser;
+
+JsonUrlParser p = new JsonUrlParser();
+JsonObject obj = p.parseObject( "(Hello:World!)" );
+System.out.println(obj.get("Hello")) // World!
+```
+
+The parser is designed for parsing untrusted input. It supports limits on
+the number of values it will instantiate and depth of nested arrays or objects
+that may be parsed before throwing a [LimitException][limit-exception], with
+sane defaults.
 
 ## License
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fjsonurl%2Fjsonurl-java.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fjsonurl%2Fjsonurl-java?ref=badge_large)
+
+[java-generic]: https://docs.oracle.com/javase/tutorial/java/generics/types.html
+[parser]: module/jsonurl-core/src/main/java/org/jsonurl/Parser.java
+[limit-exception]: module/jsonurl-core/src/main/java/org/jsonurl/LimitException.java
+[jsonorg-parser]: module/jsonurl-jsonorg/src/main/java/org/jsonurl/jsonorg/JsonUrlParser.java
+[jsr374-parser]: module/jsonurl-jsr374/src/main/java/org/jsonurl/jsonp/JsonUrlParser.java
+[java-map]: https://docs.oracle.com/javase/8/docs/api/java/util/Map.html
+[java-list]: https://docs.oracle.com/javase/8/docs/api/java/util/List.html
+
