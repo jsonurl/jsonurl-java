@@ -55,6 +55,7 @@
     <maven.doxia.plugin>[1.9,)</maven.doxia.plugin>
     <maven.project.info.reports.plugin>2.9</maven.project.info.reports.plugin>
     <nexus.staging.pluggin>1.6.8</nexus.staging.pluggin>
+    <codehaus.versions.pluggin>2.7</codehaus.versions.pluggin>
     <nexus.url>https://oss.sonatype.org</nexus.url>
 
     <junit.version>[5.4,)</junit.version>
@@ -115,7 +116,6 @@
       <url>${nexus.url}/content/repositories/snapshots</url>
     </snapshotRepository>
   </distributionManagement>
-  
 
   <dependencies>
     <dependency>
@@ -133,9 +133,6 @@
   </dependencies>
 
   <build>
-    <!-- 
-    <finalName>jsonurl-${project.artifactId}-${project.version}</finalName>
-     -->
     <pluginManagement>
       <plugins>
         <plugin>
@@ -289,6 +286,11 @@
             <nexusUrl>${nexus.url}/</nexusUrl>
             <autoReleaseAfterClose>false</autoReleaseAfterClose>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>versions-maven-plugin</artifactId>
+          <version>${codehaus.versions.pluggin}</version>
         </plugin>
       </plugins>
     </pluginManagement>
