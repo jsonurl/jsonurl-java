@@ -3,7 +3,7 @@
 [![Release](https://img.shields.io/github/release/jsonurl/jsonurl-java.svg?label=Release)](https://search.maven.org/search?q=g:org.jsonurl)
 [![javadoc](https://javadoc.io/badge2/org.jsonurl/jsonurl-core/javadoc.svg)](https://javadoc.io/doc/org.jsonurl/jsonurl-core)
 [![TravisCI Build Status](https://travis-ci.com/jsonurl/jsonurl-java.svg?branch=master)](https://travis-ci.com/jsonurl/jsonurl-java)
-[![GitHub Build Status](https://github.com/jsonurl/jsonurl-java/workflows/ci/badge.svg)](https://github.com/jsonurl/jsonurl-java/actions?query=workflow%3Aci)
+[![GitHub Build Status](https://github.com/jsonurl/jsonurl-java/workflows/ci/badge.svg?branch=master)](https://github.com/jsonurl/jsonurl-java/actions?query=workflow%3Aci)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=jsonurl_jsonurl-java&metric=alert_status)](https://sonarcloud.io/dashboard?id=jsonurl_jsonurl-java)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=jsonurl_jsonurl-java&metric=coverage)](https://sonarcloud.io/dashboard?id=jsonurl_jsonurl-java)
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=jsonurl_jsonurl-java&metric=ncloc)](https://sonarcloud.io/dashboard?id=jsonurl_jsonurl-java)
