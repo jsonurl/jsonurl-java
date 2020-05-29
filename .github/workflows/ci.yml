@@ -93,9 +93,19 @@ jobs:
     - name: Set artifact version
       run: script/version_snapshot.sh
       shell: bash
+    - name: Cache Maven dependencies
+      timeout-minutes: 10
+      uses: actions/cache@v1
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
     - name: SonarCloud scan of ${{ github.ref }}
       run: mvn -P jacoco -B -Dsonar.projectKey=jsonurl_jsonurl-java -Dsonar.organization=jsonurl -Dsonar.host.url=https://sonarcloud.io package sonar:sonar
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    - name: Collect debugging info
+      run: ls -lR
+    
 
