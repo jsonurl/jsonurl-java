@@ -113,6 +113,7 @@ abstract class JavaValueFactoryParseTest extends AbstractParseTest<
     }
     
     @Test
+    @Override
     void testMisc() {
         super.testMisc();
 

@@ -360,14 +360,12 @@ public abstract class AbstractParseTest<
     @Tag("autostring")
     @ValueSource(strings = {
             "hello",
-            "Bob's House",
             "t", "tr", "tru", "True", "tRue", "trUe", "truE",
             "f", "fa", "fal", "fals", "False", "fAlse", "faLse", "falSe", "falsE",
             "n", "nu", "nul", "Null", "nUll", "nuLl", "nulL",
     })
-    void testString(String s) throws UnsupportedEncodingException {
-        String in = urlEncode(s).replace("%27", "'");
-        parse(ValueType.STRING, in, getFactoryString(s));
+    void testString(String s) throws IOException {
+        parse(ValueType.STRING, s, getFactoryString(s));
     }
 
     private S getFactoryString(String s) {
@@ -425,9 +423,10 @@ public abstract class AbstractParseTest<
         "(a:b,'c'd)",
     })
     void testSyntaxException(String s) throws ParseException {
+        Parser<?, ?, ?, ?, ?, ?, ?, ?, ?, ?> p = newParser();
         assertThrows(
             SyntaxException.class,
-            () -> newParser().parse(s));
+            () -> p.parse(s));
     }
     
     @ParameterizedTest
@@ -439,39 +438,61 @@ public abstract class AbstractParseTest<
         "'(1,2)', STRING",
     })
     void testSyntaxException2(String text, String type) throws ParseException {
+        Parser<?, ?, ?, ?, ?, ?, ?, ?, ?, ?> p = newParser();
         assertThrows(
             SyntaxException.class,
-            () -> newParser().parse(text, ValueType.valueOf(type)));
+            () -> p.parse(text, ValueType.valueOf(type)));
     }
 
+    @ParameterizedTest
+    @Tag("parse")
+    @Tag("exception")
+    @ValueSource(strings = {
+        "%FA%80%80%80%80", //0x200000
+    })
+    void testUtf8EncodingException(String text) throws ParseException {
+        Parser<?, ?, ?, ?, ?, ?, ?, ?, ?, ?> p = newParser();
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> p.parse(text));
+    }
 
     @Test
     @Tag("parse")
     @Tag("exception")
     void testException() throws ParseException {
-        assertThrows(
-            LimitException.class,
-            () -> {
-                Parser<?,?,?,?,?,?,?,?,?,?> p = newParser();
-                p.setMaxParseChars(2);
-                p.parse("true");
-            });
+        {
+            Parser<?,?,?,?,?,?,?,?,?,?> p = newParser();
+            p.setMaxParseChars(2);
+            
+            assertThrows(
+                LimitException.class,
+                () -> {
+                    p.parse("true");
+                });
+        }
 
-        assertThrows(
-            LimitException.class,
-            () -> {
-                Parser<?,?,?,?,?,?,?,?,?,?> p = newParser();
-                p.setMaxParseDepth(2);
-                p.parse("(((1)))");
-            });
-        
-        assertThrows(
-            LimitException.class,
-            () -> {
-                Parser<?,?,?,?,?,?,?,?,?,?> p = newParser();
-                p.setMaxParseValues(2);
-                p.parse("(1,2,3)");
-            });
+        {
+            Parser<?,?,?,?,?,?,?,?,?,?> p = newParser();
+            p.setMaxParseDepth(2);
+
+            assertThrows(
+                LimitException.class,
+                () -> {
+                    p.parse("(((1)))");
+                });
+        }
+
+        {
+            Parser<?,?,?,?,?,?,?,?,?,?> p = newParser();
+            p.setMaxParseValues(2);
+
+            assertThrows(
+                LimitException.class,
+                () -> {
+                    p.parse("(1,2,3)");
+                });
+        }
 
         ParseException pe = null;
         try {

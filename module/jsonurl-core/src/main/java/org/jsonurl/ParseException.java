@@ -30,7 +30,7 @@ public class ParseException extends RuntimeException {
     /**
      * the position in the input text.
      */
-    private int position;
+    private final int position;
 
     /**
      * Create a new ParseException.
@@ -55,13 +55,6 @@ public class ParseException extends RuntimeException {
     }
 
     /**
-     * Set the position of the exception.
-     */
-    public void setPosition(int position) {
-        this.position = position;
-    }
-
-    /**
      * Exception type description.
      */
     protected String typeDescription() {
@@ -77,9 +70,9 @@ public class ParseException extends RuntimeException {
             .append(": ")
             .append(getMessage());
 
-        int position = getPosition();
-        if (position > -1) {
-            sb.append(" at ").append(position);
+        int p = getPosition();
+        if (p > -1) {
+            sb.append(" at ").append(p);
         }
 
         return sb.toString();

@@ -49,6 +49,9 @@ public final class JsonUrl {
      * a namespace to hide private, parse-specific static fields and methods.
      */
     static final class Parse { //NOPMD - internal utility class
+      
+        private Parse() {
+        }
 
         private static final int percentDecode(
                 CharSequence s,
@@ -56,7 +59,6 @@ public final class JsonUrl {
                 int len) {
 
             if (off + 2 > len) {
-                // return 0;
                 throw new SyntaxException(ERR_MSG_BADPCTENC, off);
             }
 
@@ -190,12 +192,14 @@ public final class JsonUrl {
                 } else if ((b & 0xf8) == 0xf0) {        // 11110xxx (yields 3 bits)
                     sumb = b & 0x07;
                     more = 3;                           // Expect 3 more bytes
-                } else if ((b & 0xfc) == 0xf8) {        // 111110xx (yields 2 bits)
-                    sumb = b & 0x03;
-                    more = 4;                           // Expect 4 more bytes
-                } else /*if ((b & 0xfe) == 0xfc)*/ {    // 1111110x (yields 1 bit)
-                    sumb = b & 0x01;
-                    more = 5;                           // Expect 5 more bytes
+                } else {
+                    // per rfc3629 everything else is invalid.
+                    //
+                    // Ideally I'd throw a MalformedInputException, but
+                    // I want to throw something that extends RuntimeException
+                    // and it does not.
+                    //
+                    throw new IllegalArgumentException("utf-8 decode error");
                 }
             }
             if (needEndQuote) {
