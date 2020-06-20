@@ -19,10 +19,10 @@ package org.jsonurl;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A {@link org.jsonurl.ValueFactory ValueFactory} based on J2SE8 data types.
@@ -95,12 +95,12 @@ public interface JavaValueFactory extends ValueFactory.TransparentBuilder<
 
     @Override
     default List<Object> newArrayBuilder() {
-        return new ArrayList<Object>(4);
+        return new ArrayList<>(4);
     }
 
     @Override
     default Map<String,Object> newObjectBuilder() {
-        return new HashMap<String,Object>(4);
+        return new HashMap<>(4);
     }
 
     @Override
@@ -138,7 +138,7 @@ public interface JavaValueFactory extends ValueFactory.TransparentBuilder<
     }
 
     @Override
-    default boolean isValid(EnumSet<ValueType> types, Object value) {
+    default boolean isValid(Set<ValueType> types, Object value) {
         if (isNull(value)) {
             return types.contains(ValueType.NULL);
         }

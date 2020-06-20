@@ -19,7 +19,7 @@ package org.jsonurl.jsonp;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.EnumSet;
+import java.util.Set;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
@@ -179,7 +179,7 @@ public abstract class JsonpValueFactory implements ValueFactory<
     }
     
     @Override
-    public boolean isValid(EnumSet<ValueType> types, JsonValue value) {
+    public boolean isValid(Set<ValueType> types, JsonValue value) {
         if (value instanceof JsonString) {
             return types.contains(ValueType.STRING);
         }

@@ -34,6 +34,7 @@ import static org.jsonurl.SyntaxException.ERR_MSG_STILLOPEN;
 import java.util.Deque;
 import java.util.EnumSet;
 import java.util.LinkedList;
+import java.util.Set;
 
 /**
  * A JSON-&gt;URL parser.
@@ -259,7 +260,7 @@ public class Parser<
     
     /**
      * Parse a character sequence. Simple calls
-     * {@link #parse(CharSequence, int, int, EnumSet)
+     * {@link #parse(CharSequence, int, int, Set)
      * parse(s, off, length, EnumSet.of(canReturn))}.
      */
     public V parse(CharSequence s, int off, int length, ValueType canReturn) {
@@ -268,7 +269,7 @@ public class Parser<
 
     /**
      * Parse a character sequence. Simple calls
-     * {@link #parse(CharSequence, int, int, EnumSet)
+     * {@link #parse(CharSequence, int, int, Set)
      * parse(s, off, length, EnumSet.of(canReturn))}.
      */
     public V parse(CharSequence s, ValueType canReturn) {
@@ -289,7 +290,7 @@ public class Parser<
             CharSequence s,
             int off,
             int length,
-            EnumSet<ValueType> canReturn) {
+            Set<ValueType> canReturn) {
 
         if (length == 0) {
             throw new SyntaxException(ERR_MSG_NOTEXT, 0);
@@ -342,7 +343,9 @@ public class Parser<
 
         stateStack.push(State.PAREN);
 
-        for (int pos = off + 1;;) {
+        int pos = off + 1;
+
+        for (;;) {
             if (pos == stop) {
                 throw new SyntaxException(ERR_MSG_STILLOPEN, pos);
             }

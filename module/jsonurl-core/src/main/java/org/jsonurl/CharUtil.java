@@ -163,7 +163,7 @@ final class CharUtil {
     }
 
     static final boolean isDigit(char c) {
-        return c > 127 ? false : ((CHARBITS[c] & IS_DIGIT) != 0);
+        return c <= 127 && ((CHARBITS[c] & IS_DIGIT) != 0);
     }
 
     static final int hexDecode(char c) {

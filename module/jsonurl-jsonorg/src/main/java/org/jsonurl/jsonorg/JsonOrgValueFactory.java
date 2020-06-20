@@ -17,7 +17,7 @@ package org.jsonurl.jsonorg;
  * under the License.
  */
 
-import java.util.EnumSet;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsonurl.JavaValueFactory;
@@ -140,7 +140,7 @@ public abstract class JsonOrgValueFactory implements ValueFactory.TransparentBui
     }
     
     @Override
-    public boolean isValid(EnumSet<ValueType> types, Object value) {
+    public boolean isValid(Set<ValueType> types, Object value) {
         if (value instanceof String) {
             return types.contains(ValueType.STRING);
         }
