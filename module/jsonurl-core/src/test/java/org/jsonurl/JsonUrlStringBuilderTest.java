@@ -104,7 +104,7 @@ class JsonUrlStringBuilderTest {
             "f", "fa", "fal", "fals", "False", "fAlse", "faLse", "falSe", "falsE",
             "n", "nu", "nul", "Null", "nUll", "nuLl", "nulL",
     })
-    public void testNonLiteral(String text) throws IOException {
+    void testNonLiteral(String text) throws IOException {
         testValue(text, false);
     }
 
@@ -115,11 +115,11 @@ class JsonUrlStringBuilderTest {
     @ValueSource(strings = {
             "true", "false", "null", "1", "1.0", "1e3",
     })
-    public void testLiteral(String text) throws IOException {
+    void testLiteral(String text) throws IOException {
         testValue(text, true);
     }
     
-    public void testValue(String text, boolean isLiteral) throws IOException {
+    private void testValue(String text, boolean isLiteral) throws IOException {
         String expected = isLiteral ? '\'' + text + '\'' : text;
         assertEquals(text, new JsonUrlStringBuilder().addKey(text).build());
         assertEquals(expected, new JsonUrlStringBuilder().add(text).build());
