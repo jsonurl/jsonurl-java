@@ -20,7 +20,7 @@ package org.jsonurl.spi;
 import org.jsonurl.ValueFactory;
 
 /**
- * JSON-&gt;URL Implementation Service Provider Interface.
+ * JSON&#x2192;URL Implementation Service Provider Interface.
  *
  * @author jsonurl.org
  * @author David MacCormack

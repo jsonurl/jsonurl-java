@@ -37,9 +37,9 @@ import java.util.LinkedList;
 import java.util.Set;
 
 /**
- * A JSON-&gt;URL parser.
+ * A JSON&#x2192;URL text parser.
  * 
- * <p>An instance of this class may be used to parse JSON-&gt;URL text and
+ * <p>An instance of this class may be used to parse JSON&#x2192;URL text and
  * instantiate JVM heap objects. The interface allows you to control the
  * types and values of the Objects created.
  *
@@ -197,7 +197,7 @@ public class Parser<
     /**
      * Parse a character sequence.
      *
-     * <p>Parse the given JSON-&gt;URL text and return an object.
+     * <p>Parse the given JSON&#x2192;URL text and return an object.
      * @param s the text to be parsed
      * @param off offset of the first character to be parsed
      * @param length the number of characters to be parsed
@@ -223,7 +223,7 @@ public class Parser<
     /**
      * Parse a character sequence.
      *
-     * <p>Parse the given JSON-&gt;URL text and return an array.
+     * <p>Parse the given JSON&#x2192;URL text and return an array.
      * @param s the text to be parsed
      * @param off offset of the first character to be parsed
      * @param length the number of characters to be parsed
@@ -248,7 +248,7 @@ public class Parser<
     /**
      * Parse a character sequence.
      *
-     * <p>Parse the given JSON-&gt;URL text and return a typed value.
+     * <p>Parse the given JSON&#x2192;URL text and return a typed value.
      * @param s the text to be parsed
      * @param off offset of the first character to be parsed
      * @param length the number of characters to be parsed
@@ -279,7 +279,7 @@ public class Parser<
     /**
      * Parse a character sequence.
      *
-     * <p>Parse the given JSON-&gt;URL text and return a typed value.
+     * <p>Parse the given JSON&#x2192;URL text and return a typed value.
      * @param s the text to be parsed
      * @param off offset of the first character to be parsed
      * @param length the number of characters to be parsed

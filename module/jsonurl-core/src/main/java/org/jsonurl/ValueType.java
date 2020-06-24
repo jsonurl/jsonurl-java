@@ -3,7 +3,7 @@ package org.jsonurl;
 import java.util.Set;
 
 /**
- * An enumeration of JSON&gt;URL value types.
+ * An enumeration of JSON&#x2192;URL value types.
  */
 public enum ValueType {
     NULL(true),

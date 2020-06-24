@@ -42,7 +42,7 @@ import org.jsonurl.Parser;
  */
 
 /**
- * Unit test for writing JSON-&gt;URL text.
+ * Unit test for writing JSON&#x2192;URL text.
  *
  * @author jsonurl.org
  * @author David MacCormack

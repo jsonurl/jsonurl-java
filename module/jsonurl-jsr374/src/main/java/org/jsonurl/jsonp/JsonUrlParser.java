@@ -28,7 +28,7 @@ import javax.json.JsonValue;
 import org.jsonurl.Parser;
 
 /**
- * A JSON-&gt;URL parser which uses the JSR-374 interface.
+ * A JSON&#x2192;URL parser which uses the JSR-374 interface.
  *
  * @author jsonurl.org
  * @author David MacCormack

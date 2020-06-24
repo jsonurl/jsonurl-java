@@ -25,7 +25,14 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A {@link org.jsonurl.ValueFactory ValueFactory} based on J2SE8 data types.
+ * A {@link org.jsonurl.ValueFactory ValueFactory} based on Java SE data types.
+ * 
+ * <p>The following singletons are available:
+ * <ul>
+ * <li>{@link #PRIMITIVE}
+ * <li>{@link #DOUBLE}
+ * <li>{@link #BIGMATH}
+ * </ul>
  *
  * @author jsonurl.org
  * @author David MacCormack
@@ -42,7 +49,13 @@ public interface JavaValueFactory extends ValueFactory.TransparentBuilder<
     String> {
 
     /**
-     * A singleton instance of {@link JavaValueFactory}.
+     * A singleton instance of {@link JavaValueFactory} that stores numbers as
+     * boxed primitives.
+     * 
+     * <p>This factory uses an instance of {@link java.lang.Long Long} for
+     * (most) numbers which fall between {@link Long#MIN_VALUE} and
+     * {@link Long#MAX_VALUE}, and  an instance of
+     * {@link java.lang.Double Double} for everything else.
      */
     public static final JavaValueFactory PRIMITIVE = new JavaValueFactory() {
 
@@ -53,7 +66,8 @@ public interface JavaValueFactory extends ValueFactory.TransparentBuilder<
     };
     
     /**
-     * A singleton instance of {@link JavaValueFactory}.
+     * A singleton instance of {@link JavaValueFactory} that uses instances of
+     * {@link java.lang.Double Double} for all numbers.
      */
     public static final JavaValueFactory DOUBLE = new JavaValueFactory() {
 
@@ -64,7 +78,16 @@ public interface JavaValueFactory extends ValueFactory.TransparentBuilder<
     };
     
     /**
-     * A singleton instance of {@link JavaValueFactory}.
+     * A singleton instance of {@link JavaValueFactory} that uses
+     * {@link java.math.BigInteger BigInteger} and
+     * {@link java.math.BigDecimal BigDecimal} when necessary.
+     * 
+     * <p>When using this factory, numbers without fractional parts that are
+     * too big to be stored in a {@link java.lang.Long Long} will be stored
+     * in a {@link java.math.BigInteger BigInteger}. Numbers with fractional
+     * parts that are too big to stored in a {@link java.lang.Double Double}
+     * will be stored in a {@link java.math.BigDecimal BigDecimal}.
+     * 
      */
     public static final JavaValueFactory BIGMATH = new JavaValueFactory() {
         @Override

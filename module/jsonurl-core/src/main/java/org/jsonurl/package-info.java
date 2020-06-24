@@ -1,7 +1,15 @@
 /**
- * The JSON-&gt;URL interface.
+ * This package provides an extensible JSON&#x2192;URL parser core and
+ * an implementation based on Java SE datatypes.
  *
- * <p>This package defines the JSON-&gt;URL core classes and interfaces.
+ * <p>The primary entry point for most use cases
+ * {@link org.jsonurl.JavaValueParser JavaValueParser}, which implements a
+ * JSON object model API to parse JSON&#x2192;URL text using Java SE types (e.g.
+ * {@link java.util.Map Map}, {@link java.util.List List}, etc).
+ * 
+ * <p>If you need a parser bound to your own JSON model API then
+ * a {@link org.jsonurl.ValueFactory ValueFactory} may be created and
+ * supplied to an instance of {@link org.jsonurl.Parser Parser}.
  * 
  * @author jsonurl.org
  * @author David MacCormack

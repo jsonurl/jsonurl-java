@@ -1,5 +1,5 @@
 /**
- * The JSON-&gt;URL service provider interface.
+ * The JSON&#x2192;URL service provider interface.
  * 
  * @author jsonurl.org
  * @author David MacCormack

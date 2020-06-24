@@ -24,8 +24,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
- * A NumberBuilder implements the builder pattern for JSON-&gt;URL number literals.
- * An instance of this class may be used to parse JSON-&gt;URL number
+ * A NumberBuilder implements the builder pattern for JSON&#x2192;URL number literals.
+ * An instance of this class may be used to parse JSON&#x2192;URL number
  * literals from text as Java SE values.
  *
  * <h2>Single Use</h2>
@@ -388,7 +388,7 @@ public class NumberBuilder implements NumberText { // NOPMD
     }
 
     /**
-     * Determine if the given CharSequence is a valid JSON-&gt;URL number literal.
+     * Determine if the given CharSequence is a valid JSON&#x2192;URL number literal.
      *
      *<p>Convenience for {@link #isNumber(CharSequence, int, int, boolean)
      * isNumber(s, 0, s.length(), false)}.
@@ -398,7 +398,7 @@ public class NumberBuilder implements NumberText { // NOPMD
     }
     
     /**
-     * Determine if the given CharSequence is a valid JSON-&gt;URL number literal.
+     * Determine if the given CharSequence is a valid JSON&#x2192;URL number literal.
      *
      *<p>Convenience for {@link #isNumber(CharSequence, int, int, boolean)
      * isNumber(s, 0, s.length(), isInteger)}.
@@ -408,26 +408,26 @@ public class NumberBuilder implements NumberText { // NOPMD
     }
     
     /**
-     * Determine if the given CharSequence is a valid JSON-&gt;URL number literal.
+     * Determine if the given CharSequence is a valid JSON&#x2192;URL number literal.
      *
      * <p>Convenience for {@link #isNumber(CharSequence, int, int, boolean)}
      * isNumber(s, 0, stop, false)}.
      * @param s a valid CharSequence
      * @param start an index
      * @param stop an index
-     * @return true if the CharSequence is a JSON-&gt;URL number
+     * @return true if the CharSequence is a JSON&#x2192;URL number
      */
     public static boolean isNumber(CharSequence s, int start, int stop) {
         return isNumber(s, start, stop, false);
     }
 
     /**
-     * Determine if the given CharSequence is a valid JSON-&gt;URL number literal.
+     * Determine if the given CharSequence is a valid JSON&#x2192;URL number literal.
      * 
      * @param s a valid CharSequence
      * @param start an index
      * @param stop an index
-     * @return true if the CharSequence is a JSON-&gt;URL number
+     * @return true if the CharSequence is a JSON&#x2192;URL number
      */
     @SuppressWarnings("PMD")
     public static boolean isNumber(
@@ -494,17 +494,17 @@ public class NumberBuilder implements NumberText { // NOPMD
     }
 
     /**
-     * Determine if this text represents a valid JSON-&gt;URL number literal.
+     * Determine if this text represents a valid JSON&#x2192;URL number literal.
      *
      * <p>This is the result of calling {@link #parse(CharSequence, int, int)}.
-     * @return true if this text represents is a JSON-&gt;URL number literal
+     * @return true if this text represents is a JSON&#x2192;URL number literal
      */
     public boolean isNumber() {
         return this.intIndexStop > this.intIndexStart;
     }
 
     /**
-     * Determine if the given CharSequence is a valid JSON-&gt;URL number literal.
+     * Determine if the given CharSequence is a valid JSON&#x2192;URL number literal.
      *
      *<p>Convenience for {@link #isNumber(CharSequence, int, int, boolean)
      * isNumber(s, 0, s.length(), true)}.
@@ -514,7 +514,7 @@ public class NumberBuilder implements NumberText { // NOPMD
     }
 
     /**
-     * Determine if the given CharSequence is a valid JSON-&gt;URL number literal.
+     * Determine if the given CharSequence is a valid JSON&#x2192;URL number literal.
      *
      *<p>Convenience for {@link #isNumber(CharSequence, int, int, boolean)
      * isNumber(s, start, stop, true)}.

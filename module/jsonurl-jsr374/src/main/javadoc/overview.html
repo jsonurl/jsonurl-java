@@ -1,0 +1,60 @@
+<html>
+<!--
+  Copyright 2019 David MacCormack
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  use this file except in compliance with the License. You may obtain a copy
+  of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+ -->
+<body>
+    This class library provides a JSON&#x2192;URL parser bound to
+    <a href="https://javadoc.io/doc/javax.json/javax.json-api/latest/">JSR-374</a> types.
+    <p><a href="https://tools.ietf.org/html/rfc8259">RFC8259</a> describes the
+    JSON data model and interchange format, which is
+    widely used in
+    <a href="https://en.wikipedia.org/wiki/Application_layer">application-level</a>
+    protocols including
+    <a href="https://en.wikipedia.org/wiki/Representational_state_transfer">RESTful</a>
+    <a href="https://en.wikipedia.org/wiki/Web_API">API</a>s. It is
+    common for applications to request resources via the
+    <a href="https://en.wikipedia.org/wiki/POST_(HTTP)">HTTP POST</a> method,
+    with JSON
+    <a href="https://tools.ietf.org/html/rfc2068#section-7">entities</a>.
+    However, POST is suboptimal for requests which do not modify a 
+    <a href="https://tools.ietf.org/html/rfc7231#section-2">resource</a>'s
+    state. JSON&#x2192;URL defines a text format for the JSON
+    data model suitable for use within a
+    <a href="https://tools.ietf.org/html/rfc1738">URL</a>/<a
+    href="https://tools.ietf.org/html/rfc3986">URI</a>.</p>
+
+    <h2><a name="usage" href="#usage">Usage</a></h2>
+    <p>The <a href="org/jsonurl/jsonp/JsonUrlParser.html">JsonUrlParser</a>
+    class may be used to parse JSON&#x2192;URL text to build instances of
+    JsonObject and/or JsonArray. 
+<pre>
+import javax.json.JsonObject;
+import org.jsonurl.jsonp.<a href="org/jsonurl/jsonp/JsonUrlParser.html">JsonUrlParser</a>;
+
+JsonUrlParser p = new JsonUrlParser();
+JsonObject myObject = p.parseObject( "(Hello:World!)" );
+System.out.println(obj.get("Hello")) // World!
+</pre>
+
+  
+    <h2><a name="security" href="#security">Security</a></h2>
+    <p>The parser is designed to parse untrusted input. It supports limits on
+    the number of parsed values and depth of nested arrays or objects. When the
+    limit is exceeded a LimitException is thrown. Sane limit values are set by
+    default.
+
+</body>
+</html>

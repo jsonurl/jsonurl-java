@@ -18,7 +18,7 @@ package org.jsonurl;
  */
 
 /**
- * A syntax error in JSON-&gt;URL text. 
+ * A syntax error in JSON&#x2192;URL text. 
  */
 public class SyntaxException extends ParseException {
 

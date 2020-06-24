@@ -21,7 +21,7 @@ import org.jsonurl.ValueFactory;
 import org.jsonurl.spi.JsonUrlServiceProvider;
 
 /**
- * JSON-&gt;URL SPI implementation.
+ * JSON&#x2192;URL SPI implementation.
  * @author jsonurl.org
  * @author David MacCormack
  * @since 2019-09-01
