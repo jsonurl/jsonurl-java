@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
- * A JsonTextBuilder that appends JSON-&gt;URL text to any Appendable.
+ * A JsonTextBuilder that appends JSON&#x2192;URL text to any Appendable.
  * @param <A> Accumulator type
  * @param <R> Result type
  *
@@ -41,7 +41,7 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R>
     /**
      * Create a new JsonUrlTextAppender.
      *
-     * @param out JSON-&gt;URL text destination
+     * @param out JSON&#x2192;URL text destination
      */
     public JsonUrlTextAppender(A out) {
         this.out = out;

@@ -24,7 +24,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 
 /**
- * Unit test for writing JSON-&gt;URL text.
+ * Unit test for writing JSON&#x2192;URL text.
  *
  * @author jsonurl.org
  * @author David MacCormack
@@ -43,20 +43,20 @@ public abstract class AbstractWriteTest<V,C extends V,A extends C,J extends C> {
 
     /**
      * Create a new implementation-defined Array instance.
-     * @param s JSON-&gt;URL text
+     * @param s JSON&#x2192;URL text
      * @return a valid Array instance
      */
     public abstract A newArray(String s);
 
     /**
      * Create a new implementation-defined Object instance.
-     * @param s JSON-&gt;URL text
+     * @param s JSON&#x2192;URL text
      * @return a valid Object instance
      */
     public abstract J newObject(String s);
 
     /**
-     * Create a new implementation-defined JSON-&gt;URL parser.
+     * Create a new implementation-defined JSON&#x2192;URL parser.
      * @return a valid Parser instance
      */
     public abstract Parser<V,C,?,A,?,J,?,?,?,?> newParser();

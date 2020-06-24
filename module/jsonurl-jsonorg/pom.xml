@@ -61,9 +61,31 @@
   </dependencies>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <configuration>
+            <offlineLinks>
+              <offlineLink>
+                <url>https://www.javadoc.io/doc/org.jsonurl/jsonurl-core/latest</url>
+                <location>${project.basedir}/../jsonurl-core/target/apidocs</location>
+              </offlineLink>
+              <offlineLink>
+                <url>https://junit.org/junit5/docs/${junit.version}/api</url>
+                <location>https://junit.org/junit5/docs/${junit.version}/api</location>
+              </offlineLink>
+              <offlineLink>
+                <url>https://www.javadoc.io/doc/org.json/json/${org.json.parser}</url>
+                <location>${project.basedir}/src/main/javadoc/org.json</location>
+              </offlineLink>
+            </offlineLinks>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
       </plugin>
     </plugins>

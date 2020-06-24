@@ -150,9 +150,6 @@
             <execution>
               <goals>
                 <goal>jar</goal>
-                <!--
-                <goal>test-jar</goal>
-                -->
               </goals>
             </execution>
           </executions>
@@ -175,6 +172,39 @@
           <version>${maven.javadoc.plugin}</version>
           <configuration>
             <doclint>all,-missing</doclint>
+            <!--
+              Ideally I'd simply link to javadoc.io for everything here via
+              <links>...</links>. However, there are a number of pitfalls when
+              doing so, some discussed here:
+                  https://stackoverflow.com/questions/33866209/linking-to-javadoc-io-using-javadoc-link-option 
+
+              But even after working through those it appears impossible to get
+              at the "raw" package-list because it's embeded inside an iframe
+              and attempts to access "framed" URI directly are blocked.
+
+              Another solution is to set includeDependencySources true, but
+              there are two problems with this:
+              
+              1. The org.json packages fail a number of doclint rules so I'd
+                 have to more-or-less disable all linting, but I want it for
+                 my own javadoc comments.
+              2. The javax.json packages are modular, so when jsonurl is built
+                 in Java 8 the associated javadoc tool exists with errors
+                 about being unable to parse module-info.java. This could
+                 be worked around, but it does introduce complexity.
+
+              So, I settled on the least bad of the available choices (that I
+              know of): I set isOffline to true and provide my own
+              ``package-list'' files for each package I want to link to on
+              javadoc.io.
+            -->
+            <isOffline>true</isOffline>
+            <offlineLinks>
+              <offlineLink>
+                <url>https://junit.org/junit5/docs/${junit.version}/api</url>
+                <location>https://junit.org/junit5/docs/${junit.version}/api</location>
+              </offlineLink>
+            </offlineLinks>
           </configuration>
           <executions>
             <execution>

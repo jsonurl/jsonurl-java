@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A {@link org.jsonurl.Parser Parser} based on J2SE8 data types.
+ * A {@link org.jsonurl.Parser Parser} based on Java SE data types.
  *
  * @author jsonurl.org
  * @author David MacCormack

@@ -18,7 +18,7 @@ package org.jsonurl;
  */
 
 /**
- * An exception that occurs while parsing JSON-&gt;URL text.
+ * An exception that occurs while parsing JSON&#x2192;URL text.
  */
 public class ParseException extends RuntimeException {
 

@@ -22,7 +22,7 @@ import org.json.JSONObject;
 import org.jsonurl.Parser;
 
 /**
- * A JSON-&gt;URL parser which uses classes from the
+ * A JSON&#x2192;URL parser which uses classes from the
  * {@link org.json.JSONObject org.json} package.
  *
  * @author jsonurl.org

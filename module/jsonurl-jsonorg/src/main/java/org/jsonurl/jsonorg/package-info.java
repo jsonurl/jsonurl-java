@@ -1,8 +1,15 @@
 /**
- * An implementation of the JSON-&gt;URL interface.
- *
- * <p>This is an implementation of the JSON-&gt;URL interface based on Douglas
+ * An implementation of the JSON&#x2192;URL interface based on Douglas
  * Crockford's original Java implementation of JSON.
+ *
+ * <p>The primary entry point for most use cases is
+ * {@link org.jsonurl.jsonorg.JsonUrlParser JsonUrlParser}, which parses
+ * JSON&#x2192;URL text into instances of {@link org.json.JSONObject}
+ * and {@link org.json.JSONArray}.
+ *
+ * <p>{@link org.jsonurl.jsonorg.JsonUrlWriter JsonUrlWriter} has static
+ * methods for creating JSON&#x2192;URL text from instances of
+ * {@link org.json.JSONObject} and {@link org.json.JSONArray}.
  * 
  * @author jsonurl.org
  * @author David MacCormack

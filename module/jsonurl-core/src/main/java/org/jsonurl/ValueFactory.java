@@ -22,7 +22,7 @@ import java.util.EnumSet;
 /**
  * A ValueFactory allows {@link org.jsonurl.Parser Parser}
  * to be implementation independent. A ValueFactory provides
- * implementation-defined values for JSON-&gt;URL
+ * implementation-defined values for JSON&#x2192;URL
  * objects, arrays, and literals.
  * 
  * @param <V> value type (any JSON value)
@@ -98,7 +98,7 @@ public interface ValueFactory<
      *
      * <p>This is usually a singleton. It's a value which represents
      * the empty composite (i.e. array/object) as defined in the
-     * JSON-&gt;URL spec.
+     * JSON&#x2192;URL spec.
      * @return a valid composite instance
      */
     public C getEmptyComposite();
@@ -203,7 +203,7 @@ public interface ValueFactory<
     /**
      * Get a number value for the given parsed text.
      *
-     * @param text the parsed text of a JSON-&gt;URL number literal 
+     * @param text the parsed text of a JSON&#x2192;URL number literal 
      * @return a number object for the given text
      */
     public M getNumber(NumberText text);

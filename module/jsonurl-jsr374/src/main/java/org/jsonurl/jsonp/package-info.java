@@ -1,8 +1,15 @@
 /**
- * An implementation of the JSON-&gt;URL interface.
+ * An implementation of the JSON&#x2192;URL interface based on the JSON-P
+ * interface defined by JSR-374.
+ * 
+ * <p>The primary entry point for most use cases is
+ * {@link org.jsonurl.jsonp.JsonUrlParser JsonUrlParser}, which parses
+ * JSON&#x2192;URL text into instances of {@link javax.json.JsonObject}
+ * and {@link javax.json.JsonArray}.
  *
- * <p>This is an implementation of the JSON-&gt;URL interface based on
- * the JSON-P interface defined by JSR-374.
+ * <p>{@link org.jsonurl.jsonp.JsonUrlWriter JsonUrlWriter} has static methods
+ * for creating JSON&#x2192;URL text from instances of
+ * {@link javax.json.JsonObject} and {@link javax.json.JsonArray}.
  *
  * @author jsonurl.org
  * @author David MacCormack
