@@ -439,9 +439,10 @@ public abstract class AbstractParseTest<
     })
     void testSyntaxException2(String text, String type) throws ParseException {
         Parser<?, ?, ?, ?, ?, ?, ?, ?, ?, ?> p = newParser();
+        ValueType valueType = ValueType.valueOf(type);
         assertThrows(
             SyntaxException.class,
-            () -> p.parse(text, ValueType.valueOf(type)));
+            () -> p.parse(text, valueType));
     }
 
     @ParameterizedTest
@@ -570,9 +571,11 @@ public abstract class AbstractParseTest<
             "(1)",
     })
     void testObjectException(String text) throws ParseException {
+        Parser<?,?,?,?,?,?,?,?,?,?> p = newParser();
+
         assertThrows(
             SyntaxException.class,
-            () -> newParser().parseObject(text));
+            () -> p.parseObject(text));
     }
     
     @ParameterizedTest
@@ -586,9 +589,11 @@ public abstract class AbstractParseTest<
             "(a:b)",
     })
     void testArrayException(String text) throws ParseException {
+        Parser<?,?,?,?,?,?,?,?,?,?> p = newParser();
+
         assertThrows(
             SyntaxException.class,
-            () -> newParser().parseArray(text));
+            () -> p.parseArray(text));
     }
 
     // CHECKSTYLE:OFF

@@ -393,11 +393,7 @@ public final class JsonUrl {
                 int start,
                 int end) throws IOException {
             
-            for (int i = start;; i++) {
-                if (end <= i) {
-                    break;
-                }
-
+            for (int i = start; i < end; i++) {
                 char c = s.charAt(i);
                 int cp;
                 
@@ -405,8 +401,8 @@ public final class JsonUrl {
                     throw new MalformedInputException(i);
                 }
                 if (Character.isHighSurrogate(c)) {
-                    if (end <= ++i) {
-                        break;
+                    if (++i == end) {
+                        throw new MalformedInputException(i);
                     }
 
                     char c2 = s.charAt(i);
