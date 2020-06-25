@@ -272,14 +272,14 @@ public interface ValueFactory<
             int start,
             int stop) {
 
-        keyword: switch (stop - start) {
+        switch (stop - start) {
         case 4:
             switch (s.charAt(start)) {
             case 't':
                 if (s.charAt(start + 1) != 'r'
                         || s.charAt(start + 2) != 'u'
                         || s.charAt(start + 3) != 'e') {
-                    break keyword;
+                    return null;
                 }
                 return getTrue();
 
@@ -287,12 +287,12 @@ public interface ValueFactory<
                 if (s.charAt(start + 1) != 'u'
                         || s.charAt(start + 2) != 'l'
                         || s.charAt(start + 3) != 'l') {
-                    break keyword;
+                    return null;
                 }
                 return getNull();
 
             default:
-                break keyword;
+                return null;
             }
             // this can never happen but checkstyle gets angry, so:
             // fall through
@@ -303,15 +303,13 @@ public interface ValueFactory<
                     || s.charAt(start + 2) != 'l'
                     || s.charAt(start + 3) != 's'
                     || s.charAt(start + 4) != 'e') {
-                break keyword;
+                return null;
             }
             return getFalse();
 
         default:
-            break;
+            return null;
         }
-
-        return null;
     }
 
 }
