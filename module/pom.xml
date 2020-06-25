@@ -171,6 +171,13 @@
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>${maven.javadoc.plugin}</version>
           <configuration>
+            <!--
+              This is required to allow javadocs to be built on jdk 9+. If/when
+              the jsonurl codebase moves to JDK9 this can probably be removed.
+            -->
+            <javadocVersion>${jdk.version}</javadocVersion>
+            <source>${jdk.version}</source>
+            
             <doclint>all,-missing</doclint>
             <!--
               Ideally I'd simply link to javadoc.io for everything here via
