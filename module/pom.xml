@@ -178,7 +178,7 @@
             <javadocVersion>${jdk.version}</javadocVersion>
             <source>${jdk.version}</source>
             
-            <doclint>all,-missing</doclint>
+            <doclint>all,-missing,-accessibility</doclint>
             <!--
               Ideally I'd simply link to javadoc.io for everything here via
               <links>...</links>. However, there are a number of pitfalls when
