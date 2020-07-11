@@ -49,7 +49,7 @@
   <distributionManagement>
     <site>
       <id>${project.artifactId}-site</id>
-      <url>${project.baseUri}</url>
+      <url>${project.scm.developerConnection}</url>
     </site>
   </distributionManagement>
 
@@ -69,7 +69,34 @@
       -->
       <id>javadoc-site</id>
       <build>
-        <defaultGoal>clean javadoc:aggregate</defaultGoal>
+        <defaultGoal>clean package javadoc:aggregate</defaultGoal>
+      </build>
+    </profile>
+    
+    <profile>
+      <!--
+        Uses the maven-scm-publish-plugin to publish javadocs to gh-pages
+        
+        mvn -Pjavadoc-site
+        mvn -Ppublish-javadoc-site
+      -->
+      <id>publish-javadoc-site</id>
+      <build>
+        <defaultGoal>scm-publish:publish-scm</defaultGoal>
+        <plugins>
+          <plugin>
+            <artifactId>maven-scm-publish-plugin</artifactId>
+            <configuration>
+              <scmBranch>gh-pages</scmBranch>
+              <content>${project.reporting.outputDirectory}/apidocs</content>
+              <checkinComment>doc: update by maven-scm-publish-plugin</checkinComment>
+              <ignorePathsToDelete>
+                <ignorePathsToDelete>.gitignore</ignorePathsToDelete>
+                <ignorePathsToDelete>.gitattributes</ignorePathsToDelete>
+              </ignorePathsToDelete>
+            </configuration>
+          </plugin>
+        </plugins>
       </build>
     </profile>
   
