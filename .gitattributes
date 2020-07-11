@@ -1,0 +1,32 @@
+
+# Java source
+*.java		text diff=java eol=lf
+
+# HTML, CSS, etc
+*.css		text diff=css eol=lf
+*.htm		text diff=html eol=lf
+*.html		text diff=html eol=lf
+*.js		text eol=lf
+*.json		text eol=lf
+
+# General text
+*.properties	text eol=lf
+*.xml		text eol=lf
+*.md		text eol=lf
+*.yml		text eol=lf
+.gitattributes	text eol=lf
+.gitignore	text eol=lf
+
+# Binary
+*.class		binary
+*.so		binary
+*.dll		binary
+*.ear		binary
+*.war		binary
+*.jar		binary
+
+# Images
+*.jpg		binary
+*.png		binary
+*.gif		binary
+*.ico		binary
