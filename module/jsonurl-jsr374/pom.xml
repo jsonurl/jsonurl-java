@@ -35,9 +35,17 @@
   </properties>
 
   <name>${project.groupId}:${project.artifactId}</name>
+  <url>https://www.jsonurl.org</url>
   <description>
     This implements a JSON->URL parser for the JSR-374 JSON interface.
   </description>
+
+  <distributionManagement>
+    <site>
+      <id>${project.artifactId}-site</id>
+      <url>${project.baseUri}</url>
+    </site>
+  </distributionManagement>
 
   <dependencies>
     <dependency>
@@ -64,35 +72,4 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <artifactId>maven-javadoc-plugin</artifactId>
-          <configuration>
-            <offlineLinks>
-              <offlineLink>
-                <url>https://www.javadoc.io/doc/org.jsonurl/jsonurl-core/latest</url>
-                <location>${project.basedir}/../jsonurl-core/target/apidocs</location>
-              </offlineLink>
-              <offlineLink>
-                <url>https://junit.org/junit5/docs/${junit.version}/api</url>
-                <location>https://junit.org/junit5/docs/${junit.version}/api</location>
-              </offlineLink>
-              <offlineLink>
-                <url>https://docs.oracle.com/javaee/7/api</url>
-                <location>https://docs.oracle.com/javaee/7/api</location>
-              </offlineLink>
-            </offlineLinks>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-    <plugins>
-      <plugin>
-        <artifactId>maven-source-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
 </project>

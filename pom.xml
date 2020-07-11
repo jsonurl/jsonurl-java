@@ -32,17 +32,151 @@
   <artifactId>all</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-  
+
+  <name>${project.groupId}:${project.artifactId}</name>
+  <url>https://www.jsonurl.org</url>
+  <description>
+    This is the aggregator POM for the core JSON&#x2192;URL library and
+    the interface-specific artifacts.
+  </description>
+
   <scm>
     <url>${jsonurl.scm.url}</url>
     <connection>${jsonurl.scm.base}</connection>
     <developerConnection>${jsonurl.scm.base}</developerConnection>
   </scm>
+  
+  <distributionManagement>
+    <site>
+      <id>${project.artifactId}-site</id>
+      <url>${project.baseUri}</url>
+    </site>
+  </distributionManagement>
 
   <modules>
-    <module>module</module>
     <module>module/jsonurl-core</module>
     <module>module/jsonurl-jsonorg</module>
     <module>module/jsonurl-jsr374</module>
   </modules>
+  
+  <profiles>
+    <profile>
+      <!--
+        Uses the javadoc plugin to generate a site with only aggregated
+        javadocs.
+        
+        mvn -Pjavadoc-site
+      -->
+      <id>javadoc-site</id>
+      <build>
+        <defaultGoal>clean javadoc:aggregate</defaultGoal>
+      </build>
+    </profile>
+  
+    <!--
+      Uses the maven-site-plugin to generate a site with the standard reports,
+      checkstyle, pmd, jacoco, etc.
+      
+      mvn -DstagingDirectory=`pwd`/gh-pages/module -Pjacoco,full-site 
+     -->
+    <profile>
+      <id>full-site</id>
+      <build>
+        <defaultGoal>clean package install site site:stage</defaultGoal>
+        <plugins>
+          <plugin>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>${maven.javadoc.plugin}</version>
+            <executions>
+              <execution>
+                <id>aggregate</id>
+                <goals>
+                  <goal>aggregate</goal>
+                </goals>
+                <phase>site</phase>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+
+      <reporting>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-report-plugin</artifactId>
+            <version>${maven.surefire.report.plugin}</version>
+            <configuration>
+              <aggregate>true</aggregate>
+              <linkXRef>false</linkXRef>
+            </configuration>
+          </plugin>
+
+          <plugin>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>${maven.javadoc.plugin}</version>
+            <reportSets>
+              <reportSet>
+                <id>aggregate</id>
+                <reports>
+                  <report>aggregate</report>
+                </reports>
+              </reportSet>
+            </reportSets>
+          </plugin>
+
+          <plugin>
+            <artifactId>maven-checkstyle-plugin</artifactId>
+            <version>${maven.checkstyle.plugin}</version>
+            <reportSets>
+              <reportSet>
+                <id>aggregate</id>
+                <reports>
+                  <report>checkstyle-aggregate</report>
+                </reports>
+              </reportSet>
+            </reportSets>
+            <configuration>
+              <configLocation>${checkstyle.config.file}</configLocation>
+              <encoding>${char.encoding}</encoding>
+              <linkXRef>false</linkXRef>
+              <includeTestSourceDirectory>true</includeTestSourceDirectory>
+            </configuration>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-pmd-plugin</artifactId>
+            <reportSets>
+              <reportSet>
+                <id>aggregate</id>
+                <reports>
+                  <report>pmd</report>
+                </reports>
+              </reportSet>
+            </reportSets>
+            <configuration>
+              <aggregate>true</aggregate>
+              <rulesets>
+                <ruleset>${pmd.config.file}</ruleset>
+              </rulesets>
+            </configuration>
+          </plugin>
+          
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <reportSets>
+              <reportSet>
+                <id>aggregate</id>
+                <reports>
+                  <report>report-aggregate</report>
+                </reports>
+              </reportSet>
+            </reportSets>
+          </plugin>
+        </plugins>
+      </reporting>
+    </profile>
+  </profiles>
+
 </project>

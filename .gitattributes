@@ -1,5 +1,3 @@
-# default to binary
-#* binary
 
 # Java source
 *.java		text diff=java eol=lf
@@ -27,3 +25,8 @@
 *.war		binary
 *.jar		binary
 
+# Images
+*.jpg		binary
+*.png		binary
+*.gif		binary
+*.ico		binary

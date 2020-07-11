@@ -46,6 +46,7 @@
     <maven.jar.plugin>3.2.0</maven.jar.plugin>
     <maven.source.plugin>3.2.1</maven.source.plugin>
     <maven.surefire.plugin>2.22.2</maven.surefire.plugin>
+    <maven.surefire.report.plugin>2.22.2</maven.surefire.report.plugin>
     <maven.javadoc.plugin>3.1.1</maven.javadoc.plugin>
     <maven.checkstyle.plugin>3.1.1</maven.checkstyle.plugin>
     <maven.pmd.plugin>3.13.0</maven.pmd.plugin>
@@ -54,9 +55,12 @@
     <maven.site.plugin>3.8.2</maven.site.plugin>
     <maven.doxia.plugin>[1.9,)</maven.doxia.plugin>
     <maven.project.info.reports.plugin>2.9</maven.project.info.reports.plugin>
+    <maven.changelog.plugin>2.3</maven.changelog.plugin>
+    <maven.scm.publish.plugin>3.0.0</maven.scm.publish.plugin>
     <nexus.staging.plugin>1.6.8</nexus.staging.plugin>
     <codehaus.versions.plugin>2.7</codehaus.versions.plugin>
     <sonar.maven.plugin>3.7.0.1746</sonar.maven.plugin>
+
     <nexus.url>https://oss.sonatype.org</nexus.url>
 
     <junit.version>5.6.2</junit.version>
@@ -74,8 +78,10 @@
     <jsonurl.scm.base>scm:git:git@github.com:${jsonurl.scm.path}.git</jsonurl.scm.base>
     <jsonurl.scm.url>https://github.com/${jsonurl.scm.path}</jsonurl.scm.url>
 
-    <checkstyle.config.location>../../config/checkstyle.xml</checkstyle.config.location>
-    <pmd.config.location>../../config/pmd-ruleset.xml</pmd.config.location>
+    <checkstyle.config.file>config/checkstyle.xml</checkstyle.config.file>
+    <checkstyle.config.module.location>../../${checkstyle.config.file}</checkstyle.config.module.location>
+    <pmd.config.file>config/pmd-ruleset.xml</pmd.config.file>
+    <pmd.config.module.location>../../${pmd.config.file}</pmd.config.module.location>
     <jacoco.minimum.coverage>0.40</jacoco.minimum.coverage>
 
     <sonar.organization>jsonurl</sonar.organization>
@@ -101,7 +107,7 @@
   </licenses>
   <organization>
     <name>jsonurl.org</name>
-    <url>http://jsonurl.org</url>
+    <url>https://jsonurl.org</url>
   </organization>
   <developers>
     <developer>
@@ -123,7 +129,15 @@
       <id>ossrh</id>
       <url>${nexus.url}/content/repositories/snapshots</url>
     </snapshotRepository>
+    <site>
+      <id>${project.artifactId}-site</id>
+      <url>${project.baseUri}</url>
+    </site>
   </distributionManagement>
+  <ciManagement>
+    <system>GitHub</system>
+    <url>${jsonurl.scm.url}/actions</url>
+  </ciManagement>
 
   <dependencies>
     <dependency>
@@ -138,154 +152,73 @@
     <pluginManagement>
       <plugins>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>${maven.compiler.plugin}</version>
         </plugin>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
           <version>${maven.source.plugin}</version>
-          <executions>
-            <execution>
-              <goals>
-                <goal>jar</goal>
-              </goals>
-            </execution>
-          </executions>
         </plugin>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
           <version>${maven.jar.plugin}</version>
-          <executions>
-            <execution>
-              <goals>
-                <goal>test-jar</goal>
-              </goals>
-            </execution>
-          </executions>
         </plugin>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>${maven.javadoc.plugin}</version>
           <configuration>
             <!--
-              This is required to allow javadocs to be built on jdk 9+. If/when
-              the jsonurl codebase moves to JDK9 this can probably be removed.
+              javadocVersion is required to allow javadocs to be built on jdk 9+
+              so it it doesn't get confused by dependencies whose javadocs are
+              modular. If/when the jsonurl codebase moves to jdk 9+, and
+              properly supports modules, this can probably be removed.
             -->
             <javadocVersion>${jdk.version}</javadocVersion>
             <source>${jdk.version}</source>
             
             <doclint>all,-missing,-accessibility</doclint>
-            <!--
-              Ideally I'd simply link to javadoc.io for everything here via
-              <links>...</links>. However, there are a number of pitfalls when
-              doing so, some discussed here:
-                  https://stackoverflow.com/questions/33866209/linking-to-javadoc-io-using-javadoc-link-option 
-
-              But even after working through those it appears impossible to get
-              at the "raw" package-list because it's embeded inside an iframe
-              and attempts to access "framed" URI directly are blocked.
-
-              Another solution is to set includeDependencySources true, but
-              there are two problems with this:
-              
-              1. The org.json packages fail a number of doclint rules so I'd
-                 have to more-or-less disable all linting, but I want it for
-                 my own javadoc comments.
-              2. The javax.json packages are modular, so when jsonurl is built
-                 in Java 8 the associated javadoc tool exists with errors
-                 about being unable to parse module-info.java. This could
-                 be worked around, but it does introduce complexity.
-
-              So, I settled on the least bad of the available choices (that I
-              know of): I set isOffline to true and provide my own
-              ``package-list'' files for each package I want to link to on
-              javadoc.io.
-            -->
-            <isOffline>true</isOffline>
-            <offlineLinks>
-              <offlineLink>
-                <url>https://junit.org/junit5/docs/${junit.version}/api</url>
-                <location>https://junit.org/junit5/docs/${junit.version}/api</location>
-              </offlineLink>
-            </offlineLinks>
+            <links>
+              <link>https://junit.org/junit5/docs/${junit.version}/api</link>
+              <link>https://docs.oracle.com/javaee/7/api</link>
+              <link>https://stleary.github.io/JSON-java/</link>
+            </links>
           </configuration>
-          <executions>
-            <execution>
-              <goals>
-                <goal>jar</goal>
-              </goals>
-            </execution>
-          </executions>
         </plugin>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>${maven.surefire.plugin}</version>
         </plugin>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
           <version>${maven.checkstyle.plugin}</version>
           <configuration>
-            <configLocation>${checkstyle.config.location}</configLocation>
+            <configLocation>${checkstyle.config.module.location}</configLocation>
             <encoding>${char.encoding}</encoding>
             <consoleOutput>false</consoleOutput>
             <failsOnError>true</failsOnError>
             <linkXRef>false</linkXRef>
             <includeTestSourceDirectory>true</includeTestSourceDirectory>
           </configuration>
-          <executions>
-            <execution>
-              <id>validate</id>
-              <phase>validate</phase>
-              <goals>
-                <goal>check</goal>
-              </goals>
-            </execution>
-          </executions>
         </plugin>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-pmd-plugin</artifactId>
           <version>${maven.pmd.plugin}</version>
           <configuration>
             <sourceEncoding>${char.encoding}</sourceEncoding>
             <targetJdk>${jdk.version}</targetJdk>
             <rulesets>
-              <ruleset>${pmd.config.location}</ruleset>
+              <ruleset>${pmd.config.module.location}</ruleset>
             </rulesets>
             <printFailingErrors>true</printFailingErrors>
             <failOnViolation>true</failOnViolation>
             <linkXRef>false</linkXRef>
+            <analysisCache>true</analysisCache>
           </configuration>
-          <executions>
-            <execution>
-              <phase>validate</phase>
-              <goals>
-                <goal>check</goal>
-              </goals>
-            </execution>
-          </executions>
         </plugin>
         <plugin>
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
           <version>${maven.jacoco.plugin}</version>
-          <executions>
-            <execution>
-              <id>prepare-agent</id>
-              <goals><goal>prepare-agent</goal></goals>
-            </execution>
-            <execution>
-              <id>test</id>
-              <phase>test</phase>
-              <goals><goal>report</goal><goal>check</goal></goals>
-            </execution>
-          </executions>
           <configuration>
             <rules>
               <rule>
@@ -302,18 +235,8 @@
           </configuration>
         </plugin>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-gpg-plugin</artifactId>
           <version>${maven.gpg.plugin}</version>
-          <executions>
-            <execution>
-              <id>sign-artifacts</id>
-              <phase>verify</phase>
-              <goals>
-                <goal>sign</goal>
-              </goals>
-            </execution>
-          </executions>
         </plugin>
         <plugin>
           <groupId>org.sonatype.plugins</groupId>
@@ -336,8 +259,53 @@
           <artifactId>sonar-maven-plugin</artifactId>
           <version>${sonar.maven.plugin}</version>
         </plugin>
+        <plugin>
+          <artifactId>maven-changelog-plugin</artifactId>
+          <version>${maven.changelog.plugin}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-project-info-reports-plugin</artifactId>
+          <version>${maven.project.info.reports.plugin}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-report-plugin</artifactId>
+          <version>${maven.surefire.report.plugin}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-scm-publish-plugin</artifactId>
+          <version>${maven.scm.publish.plugin}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>${maven.site.plugin}</version>
+        </plugin>
       </plugins>
     </pluginManagement>
+    <plugins>
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <skipIfEmpty>true</skipIfEmpty>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
 
   <profiles>
@@ -351,8 +319,14 @@
       <build>
         <plugins>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
@@ -362,14 +336,22 @@
       <id>checkstyle</id>
       <activation>
         <file>
-          <exists>${checkstyle.config.location}</exists>
+          <exists>${checkstyle.config.module.location}</exists>
         </file>
       </activation>
       <build>
         <plugins>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-checkstyle-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>validate</id>
+                <phase>validate</phase>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
@@ -379,14 +361,24 @@
       <id>pmd</id>
       <activation>
         <file>
-          <exists>${basedir}/${pmd.config.location}</exists>
+          <exists>${basedir}/${pmd.config.module.location}</exists>
         </file>
       </activation>
       <build>
         <plugins>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-pmd-plugin</artifactId>
+            <configuration>
+              <analysisCache>true</analysisCache>
+            </configuration>
+            <executions>
+              <execution>
+                <phase>validate</phase>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
@@ -402,8 +394,16 @@
       <build>
         <plugins>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
@@ -428,9 +428,119 @@
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>prepare-agent</id>
+                <goals><goal>prepare-agent</goal></goals>
+              </execution>
+              <execution>
+                <id>test</id>
+                <phase>test</phase>
+                <goals><goal>report</goal><goal>check</goal></goals>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
+    </profile>
+
+    <!--
+      Uses the maven-site-plugin to create a site with the standard reports,
+      checkstyle, pmd, jacoco, etc. 
+     -->
+    <profile>
+      <id>full-site</id>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-site-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+
+      <reporting>
+        <plugins>
+          <plugin>
+            <artifactId>maven-project-info-reports-plugin</artifactId>
+          </plugin>
+
+          <plugin>
+            <artifactId>maven-surefire-report-plugin</artifactId>
+            <configuration>
+              <linkXRef>false</linkXRef>
+            </configuration>
+          </plugin>
+
+          <plugin>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <reportSets>
+              <reportSet>
+                <reports>
+                  <report>javadoc</report>
+                </reports>
+              </reportSet>
+            </reportSets>
+          </plugin>
+
+          <plugin>
+            <artifactId>maven-changelog-plugin</artifactId>
+            <configuration>
+              <displayChangeSetDetailUrl>${jsonurl.scm.url}/commit/%REV%</displayChangeSetDetailUrl>
+              <displayFileDetailUrl>${jsonurl.scm.url}/blob/master/%FILE%</displayFileDetailUrl>
+              <displayFileRevDetailUrl>${jsonurl.scm.url}/blob/%REV%/%FILE%</displayFileRevDetailUrl>
+            </configuration>
+          </plugin>
+
+          <plugin>
+            <artifactId>maven-checkstyle-plugin</artifactId>
+            <reportSets>
+              <reportSet>
+                <reports>
+                  <report>checkstyle</report>
+                </reports>
+              </reportSet>
+            </reportSets>
+            <configuration>
+              <configLocation>${checkstyle.config.module.location}</configLocation>
+              <encoding>${char.encoding}</encoding>
+              <linkXRef>false</linkXRef>
+              <includeTestSourceDirectory>true</includeTestSourceDirectory>
+            </configuration>
+          </plugin>
+
+          <plugin>
+            <artifactId>maven-pmd-plugin</artifactId>
+            <reportSets>
+              <reportSet>
+                <reports>
+                  <report>pmd</report>
+                </reports>
+              </reportSet>
+            </reportSets>
+            <configuration>
+              <sourceEncoding>${char.encoding}</sourceEncoding>
+              <targetJdk>${jdk.version}</targetJdk>
+              <rulesets>
+                <ruleset>${pmd.config.module.location}</ruleset>
+              </rulesets>
+              <linkXRef>false</linkXRef>
+              <analysisCache>true</analysisCache>
+            </configuration>
+          </plugin>
+          
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <reportSets>
+              <reportSet>
+                <reports>
+                  <report>report</report>
+                </reports>
+              </reportSet>
+            </reportSets>
+          </plugin>
+        </plugins>
+      </reporting>
     </profile>
   </profiles>
 </project>
