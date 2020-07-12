@@ -35,6 +35,16 @@ jobs:
       with:
         name: jsonurl-maven-repository
         path: snapshot/*
+    - name: Publish gh-pages
+      if: |
+          success()
+            && github.repository_owner == 'jsonurl'
+            && github.ref == 'refs/heads/master'
+#           '-Dscmpublish.dryRun=true'
+      run: >
+           mvn '-Dscmpublish.checkinComment=doc: Update by action ${{ github.workflow }}.${{ github.job }}/${{ github.run_id }} on behalf of ${{ github.actor }} for ${{ github.event_name }} ${{ github.sha }}'
+           '-Dscmpublish.pubScmUrl=scm:git:https://github.com/${{ github.repository }}.git'
+           -B -Ppublish-javadoc-site javadoc:aggregate scm-publish:publish-scm
 
   matrix-build:
     needs: artifact
@@ -105,7 +115,5 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    - name: Collect debugging info
-      run: ls -lR
     
 
