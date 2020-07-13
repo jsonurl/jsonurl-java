@@ -40,11 +40,13 @@ jobs:
           success()
             && github.repository_owner == 'jsonurl'
             && github.ref == 'refs/heads/master'
-#           '-Dscmpublish.dryRun=true'
       run: >
-           mvn '-Dscmpublish.checkinComment=doc: Update by action ${{ github.workflow }}.${{ github.job }}/${{ github.run_id }} on behalf of ${{ github.actor }} for ${{ github.event_name }} ${{ github.sha }}'
-           '-Dscmpublish.pubScmUrl=scm:git:https://github.com/${{ github.repository }}.git'
-           -B -Ppublish-javadoc-site javadoc:aggregate scm-publish:publish-scm
+           script/deploy_ghpages.sh
+           'doc: Update by action ${{ github.workflow }}.${{ github.job }}/${{ github.run_id }} on behalf of ${{ github.actor }} for ${{ github.event_name }} ${{ github.sha }}'
+           'scm:git:https://github.com/${{ github.repository }}.git'
+      shell: bash
+      env:
+        GH_ACTION_KEY: ${{ secrets.GH_ACTION_KEY }}
 
   matrix-build:
     needs: artifact
