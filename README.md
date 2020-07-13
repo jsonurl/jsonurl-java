@@ -33,8 +33,17 @@ data types (e.g. [java.util.Map][java-map], [java.util.List][java-list], etc).
 There are two additional modules, distributed as separate artifacts, which
 implement a parser based on JSR-374 and Douglas Crockford's Java API.
 
-Java SE API example:
+[Java SE][java-util] API example:
 
+```xml
+<dependencies>
+  <dependency>
+    <groupId>org.jsonurl</groupId>
+    <artifactId>jsonurl-core</artifactId>
+    <version>${jsonurl.version}</version>
+  </dependency>
+</dependencies>
+```
 ```java
 import org.jsonurl.JavaValueParser;
 
@@ -45,6 +54,15 @@ System.out.println(obj.get("Hello")) // World!
 
 [Json.org][javadoc-org-json] example:
 
+```xml
+<dependencies>
+  <dependency>
+    <groupId>org.jsonurl</groupId>
+    <artifactId>jsonurl-jsonorg</artifactId>
+    <version>${jsonurl.version}</version>
+  </dependency>
+</dependencies>
+```
 ```java
 import org.jsonurl.jsonorg.JsonUrlParser;
 
@@ -55,6 +73,20 @@ System.out.println(obj.get("Hello")) // World!
 
 [JSR-374][javadoc-javax-json] example:
 
+```xml
+<dependencies>
+  <dependency>
+    <groupId>org.jsonurl</groupId>
+    <artifactId>jsonurl-jsr374</artifactId>
+    <version>${jsonurl.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.glassfish</groupId>
+    <artifactId>javax.json</artifactId>
+    <version>${javax.json.version}</version>
+  </dependency>
+</dependencies>
+```
 ```java
 import org.jsonurl.jsonp.JsonUrlParser;
 
@@ -84,4 +116,5 @@ Sane limit values are set by default.
 [java-list]: https://docs.oracle.com/javase/8/docs/api/java/util/List.html
 [javadoc-org-json]: https://javadoc.io/doc/org.json/json/
 [javadoc-javax-json]: https://javadoc.io/doc/javax.json/javax.json-api/
+[java-util]: https://docs.oracle.com/javase/8/docs/api/java/util/
 
