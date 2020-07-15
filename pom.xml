@@ -70,6 +70,14 @@
       <id>javadoc-site</id>
       <build>
         <defaultGoal>clean package javadoc:aggregate</defaultGoal>
+        <plugins>
+          <plugin>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <configuration>
+              <doctitle>JSON&#x2192;URL Java ${project.version} API</doctitle>
+            </configuration>
+          </plugin>
+        </plugins>
       </build>
     </profile>
     
@@ -90,7 +98,6 @@
               <scmBranch>gh-pages</scmBranch>
               <content>${project.reporting.outputDirectory}/apidocs</content>
               <checkinComment>doc: update by maven-scm-publish-plugin</checkinComment>
-              <!-- <serverId>github</serverId>  -->
               <ignorePathsToDelete>
                 <ignorePathsToDelete>.gitignore</ignorePathsToDelete>
                 <ignorePathsToDelete>.gitattributes</ignorePathsToDelete>
