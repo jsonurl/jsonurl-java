@@ -147,6 +147,13 @@ public final class JsonUrl {
             int sumb = 0;
             int more = -1;
 
+            //
+            // sonarcloud for codesmell for loop label and recommends
+            // refactoring to remove it.
+            //
+            // The label facilitates consistent error handling along with
+            // a switch to be used for per-character behavior.
+            //
             loop: for (int i = start; i < stop; i++) {
                 char c;
                 int b;
@@ -173,6 +180,11 @@ public final class JsonUrl {
                     break;
                 }
                 
+                //
+                // This is largely based on unescape.java referenced above,
+                // however, that code is old and doesn't take into account
+                // changes in behavior for UTF-16. This code does. 
+                //
                 // Decode byte b as UTF-8, sumb collects incomplete chars
                 if ((b & 0xc0) == 0x80) {               // 10xxxxxx (continuation byte)
                     sumb = (sumb << 6) | (b & 0x3f);    // Add 6 bits to sumb
