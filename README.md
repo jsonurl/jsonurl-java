@@ -12,6 +12,7 @@
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=jsonurl_jsonurl-java&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=jsonurl_jsonurl-java)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fjsonurl%2Fjsonurl-java.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fjsonurl%2Fjsonurl-java?ref=badge_shield)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
+[![project chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://jsonurl.zulipchat.com/)
 
 [json.org module][jsonorg-module]: [![Known Vulnerabilities](https://snyk.io/test/github/jsonurl/jsonurl-java/badge.svg?targetFile=module/jsonurl-jsonorg/pom.xml)](https://snyk.io/test/github/jsonurl/jsonurl-java?targetFile=module/jsonurl-jsonorg/pom.xml)
 [![javadoc](https://javadoc.io/badge2/org.jsonurl/jsonurl-jsonorg/javadoc.svg)](https://javadoc.io/doc/org.jsonurl/jsonurl-jsonorg)
@@ -95,6 +96,17 @@ JsonUrlParser p = new JsonUrlParser();
 JsonObject obj = p.parseObject( "(Hello:World!)" );
 System.out.println(obj.get("Hello")) // World!
 ```
+
+## Javadocs
+All artifacts published to Maven Central include `sources` and `javadoc` JARs.
+You can browse the current, and all previous revisions, via Javadoc.io:
+  + [jsonurl-core](https://javadoc.io/doc/org.jsonurl/jsonurl-core)
+  + [jsonurl-jsonorg](https://javadoc.io/doc/org.jsonurl/jsonurl-jsonorg)
+  + [jsonurl-jsr374](https://javadoc.io/doc/org.jsonurl/jsonurl-jsr374)
+
+Additionally, Javadocs are also generated automatically on pushes to
+[master](https://jsonurl.github.io/jsonurl-java/). 
+  
 
 ## Security
 The parser is designed to parse untrusted input. It supports limits on
