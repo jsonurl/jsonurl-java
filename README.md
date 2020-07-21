@@ -35,7 +35,7 @@ data types (e.g. [java.util.Map][java-map], [java.util.List][java-list], etc).
 There are two additional modules, distributed as separate artifacts, which
 implement a parser based on JSR-374 and Douglas Crockford's Java API.
 
-[Java SE][java-util] API example:
+### [Java SE][java-util] API example:
 
 ```xml
 <dependencies>
@@ -47,6 +47,7 @@ implement a parser based on JSR-374 and Douglas Crockford's Java API.
 </dependencies>
 ```
 ```java
+import java.util.Map;
 import org.jsonurl.JavaValueParser;
 
 JavaValueParser p = new JavaValueParser();
@@ -54,7 +55,7 @@ Map obj = p.parseObject( "(Hello:World!)" );
 System.out.println(obj.get("Hello")) // World!
 ```
 
-[Json.org][javadoc-org-json] example:
+### [Json.org][javadoc-org-json] example:
 
 ```xml
 <dependencies>
@@ -66,6 +67,7 @@ System.out.println(obj.get("Hello")) // World!
 </dependencies>
 ```
 ```java
+import org.json.JSONObject;
 import org.jsonurl.jsonorg.JsonUrlParser;
 
 JsonUrlParser p = new JsonUrlParser();
@@ -73,7 +75,7 @@ JSONObject obj = p.parseObject( "(Hello:World!)" );
 System.out.println(obj.get("Hello")) // World!
 ```
 
-[JSR-374][javadoc-javax-json] example:
+### [JSR-374][javadoc-javax-json] example:
 
 ```xml
 <dependencies>
@@ -90,6 +92,7 @@ System.out.println(obj.get("Hello")) // World!
 </dependencies>
 ```
 ```java
+import javax.json.JsonObject;
 import org.jsonurl.jsonp.JsonUrlParser;
 
 JsonUrlParser p = new JsonUrlParser();
