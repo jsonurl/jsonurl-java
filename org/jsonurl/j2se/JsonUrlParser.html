@@ -44,11 +44,11 @@
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../org/jsonurl/jsonorg/JsonOrgValueFactory.html" title="class in org.jsonurl.jsonorg"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../org/jsonurl/jsonorg/JsonUrlWriter.html" title="class in org.jsonurl.jsonorg"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../org/jsonurl/j2se/JavaValueFactory.html" title="interface in org.jsonurl.j2se"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li>Next&nbsp;Class</li>
 </ul>
 <ul class="navList">
-<li><a href="../../../index.html?org/jsonurl/jsonorg/JsonUrlParser.html" target="_top">Frames</a></li>
+<li><a href="../../../index.html?org/jsonurl/j2se/JsonUrlParser.html" target="_top">Frames</a></li>
 <li><a href="JsonUrlParser.html" target="_top">No&nbsp;Frames</a></li>
 </ul>
 <ul class="navList" id="allclasses_navbar_top">
@@ -87,7 +87,7 @@
 <!-- ========= END OF TOP NAVBAR ========= -->
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
-<div class="subTitle">org.jsonurl.jsonorg</div>
+<div class="subTitle">org.jsonurl.j2se</div>
 <h2 title="Class JsonUrlParser" class="title">Class JsonUrlParser</h2>
 </div>
 <div class="contentContainer">
@@ -98,10 +98,10 @@
 <li><a href="../../../org/jsonurl/Parser.html" title="class in org.jsonurl">org.jsonurl.Parser</a>&lt;V,C,A,A,J,J,B,M,N,S&gt;</li>
 <li>
 <ul class="inheritance">
-<li><a href="../../../org/jsonurl/Parser.TransparentBuilder.html" title="class in org.jsonurl">org.jsonurl.Parser.TransparentBuilder</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="https://stleary.github.io/JSON-java/org/json/JSONArray.html?is-external=true" title="class or interface in org.json">JSONArray</a>,<a href="https://stleary.github.io/JSON-java/org/json/JSONObject.html?is-external=true" title="class or interface in org.json">JSONObject</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Boolean.html?is-external=true" title="class or interface in java.lang">Boolean</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Number.html?is-external=true" title="class or interface in java.lang">Number</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;</li>
+<li><a href="../../../org/jsonurl/Parser.TransparentBuilder.html" title="class in org.jsonurl">org.jsonurl.Parser.TransparentBuilder</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&gt;,<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&gt;,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Boolean.html?is-external=true" title="class or interface in java.lang">Boolean</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Number.html?is-external=true" title="class or interface in java.lang">Number</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;</li>
 <li>
 <ul class="inheritance">
-<li>org.jsonurl.jsonorg.JsonUrlParser</li>
+<li>org.jsonurl.j2se.JsonUrlParser</li>
 </ul>
 </li>
 </ul>
@@ -115,9 +115,8 @@
 <hr>
 <br>
 <pre>public class <span class="typeNameLabel">JsonUrlParser</span>
-extends <a href="../../../org/jsonurl/Parser.TransparentBuilder.html" title="class in org.jsonurl">Parser.TransparentBuilder</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="https://stleary.github.io/JSON-java/org/json/JSONArray.html?is-external=true" title="class or interface in org.json">JSONArray</a>,<a href="https://stleary.github.io/JSON-java/org/json/JSONObject.html?is-external=true" title="class or interface in org.json">JSONObject</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Boolean.html?is-external=true" title="class or interface in java.lang">Boolean</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Number.html?is-external=true" title="class or interface in java.lang">Number</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;</pre>
-<div class="block">A JSON&#x2192;URL parser which uses classes from the
- <a href="https://stleary.github.io/JSON-java/org/json/JSONObject.html?is-external=true" title="class or interface in org.json"><code>org.json</code></a> package.</div>
+extends <a href="../../../org/jsonurl/Parser.TransparentBuilder.html" title="class in org.jsonurl">Parser.TransparentBuilder</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&gt;,<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&gt;,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Boolean.html?is-external=true" title="class or interface in java.lang">Boolean</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Number.html?is-external=true" title="class or interface in java.lang">Number</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;</pre>
+<div class="block">A <a href="../../../org/jsonurl/Parser.html" title="class in org.jsonurl"><code>Parser</code></a> based on Java SE data types.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>2019-09-01</dd>
@@ -172,12 +171,12 @@ extends <a href="../../../org/jsonurl/Parser.TransparentBuilder.html" title="cla
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../org/jsonurl/jsonorg/JsonUrlParser.html#JsonUrlParser--">JsonUrlParser</a></span>()</code>
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../org/jsonurl/j2se/JsonUrlParser.html#JsonUrlParser--">JsonUrlParser</a></span>()</code>
 <div class="block">Instantiate a new Parser.</div>
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../org/jsonurl/jsonorg/JsonUrlParser.html#JsonUrlParser-org.jsonurl.jsonorg.JsonOrgValueFactory-">JsonUrlParser</a></span>(<a href="../../../org/jsonurl/jsonorg/JsonOrgValueFactory.html" title="class in org.jsonurl.jsonorg">JsonOrgValueFactory</a>&nbsp;factory)</code>
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../org/jsonurl/j2se/JsonUrlParser.html#JsonUrlParser-org.jsonurl.j2se.JavaValueFactory-">JsonUrlParser</a></span>(<a href="../../../org/jsonurl/j2se/JavaValueFactory.html" title="interface in org.jsonurl.j2se">JavaValueFactory</a>&nbsp;factory)</code>
 <div class="block">Instantiate a new Parser.</div>
 </td>
 </tr>
@@ -225,28 +224,17 @@ extends <a href="../../../org/jsonurl/Parser.TransparentBuilder.html" title="cla
 <li class="blockList">
 <h4>JsonUrlParser</h4>
 <pre>public&nbsp;JsonUrlParser()</pre>
-<div class="block">Instantiate a new Parser.
-
- <p>The returned parser uses the
- <a href="../../../org/jsonurl/jsonorg/JsonOrgValueFactory.html#PRIMITIVE"><code>PRIMITIVE</code></a> factory.</div>
+<div class="block">Instantiate a new Parser.</div>
 </li>
 </ul>
-<a name="JsonUrlParser-org.jsonurl.jsonorg.JsonOrgValueFactory-">
+<a name="JsonUrlParser-org.jsonurl.j2se.JavaValueFactory-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>JsonUrlParser</h4>
-<pre>public&nbsp;JsonUrlParser(<a href="../../../org/jsonurl/jsonorg/JsonOrgValueFactory.html" title="class in org.jsonurl.jsonorg">JsonOrgValueFactory</a>&nbsp;factory)</pre>
+<pre>public&nbsp;JsonUrlParser(<a href="../../../org/jsonurl/j2se/JavaValueFactory.html" title="interface in org.jsonurl.j2se">JavaValueFactory</a>&nbsp;factory)</pre>
 <div class="block">Instantiate a new Parser.</div>
-<dl>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>factory</code> - a valid JsonOrgValueFactory</dd>
-<dt><span class="seeLabel">See Also:</span></dt>
-<dd><a href="../../../org/jsonurl/jsonorg/JsonOrgValueFactory.html#PRIMITIVE"><code>JsonOrgValueFactory.PRIMITIVE</code></a>, 
-<a href="../../../org/jsonurl/jsonorg/JsonOrgValueFactory.html#DOUBLE"><code>JsonOrgValueFactory.DOUBLE</code></a>, 
-<a href="../../../org/jsonurl/jsonorg/JsonOrgValueFactory.html#BIGMATH"><code>JsonOrgValueFactory.BIGMATH</code></a></dd>
-</dl>
 </li>
 </ul>
 </li>
@@ -277,11 +265,11 @@ extends <a href="../../../org/jsonurl/Parser.TransparentBuilder.html" title="cla
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../org/jsonurl/jsonorg/JsonOrgValueFactory.html" title="class in org.jsonurl.jsonorg"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../org/jsonurl/jsonorg/JsonUrlWriter.html" title="class in org.jsonurl.jsonorg"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../org/jsonurl/j2se/JavaValueFactory.html" title="interface in org.jsonurl.j2se"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li>Next&nbsp;Class</li>
 </ul>
 <ul class="navList">
-<li><a href="../../../index.html?org/jsonurl/jsonorg/JsonUrlParser.html" target="_top">Frames</a></li>
+<li><a href="../../../index.html?org/jsonurl/j2se/JsonUrlParser.html" target="_top">Frames</a></li>
 <li><a href="JsonUrlParser.html" target="_top">No&nbsp;Frames</a></li>
 </ul>
 <ul class="navList" id="allclasses_navbar_bottom">

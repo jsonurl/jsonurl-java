@@ -1,4 +1,4 @@
 org.jsonurl
+org.jsonurl.j2se
 org.jsonurl.jsonorg
 org.jsonurl.jsonp
-org.jsonurl.spi
