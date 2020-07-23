@@ -1,4 +1,4 @@
-package org.jsonurl;
+package org.jsonurl.j2se;
 
 /*
  * Copyright 2019 David MacCormack
@@ -23,6 +23,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.jsonurl.NumberBuilder;
+import org.jsonurl.NumberText;
+import org.jsonurl.ValueFactory;
+import org.jsonurl.ValueType;
 
 /**
  * A {@link org.jsonurl.ValueFactory ValueFactory} based on Java SE data types.

@@ -1,7 +1,7 @@
 package org.jsonurl;
 
 /*
- * Copyright 2019 David MacCormack
+ * Copyright 2019-2020 David MacCormack
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -32,6 +32,7 @@ import static org.jsonurl.SyntaxException.ERR_MSG_NOTEXT;
 
 import java.io.IOException;
 import java.nio.charset.MalformedInputException;
+import org.jsonurl.j2se.JavaValueFactory;
 
 /**
  * This class provides static methods for performing a number of
@@ -621,6 +622,7 @@ public final class JsonUrl {
      * {@link #parseLiteral(CharSequence, int, int, ValueFactory)
      * parseLiteral(s, start, length, JavaValueFactory.PRIMITIVE)}.
      * @see JsonUrl#parseLiteral(CharSequence, int, int, ValueFactory)
+     * @see JavaValueFactory#PRIMITIVE
      */
     public static final Object parseLiteral(
             CharSequence s,

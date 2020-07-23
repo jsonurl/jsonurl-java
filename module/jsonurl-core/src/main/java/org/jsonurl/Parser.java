@@ -47,7 +47,7 @@ import java.util.Set;
  * with specific types and an instance of
  * {@link org.jsonurl.ValueFactory ValueFactory}. If you don't need
  * control over types you may use
- * {@link org.jsonurl.JavaValueParser JavaValueParser}. 
+ * {@link org.jsonurl.j2se.JsonUrlParser JsonUrlParser}. 
  *
  * @param V value type (any JSON value)
  * @param C composite type (array or object)

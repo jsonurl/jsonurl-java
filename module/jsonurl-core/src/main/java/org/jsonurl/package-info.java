@@ -1,15 +1,13 @@
 /**
  * This package provides an extensible JSON&#x2192;URL parser core and
- * an implementation based on Java SE datatypes.
+ * static utility methods.
  *
- * <p>The primary entry point for most use cases
- * {@link org.jsonurl.JavaValueParser JavaValueParser}, which implements a
- * JSON object model API to parse JSON&#x2192;URL text using Java SE types (e.g.
- * {@link java.util.Map Map}, {@link java.util.List List}, etc).
- * 
  * <p>If you need a parser bound to your own JSON model API then
  * a {@link org.jsonurl.ValueFactory ValueFactory} may be created and
- * supplied to an instance of {@link org.jsonurl.Parser Parser}.
+ * supplied to an instance of {@link org.jsonurl.Parser Parser}. Otherwise,
+ * if a parser based on J2SE datatypes is sufficient then
+ * take a look at {@link org.jsonurl.j2se.JsonUrlParser JsonUrlParser} which
+ * does just that. 
  * 
  * @author jsonurl.org
  * @author David MacCormack

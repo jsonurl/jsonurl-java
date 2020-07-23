@@ -1,5 +1,7 @@
 package org.jsonurl;
 
+import org.jsonurl.j2se.JavaValueFactory;
+
 /*
  * Copyright 2019 David MacCormack
  * 

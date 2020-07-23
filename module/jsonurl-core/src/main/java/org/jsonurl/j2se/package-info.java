@@ -1,11 +1,17 @@
 /**
- * The JSON&#x2192;URL service provider interface.
+ * This package provides an implementation of the JSON&#x2192;URL parser
+ * based on Java SE datatypes.
+ *
+ * <p>The primary entry point for most use cases
+ * {@link org.jsonurl.j2se.JsonUrlParser JsonUrlParser}, which implements a
+ * JSON object model API to parse JSON&#x2192;URL text using Java SE types (e.g.
+ * {@link java.util.Map Map}, {@link java.util.List List}, etc).
  * 
  * @author jsonurl.org
  * @author David MacCormack
  * @since 2019-09-01
  */
-package org.jsonurl.spi;
+package org.jsonurl.j2se;
 
 /*
  * Copyright 2019 David MacCormack

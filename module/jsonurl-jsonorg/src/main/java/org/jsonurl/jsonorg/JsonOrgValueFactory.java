@@ -20,11 +20,11 @@ package org.jsonurl.jsonorg;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.jsonurl.JavaValueFactory;
 import org.jsonurl.NumberBuilder;
 import org.jsonurl.NumberText;
 import org.jsonurl.ValueFactory;
 import org.jsonurl.ValueType;
+import org.jsonurl.j2se.JavaValueFactory;
 
 
 /**

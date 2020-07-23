@@ -19,6 +19,8 @@ package org.jsonurl;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import org.jsonurl.j2se.JavaValueFactory;
+import org.jsonurl.j2se.JsonUrlParser;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -29,7 +31,7 @@ class JavaValueParserTest {
 
     @Test
     void testConstruct() {
-        assertNotNull(new JavaValueParser());
-        assertNotNull(new JavaValueParser(JavaValueFactory.PRIMITIVE));
+        assertNotNull(new JsonUrlParser());
+        assertNotNull(new JsonUrlParser(JavaValueFactory.PRIMITIVE));
     }
 }
