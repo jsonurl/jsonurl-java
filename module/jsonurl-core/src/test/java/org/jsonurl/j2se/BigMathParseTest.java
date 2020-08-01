@@ -1,6 +1,4 @@
-package org.jsonurl;
-
-import org.jsonurl.j2se.JavaValueFactory;
+package org.jsonurl.j2se;
 
 /*
  * Copyright 2019 David MacCormack
@@ -20,18 +18,18 @@ import org.jsonurl.j2se.JavaValueFactory;
  */
 
 /**
- * Unit test using JavaValueFactory.PRIMITIVE
+ * Unit test using JavaValueFactory.BIGMATH
  *
  * @author jsonurl.org
  * @author David MacCormack
  * @since 2019-09-01
  */
-public class PrimitiveParseTest extends JavaValueFactoryParseTest {
+public class BigMathParseTest extends JavaValueFactoryParseTest {
 
     /**
-     * Create a new PrimitiveParseTest.
+     * Create a new BigMathParseTest.
      */
-    public PrimitiveParseTest() {
-        super(JavaValueFactory.PRIMITIVE);
+    public BigMathParseTest() {
+        super(JavaValueFactory.BIGMATH);
     }
 }

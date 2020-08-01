@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.EnumSet;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -389,11 +390,14 @@ public abstract class AbstractParseTest<
             .replace(",", "%2C")
             .replace(":", "%3A");
     }
+    
+    @Test
+    void testIsEmpty() {
+        assertTrue(factory.isEmpty(newParser().parse("()")));
+    }
 
     @Test
-    void testMisc() {
-        assertTrue(factory.isEmpty(newParser().parse("()")));
-
+    void testSetterAndGetter() {
         Parser<?,?,?,?,?,?,?,?,?,?> p = newParser();
 
         p.setMaxParseChars(13);
@@ -683,5 +687,16 @@ public abstract class AbstractParseTest<
         assertEquals(
                 "Fred",
                 getString("first", getObject("name", parseResult)));
+    }
+    
+    @Test
+    @DisplayName("testJsonUrlText6: Deeply nested array: ((((1))))")
+    void testJsonUrlText6() throws ParseException {
+        A parseResult = parseArray("((((1))))");
+
+        assertEquals(
+                factory.getNumber(new NumberBuilder("1")),
+                getNumber(0,
+                    getArray(0, getArray(0, getArray(0,parseResult)))));
     }
 }

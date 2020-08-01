@@ -1,4 +1,4 @@
-package org.jsonurl;
+package org.jsonurl.j2se;
 
 /*
  * Copyright 2019-2020 David MacCormack
@@ -20,7 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 import java.util.Map;
-import org.jsonurl.j2se.JavaValueFactory;
+import org.jsonurl.AbstractParseTest;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -114,10 +115,8 @@ abstract class JavaValueFactoryParseTest extends AbstractParseTest<
     }
     
     @Test
-    @Override
-    void testMisc() {
-        super.testMisc();
-
+    @DisplayName("JavaValueFactory.toJavaString")
+    void testToJavaString() {
         String test = "Hello, World!";
 
         assertEquals(
