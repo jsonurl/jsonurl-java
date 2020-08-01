@@ -1,4 +1,4 @@
-package org.jsonurl;
+package org.jsonurl.j2se;
 
 /*
  * Copyright 2019 David MacCormack
@@ -17,21 +17,19 @@ package org.jsonurl;
  * under the License.
  */
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import org.jsonurl.j2se.JavaValueFactory;
-import org.jsonurl.j2se.JsonUrlParser;
-import org.junit.jupiter.api.Test;
-
 /**
- * JavaValueParserTest.
+ * Unit test using JavaValueFactory.DOUBLE
+ *
+ * @author jsonurl.org
+ * @author David MacCormack
+ * @since 2019-09-01
  */
-@SuppressWarnings("PMD")
-class JavaValueParserTest {
+public class DoubleParseTest extends JavaValueFactoryParseTest {
 
-    @Test
-    void testConstruct() {
-        assertNotNull(new JsonUrlParser());
-        assertNotNull(new JsonUrlParser(JavaValueFactory.PRIMITIVE));
+    /**
+     * Create a new DoubleParseTest.
+     */
+    public DoubleParseTest() {
+        super(JavaValueFactory.DOUBLE);
     }
 }
