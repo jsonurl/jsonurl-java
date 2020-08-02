@@ -54,10 +54,58 @@ public abstract class JsonpValueFactory implements ValueFactory<
         JsonString> {
     
     /**
-     * The default MathContext.
+     * A {@link JsonpValueFactory} that uses
+     * {@link java.math.BigInteger BigInteger} and
+     * {@link java.math.BigDecimal BigDecimal} when necessary.
+     * 
+     * <p>When using this factory, numbers without fractional parts that are
+     * too big to be stored in a {@link java.lang.Long Long} will be stored
+     * in a {@link java.math.BigInteger BigInteger}. Numbers with fractional
+     * parts that are too big to stored in a {@link java.lang.Double Double}
+     * will be stored in a {@link java.math.BigDecimal BigDecimal}.
      */
-    public static final MathContext DEFAULT_MATH_CONTEXT =
-        MathContext.DECIMAL128;
+    public static class BigMath extends JsonpValueFactory {
+        /**
+         * MathContext for new BigDecimal instances. 
+         */
+        private final MathContext mc;
+
+        /**
+         * Create a new BigMath JsonOrgValueFactory using the default
+         * MathContext {@link java.math.MathContext#DECIMAL128 DECIMAL128}.
+         */
+        public BigMath() {
+            this(MathContext.DECIMAL128);
+        }
+
+        /**
+         * Create a new BigMath JsonOrgValueFactory using the given MathContext.
+         * @param mc a valid MathContext or null
+         */
+        public BigMath(MathContext mc) {
+            this.mc = mc;
+        }
+        
+        @Override
+        public JsonNumber getNumber(NumberText text) {
+            if (!text.hasFractionalPart()) {
+                switch (text.getExponentType()) { // NOPMD - don't want default
+                case NONE:
+                    return Json.createValue(new BigInteger(text.toString()));
+
+                case JUST_VALUE:
+                case POSITIVE_VALUE:
+                    BigDecimal d = new BigDecimal(text.toString(), mc);
+                    return Json.createValue(d.toBigIntegerExact());
+
+                case NEGATIVE_VALUE:
+                    break;
+                }
+            }
+
+            return Json.createValue(new BigDecimal(text.toString(), mc));
+        }
+    }
 
     /**
      * A singleton instance of {@link JsonpValueFactory}.
@@ -96,35 +144,9 @@ public abstract class JsonpValueFactory implements ValueFactory<
     };
 
     /**
-     * A singleton instance of {@link JsonpValueFactory}.
-     * 
-     * <p>This factory uses
-     * {@link java.math.BigInteger#BigInteger(String) new BigInteger()} or 
-     * {@link java.math.BigDecimal#BigDecimal(String) new BigDecimal()}
-     * to parse JSON&#x2192;URL numbers.
+     * A singleton instance of {@link BigMath}.
      */
-    public static final JsonpValueFactory BIGMATH = new JsonpValueFactory() {
-        @Override
-        public JsonNumber getNumber(NumberText text) {
-            if (!text.hasFractionalPart()) {
-                switch (text.getExponentType()) { // NOPMD - don't want default
-                case NONE:
-                    return Json.createValue(new BigInteger(text.toString()));
-
-                case JUST_VALUE:
-                case POSITIVE_VALUE:
-                    BigDecimal d = new BigDecimal(text.toString(),
-                        DEFAULT_MATH_CONTEXT);
-                    return Json.createValue(d.toBigIntegerExact());
-
-                case NEGATIVE_VALUE:
-                    break;
-                }
-            }
-
-            return Json.createValue(new BigDecimal(text.toString(),
-                DEFAULT_MATH_CONTEXT));
-        }
+    public static final JsonpValueFactory BIGMATH = new BigMath() {
     };
 
     @Override

@@ -54,6 +54,34 @@ public interface JavaValueFactory extends ValueFactory.TransparentBuilder<
     String> {
 
     /**
+     * A {@link org.jsonurl.ValueFactory ValueFactory} based on Java SE data
+     * types that uses {@link java.math.BigInteger BigInteger} and
+     * {@link java.math.BigDecimal BigDecimal} when necessary.
+     * 
+     * <p>When using this factory, numbers without fractional parts that are
+     * too big to be stored in a {@link java.lang.Long Long} will be stored
+     * in a {@link java.math.BigInteger BigInteger}. Numbers with fractional
+     * parts that are too big to stored in a {@link java.lang.Double Double}
+     * will be stored in a {@link java.math.BigDecimal BigDecimal}.
+     */
+    public interface BigMath extends JavaValueFactory {
+        @Override
+        default Number getNumber(NumberText text) {
+            return NumberBuilder.build(text, false, getMathContext());
+        }
+
+        /**
+         * Get the MathContext for use when instantiating BigDecmial.
+         * This defaults to {@link java.math.MathContext#DECIMAL128 DECIMAL128}
+         * in order to place some limit on untrusted input.
+         * @return a valid MathContext or null 
+         */
+        default MathContext getMathContext() {
+            return MathContext.DECIMAL128;
+        }
+    }
+
+    /**
      * A singleton instance of {@link JavaValueFactory} that stores numbers as
      * boxed primitives.
      * 
@@ -83,25 +111,9 @@ public interface JavaValueFactory extends ValueFactory.TransparentBuilder<
     };
     
     /**
-     * A singleton instance of {@link JavaValueFactory} that uses
-     * {@link java.math.BigInteger BigInteger} and
-     * {@link java.math.BigDecimal BigDecimal} when necessary.
-     * 
-     * <p>When using this factory, numbers without fractional parts that are
-     * too big to be stored in a {@link java.lang.Long Long} will be stored
-     * in a {@link java.math.BigInteger BigInteger}. Numbers with fractional
-     * parts that are too big to stored in a {@link java.lang.Double Double}
-     * will be stored in a {@link java.math.BigDecimal BigDecimal}.
-     * 
+     * A singleton instance of {@link BigMath}.
      */
-    public static final JavaValueFactory BIGMATH = new JavaValueFactory() {
-        @Override
-        public Number getNumber(NumberText text) {
-            //
-            // input is untrusted by default, so use MathContext.DECIMAL128
-            //
-            return NumberBuilder.build(text, false, MathContext.DECIMAL128);
-        }
+    public static final JavaValueFactory BIGMATH = new BigMath() {
     };
 
     /**

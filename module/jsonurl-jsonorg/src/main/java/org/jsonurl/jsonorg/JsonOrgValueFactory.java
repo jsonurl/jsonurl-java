@@ -43,6 +43,46 @@ public abstract class JsonOrgValueFactory implements ValueFactory.TransparentBui
         Number,
         Object,
         String> {
+    
+    /**
+     * A {@link JsonOrgValueFactory} that uses
+     * {@link java.math.BigInteger BigInteger} and
+     * {@link java.math.BigDecimal BigDecimal} when necessary.
+     * 
+     * <p>When using this factory, numbers without fractional parts that are
+     * too big to be stored in a {@link java.lang.Long Long} will be stored
+     * in a {@link java.math.BigInteger BigInteger}. Numbers with fractional
+     * parts that are too big to stored in a {@link java.lang.Double Double}
+     * will be stored in a {@link java.math.BigDecimal BigDecimal}.
+     */
+    public static class BigMath extends JsonOrgValueFactory {
+
+        /**
+         * MathContext for new BigDecimal instances. 
+         */
+        private final MathContext mc;
+
+        /**
+         * Create a new BigMath JsonOrgValueFactory using the default
+         * MathContext {@link java.math.MathContext#DECIMAL128 DECIMAL128}.
+         */
+        public BigMath() {
+            this(MathContext.DECIMAL128);
+        }
+
+        /**
+         * Create a new BigMath JsonOrgValueFactory using the given MathContext.
+         * @param mc a valid MathContext or null
+         */
+        public BigMath(MathContext mc) {
+            this.mc = mc;
+        }
+
+        @Override
+        public Number getNumber(NumberText text) {
+            return NumberBuilder.build(text, false, mc);
+        }
+    }
 
     /**
      * This represents the empty composite value.
@@ -81,21 +121,9 @@ public abstract class JsonOrgValueFactory implements ValueFactory.TransparentBui
     };
     
     /**
-     * A singleton instance of {@link JsonOrgValueFactory}.
-     *
-     * <p>This factory uses
-     * {@link org.jsonurl.NumberBuilder#build(boolean)
-     * NumberBuilder.build(text,false)}
-     * to parse JSON&#x2192;URL numbers.
+     * A singleton instance of {@link BigMath}.
      */
-    public static final JsonOrgValueFactory BIGMATH = new JsonOrgValueFactory() {
-        @Override
-        public Number getNumber(NumberText text) {
-            //
-            // input is untrusted by default, so use MathContext.DECIMAL128
-            //
-            return NumberBuilder.build(text, false, MathContext.DECIMAL128);
-        }
+    public static final JsonOrgValueFactory BIGMATH = new BigMath() {
     };
 
     @Override
