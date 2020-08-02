@@ -17,6 +17,7 @@ package org.jsonurl.j2se;
  * under the License.
  */
 
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -96,7 +97,10 @@ public interface JavaValueFactory extends ValueFactory.TransparentBuilder<
     public static final JavaValueFactory BIGMATH = new JavaValueFactory() {
         @Override
         public Number getNumber(NumberText text) {
-            return NumberBuilder.build(text, false);
+            //
+            // input is untrusted by default, so use MathContext.DECIMAL128
+            //
+            return NumberBuilder.build(text, false, MathContext.DECIMAL128);
         }
     };
 

@@ -19,6 +19,7 @@ package org.jsonurl.jsonp;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 import java.util.Set;
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -51,6 +52,12 @@ public abstract class JsonpValueFactory implements ValueFactory<
         JsonNumber,
         JsonValue,
         JsonString> {
+    
+    /**
+     * The default MathContext.
+     */
+    public static final MathContext DEFAULT_MATH_CONTEXT =
+        MathContext.DECIMAL128;
 
     /**
      * A singleton instance of {@link JsonpValueFactory}.
@@ -106,7 +113,8 @@ public abstract class JsonpValueFactory implements ValueFactory<
 
                 case JUST_VALUE:
                 case POSITIVE_VALUE:
-                    BigDecimal d = new BigDecimal(text.toString());
+                    BigDecimal d = new BigDecimal(text.toString(),
+                        DEFAULT_MATH_CONTEXT);
                     return Json.createValue(d.toBigIntegerExact());
 
                 case NEGATIVE_VALUE:
@@ -114,7 +122,8 @@ public abstract class JsonpValueFactory implements ValueFactory<
                 }
             }
 
-            return Json.createValue(new BigDecimal(text.toString()));
+            return Json.createValue(new BigDecimal(text.toString(),
+                DEFAULT_MATH_CONTEXT));
         }
     };
 

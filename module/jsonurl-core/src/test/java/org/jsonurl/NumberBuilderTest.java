@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -69,45 +70,63 @@ class NumberBuilderTest {
     }
     
     private void assertEquals_isNumber(boolean expect, String s) {
-        assertEquals(expect, NumberBuilder.isNumber(s));
-        assertEquals(expect, NumberBuilder.isNumber(s, false));
+        assertEquals(expect, NumberBuilder.isNumber(s), s);
+        assertEquals(expect, NumberBuilder.isNumber(s, false), s);
 
         assertEquals(expect, NumberBuilder.isNumber(
             PREFIX + s + SUFFIX,
             PREFIX.length(),
-            PREFIX.length() + s.length()));
+            PREFIX.length() + s.length()),
+            s);
 
-        assertEquals(expect, new NumberBuilder(s).isNumber());
+        assertEquals(expect, new NumberBuilder(s).isNumber(), s);
 
         assertEquals(expect, new NumberBuilder(
             PREFIX + s + SUFFIX,
             PREFIX.length(),
-            PREFIX.length() + s.length()).isNumber());
+            PREFIX.length() + s.length()).isNumber(),
+            s);
 
-        assertEquals(expect, new NumberBuilder(s).hasIntegerPart());
+        assertEquals(expect, new NumberBuilder(s).hasIntegerPart(), s);
     }
 
     private void assertEquals_isInteger(boolean expect, String s) {
-        assertEquals(expect, NumberBuilder.isInteger(s));
-        assertEquals(expect, NumberBuilder.isNumber(s, true));
+        assertEquals(expect, NumberBuilder.isInteger(s), s);
+        assertEquals(expect, NumberBuilder.isNumber(s, true), s);
 
         assertEquals(expect, NumberBuilder.isInteger(
             PREFIX + s + SUFFIX,
             PREFIX.length(),
-            PREFIX.length() + s.length()));
+            PREFIX.length() + s.length()),
+            s);
         
-        assertEquals(expect, new NumberBuilder(s).isInteger());
+        assertEquals(expect, new NumberBuilder(s).isInteger(), s);
 
         assertEquals(expect, new NumberBuilder(
             PREFIX + s + SUFFIX,
             PREFIX.length(),
-            PREFIX.length() + s.length()).isInteger());
+            PREFIX.length() + s.length()).isInteger(),
+            s);
     }
 
     private void assertToString(String s) {
         NumberBuilder nb = newNumberBuilder(s);
-        assertArrayEquals(nb.toChars(), NumberBuilder.toChars(nb));
-        assertEquals(nb.toString(), NumberBuilder.toString(nb));
+        assertArrayEquals(nb.toChars(), NumberBuilder.toChars(nb), s);
+        assertEquals(nb.toString(), NumberBuilder.toString(nb), s);
+    }
+    
+    @ParameterizedTest
+    @CsvSource({
+        Math.PI + ", 3.141593"
+    })
+    void testMathContext(double in, double expect) {
+        final MathContext mc = MathContext.DECIMAL32;
+        final String sin = String.valueOf(in);
+        NumberBuilder nb = newNumberBuilder(sin);
+        nb.setMathContext(mc);
+        assertEquals(mc, nb.getMathContext(), sin);
+        BigDecimal bd = nb.toBigDecimal();
+        assertEquals(expect, bd.doubleValue());
     }
 
     @ParameterizedTest
@@ -126,7 +145,8 @@ class NumberBuilderTest {
     void testLong(long g) {
         assertEquals(
                 Long.valueOf(g),
-                newNumberBuilder(String.valueOf(g)).build(true));
+                newNumberBuilder(String.valueOf(g)).build(true),
+                String.valueOf(g));
 
         assertEquals_isNumber(true, String.valueOf(g));
         assertEquals_isInteger(true, String.valueOf(g));
@@ -143,7 +163,7 @@ class NumberBuilderTest {
         "12345678905432132",
     })
     void testLong(String s) {
-        assertEquals(Long.valueOf(s), newNumberBuilder(s).build(true));
+        assertEquals(Long.valueOf(s), newNumberBuilder(s).build(true), s);
         assertEquals_isNumber(true, s);
         assertEquals_isInteger(true, s);
         assertToString(s);
@@ -164,7 +184,7 @@ class NumberBuilderTest {
         "'4e+15',4000000000000000",
     })
     void testLong(String in, long out) {
-        assertEquals(Long.valueOf(out), newNumberBuilder(in).build(true));
+        assertEquals(Long.valueOf(out), newNumberBuilder(in).build(true), in);
         assertEquals_isNumber(true, in);
         assertEquals_isInteger(true, in);
         assertToString(in);
@@ -191,15 +211,18 @@ class NumberBuilderTest {
     void testDouble(String s) {
         assertEquals(
                 Double.valueOf(s),
-                newNumberBuilder(s).build(true));
+                newNumberBuilder(s).build(true),
+                s);
 
         assertEquals(
             Double.valueOf(s),
-            newNumberBuilder(s).toDouble());
+            newNumberBuilder(s).toDouble(),
+            s);
         
         assertEquals(
             new BigDecimal(s),
-            newNumberBuilder(s).toBigDecimal());
+            newNumberBuilder(s).toBigDecimal(),
+            s);
 
         assertEquals_isNumber(true, s);
 
@@ -208,7 +231,8 @@ class NumberBuilderTest {
             s);
         
         assertEquals(s.indexOf('.') != -1,
-            new NumberBuilder(s).hasFractionalPart());
+            new NumberBuilder(s).hasFractionalPart(),
+            s);
 
         assertToString(s);
     }
@@ -225,7 +249,8 @@ class NumberBuilderTest {
     void testDouble(long g) {
         assertEquals(
                 Double.valueOf(g),
-                newNumberBuilder(String.valueOf(g)).build(true));
+                newNumberBuilder(String.valueOf(g)).build(true),
+                String.valueOf(g));
 
         assertEquals_isNumber(true, String.valueOf(g));
         assertEquals_isInteger(true, String.valueOf(g));
@@ -246,7 +271,8 @@ class NumberBuilderTest {
 
         assertEquals(
                 new BigInteger(out),
-                newNumberBuilder(String.valueOf(in)).build(false));
+                newNumberBuilder(String.valueOf(in)).build(false),
+                in);
 
         assertEquals_isNumber(true, in);
         assertEquals_isInteger(true, in);
@@ -264,7 +290,7 @@ class NumberBuilderTest {
         "1e+", "1e-",
     })
     void testNonNumberLiterals(String s) {
-        assertFalse(JsonUrl.parseLiteral(s) instanceof Number);
+        assertFalse(JsonUrl.parseLiteral(s) instanceof Number, s);
         assertEquals_isNumber(false, s);
         assertEquals_isInteger(false, s);
     }

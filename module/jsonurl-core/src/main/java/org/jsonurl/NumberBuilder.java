@@ -22,6 +22,7 @@ import static org.jsonurl.CharUtil.isDigit;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 
 /**
  * A NumberBuilder implements the builder pattern for JSON&#x2192;URL number literals.
@@ -173,6 +174,11 @@ public class NumberBuilder implements NumberText { // NOPMD
      * {@link #parse(CharSequence, int, int)}.
      */
     private int expIndexStop = -1;
+    
+    /**
+     * The user supplied math context for use with BigDecimals.
+     */
+    private MathContext mc;
 
     /**
      * Create a new NumberBuilder.
@@ -545,20 +551,21 @@ public class NumberBuilder implements NumberText { // NOPMD
     /**
      * Parse the given NumberText as a {@link java.math.BigDecimal}.
      */
-    public static final BigDecimal toBigDecimal(NumberText t) {
+    public static final BigDecimal toBigDecimal(NumberText t, MathContext mc) {
         char[] s = toChars(
                 t.getText(),
                 t.getStartIndex(),
                 t.getStopIndex());
 
-        return new BigDecimal(new String(s));
+        final String str = new String(s);
+        return mc == null ? new BigDecimal(str) : new BigDecimal(str, mc);
     }
 
     /**
      * Parse the given NumberText as a {@link java.math.BigDecimal}.
      */
     public BigDecimal toBigDecimal() {
-        return toBigDecimal(this);
+        return toBigDecimal(this, mc);
     }
 
     /**
@@ -568,16 +575,39 @@ public class NumberBuilder implements NumberText { // NOPMD
      * build(this, primitiveOnly)}.
      */
     public Number build(boolean primitiveOnly) {
-        return build(this, primitiveOnly);
+        return build(this, primitiveOnly, mc);
+    }
+
+    /**
+     * Build a {@link java.lang.Number Number} from the given NumberText.
+     * Convenience for
+     * {@link #build(NumberText, boolean, MathContext) build(t, false, mc)}.
+     */
+    public static final Number build(
+            NumberText t,
+            MathContext mc) {
+        return build(t, false, mc);
+    }
+
+    /**
+     * Build a {@link java.lang.Number Number} from the given NumberText.
+     * Convenience for
+     * {@link #build(NumberText, boolean, MathContext)
+     * build(t, primitiveOnly, null)}.
+     */
+    public static final Number build(
+            NumberText t,
+            boolean primitiveOnly) {
+        return build(t, primitiveOnly, null);
     }
 
     /**
      * Build a {@link java.lang.Number Number} from the given NumberText.
      *
      * <p>The benefit of this method (over {@link #toDouble(NumberText)} or
-     * {@link #toBigDecimal(NumberText)}) is that it has the logic to return
-     * an Object tailored to the value itself. For example, if the value
-     * can be represented as a {@link Long} then it will be.
+     * {@link #toBigDecimal(NumberText, MathContext)}) is that it has the logic
+     * to return an Object tailored to the value itself. For example, if the
+     * value can be represented as a {@link Long} then it will be.
      *
      * @param t a valid NumberText
      * @param primitiveOnly if true, the returned Number will be a
@@ -587,7 +617,10 @@ public class NumberBuilder implements NumberText { // NOPMD
      * {@link java.math.BigDecimal BigDecimal}. 
      * @return an instance of java.lang.Number
      */
-    public static final Number build(NumberText t, boolean primitiveOnly) {
+    public static final Number build(
+            NumberText t, 
+            boolean primitiveOnly,
+            MathContext mc) {
         if (!t.hasFractionalPart()) {
             switch (t.getExponentType()) { //NOPMD - no default
             case NEGATIVE_VALUE:
@@ -599,7 +632,7 @@ public class NumberBuilder implements NumberText { // NOPMD
             }
         }
 
-        return primitiveOnly ? toDouble(t) : toBigDecimal(t);
+        return primitiveOnly ? toDouble(t) : toBigDecimal(t, mc);
     }
     
     /**
@@ -816,5 +849,22 @@ public class NumberBuilder implements NumberText { // NOPMD
     @Override
     public int getStopIndex() {
         return this.stop;
+    }
+
+    /**
+     * Get the MathContext for this NumberBuilder.
+     * @return a valid MathContext or null
+     */
+    public MathContext getMathContext() {
+        return mc;
+    }
+
+    /**
+     * Set the MathContext to be passed to new instances of
+     * {@link java.math.BigDecimal BigDecimal}.
+     * @param mc a valid MathContext or null
+     */
+    public void setMathContext(MathContext mc) {
+        this.mc = mc;
     }
 }

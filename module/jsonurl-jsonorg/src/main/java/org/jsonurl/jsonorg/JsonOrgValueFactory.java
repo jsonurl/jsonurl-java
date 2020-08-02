@@ -17,6 +17,7 @@ package org.jsonurl.jsonorg;
  * under the License.
  */
 
+import java.math.MathContext;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -90,7 +91,10 @@ public abstract class JsonOrgValueFactory implements ValueFactory.TransparentBui
     public static final JsonOrgValueFactory BIGMATH = new JsonOrgValueFactory() {
         @Override
         public Number getNumber(NumberText text) {
-            return NumberBuilder.build(text, false);
+            //
+            // input is untrusted by default, so use MathContext.DECIMAL128
+            //
+            return NumberBuilder.build(text, false, MathContext.DECIMAL128);
         }
     };
 
