@@ -19,6 +19,7 @@ package org.jsonurl;
 
 import static org.jsonurl.JsonUrl.Parse.literal;
 import static org.jsonurl.JsonUrl.Parse.literalToJavaString;
+import static org.jsonurl.JsonUrl.Parse.newNumberBuilder;
 import static org.jsonurl.JsonUrl.parseLiteralLength;
 import static org.jsonurl.LimitException.ERR_MSG_LIMIT_MAX_PARSE_CHARS;
 import static org.jsonurl.LimitException.ERR_MSG_LIMIT_MAX_PARSE_DEPTH;
@@ -302,7 +303,7 @@ public class Parser<
             canReturn = TYPE_VALUE_ANY;
         }
 
-        NumberBuilder numb = new NumberBuilder();
+        NumberBuilder numb = newNumberBuilder(factory);
 
         char c = s.charAt(off);
 
@@ -485,7 +486,9 @@ public class Parser<
                     }
 
                     ABT sea = factory.newArrayBuilder();
+
                     factory.add(sea, literal(buf, numb, s, litpos, pos, factory));
+
                     valueStack.push(factory.newArray(sea));
 
                     if (--parseDepth == 0) {
@@ -547,6 +550,7 @@ public class Parser<
 
                 stateStack.set(0, State.ARRAY_AFTER_ELEMENT);
                 valueStack.push(literal(buf, numb, s, litpos, pos, factory));
+
                 continue;
 
             case ARRAY_AFTER_ELEMENT:
@@ -608,6 +612,7 @@ public class Parser<
 
                 stateStack.set(0, State.OBJECT_AFTER_ELEMENT);
                 valueStack.push(literal(buf, numb, s, litpos, pos, factory));
+
                 continue;
 
             case OBJECT_AFTER_ELEMENT:

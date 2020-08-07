@@ -1,5 +1,3 @@
-package org.jsonurl.j2se;
-
 /*
  * Copyright 2019-2020 David MacCormack
  * 
@@ -16,11 +14,16 @@ package org.jsonurl.j2se;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+package org.jsonurl.j2se;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.math.MathContext;
 import java.util.List;
 import java.util.Map;
 import org.jsonurl.AbstractParseTest;
+import org.jsonurl.BigMathProvider.BigIntegerOverflow;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -113,6 +116,11 @@ abstract class JavaValueFactoryParseTest extends AbstractParseTest<
     protected String getString(String key, Map<String,Object> value) {
         return (String)value.get(key);
     }
+
+    @Override
+    protected Number getNumberValue(Object value) {
+        return value instanceof Number ? (Number)value : null;
+    }
     
     @Test
     @DisplayName("JavaValueFactory.toJavaString")
@@ -134,5 +142,14 @@ abstract class JavaValueFactoryParseTest extends AbstractParseTest<
             JavaValueFactory.toJavaString(
                 new StringBuilder(test), 1, test.length()),
             test);
+    }
+    
+    @Override
+    protected JavaValueFactory newBigMathFactory(
+                MathContext mc,
+                String boundNeg,
+                String boundPos,
+                BigIntegerOverflow over) {
+        return new JavaValueFactory.BigMathFactory(mc, boundNeg, boundPos, over);
     }
 }

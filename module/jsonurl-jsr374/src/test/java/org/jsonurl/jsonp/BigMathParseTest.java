@@ -1,5 +1,3 @@
-package org.jsonurl.jsonp;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,19 +17,114 @@ package org.jsonurl.jsonp;
  * under the License.
  */
 
+package org.jsonurl.jsonp;
+
+import java.math.MathContext;
+import org.jsonurl.BigMathProvider;
+
 /**
- * Unit test using JsonpValueFactory.BIGMATH.
+ * Unit test using JsonpValueFactory.BigMathFactory.
  *
  * @author jsonurl.org
  * @author David MacCormack
  * @since 2019-09-01
  */
-public class BigMathParseTest extends JsonpParseTest {
+class BigMathParseTest extends JsonpParseTest {
+
+    /**
+     * Unit test using JsonpValueFactory.BIGMATH32.
+     */
+    static final class Math32 extends JsonpParseTest {
+
+        /**
+         * Create a new Math32.
+         */
+        Math32() {
+            super(JsonpValueFactory.BIGMATH32);
+        }
+    }
+
+    /**
+     * Unit test using JsonpValueFactory.BIGMATH64.
+     */
+    static final class Math64 extends JsonpParseTest {
+
+        /**
+         * Create a new Math64.
+         */
+        Math64() {
+            super(JsonpValueFactory.BIGMATH64);
+        }
+    }
+
+    /**
+     * Unit test using JsonpValueFactory.BIGMATH128.
+     */
+    static final class Math128 extends JsonpParseTest {
+
+        /**
+         * Create a new Math128.
+         */
+        Math128() {
+            super(JsonpValueFactory.BIGMATH128);
+        }
+    }
+    
+    /**
+     * Unit test using JsonpValueFactory.BIGMATH32.
+     */
+    static final class Decimal32 extends JsonpParseTest {
+
+        /**
+         * Create a new Decimal32.
+         */
+        Decimal32() {
+            super(new JsonpValueFactory.BigMathFactory(
+                MathContext.DECIMAL32,
+                BigMathProvider.BIG_INTEGER32_BOUNDARY_NEG,
+                BigMathProvider.BIG_INTEGER32_BOUNDARY_POS,
+                null));
+        }
+    }
+
+    /**
+     * Unit test using JsonpValueFactory.BIGMATH64.
+     */
+    static final class Decimal64 extends JsonpParseTest {
+
+        /**
+         * Create a new Decimal64.
+         */
+        Decimal64() {
+            super(new JsonpValueFactory.BigMathFactory(
+                MathContext.DECIMAL64,
+                BigMathProvider.BIG_INTEGER64_BOUNDARY_NEG,
+                BigMathProvider.BIG_INTEGER64_BOUNDARY_POS,
+                null));
+        }
+    }
+
+    /**
+     * Unit test using JsonpValueFactory.BIGMATH128.
+     */
+    static final class Decimal128 extends JsonpParseTest {
+
+        /**
+         * Create a new Decimal128.
+         */
+        Decimal128() {
+            super(new JsonpValueFactory.BigMathFactory(
+                MathContext.DECIMAL128,
+                BigMathProvider.BIG_INTEGER128_BOUNDARY_NEG,
+                BigMathProvider.BIG_INTEGER128_BOUNDARY_POS,
+                null));
+        }
+    }
 
     /**
      * Create a new BigMathParseTest.
      */
-    public BigMathParseTest() {
-        super(JsonpValueFactory.BIGMATH);
+    BigMathParseTest() {
+        super(new JsonpValueFactory.BigMathFactory(null, null, null, null));
     }
 }

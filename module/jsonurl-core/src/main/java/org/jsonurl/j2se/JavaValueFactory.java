@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.jsonurl.BigMath;
 import org.jsonurl.NumberBuilder;
 import org.jsonurl.NumberText;
 import org.jsonurl.ValueFactory;
@@ -36,7 +37,9 @@ import org.jsonurl.ValueType;
  * <ul>
  * <li>{@link #PRIMITIVE}
  * <li>{@link #DOUBLE}
- * <li>{@link #BIGMATH}
+ * <li>{@link #BIGMATH32}
+ * <li>{@link #BIGMATH64}
+ * <li>{@link #BIGMATH128}
  * </ul>
  *
  * @author jsonurl.org
@@ -44,40 +47,63 @@ import org.jsonurl.ValueType;
  * @since 2019-09-01
  */
 public interface JavaValueFactory extends ValueFactory.TransparentBuilder<
-    Object,
-    Object,
-    List<Object>,
-    Map<String,Object>,
-    Boolean,
-    Number,
-    Object,
-    String> {
+        Object,
+        Object,
+        List<Object>,
+        Map<String,Object>,
+        Boolean,
+        Number,
+        Object,
+        String> {
 
     /**
      * A {@link org.jsonurl.ValueFactory ValueFactory} based on Java SE data
      * types that uses {@link java.math.BigInteger BigInteger} and
      * {@link java.math.BigDecimal BigDecimal} when necessary.
      * 
-     * <p>When using this factory, numbers without fractional parts that are
-     * too big to be stored in a {@link java.lang.Long Long} will be stored
-     * in a {@link java.math.BigInteger BigInteger}. Numbers with fractional
-     * parts that are too big to stored in a {@link java.lang.Double Double}
-     * will be stored in a {@link java.math.BigDecimal BigDecimal}.
+     * <p>When using an instance of this factory numbers without fractional
+     * parts that are too big to be stored in a {@link java.lang.Long Long}
+     * will be stored in a {@link java.math.BigInteger BigInteger}. Numbers
+     * with fractional parts that are too big to stored in a
+     * {@link java.lang.Double Double} will be stored in a
+     * {@link java.math.BigDecimal BigDecimal}.
      */
-    public interface BigMath extends JavaValueFactory {
-        @Override
-        default Number getNumber(NumberText text) {
-            return NumberBuilder.build(text, false, getMathContext());
-        }
+    public static class BigMathFactory extends BigMath 
+            implements JavaValueFactory,
+                ValueFactory.BigMathFactory<
+                    Object,
+                    Object,
+                    List<Object>,
+                    List<Object>,
+                    Map<String,Object>,
+                    Map<String,Object>,
+                    Boolean,
+                    Number,
+                    Object,
+                    String> {
 
         /**
-         * Get the MathContext for use when instantiating BigDecmial.
-         * This defaults to {@link java.math.MathContext#DECIMAL128 DECIMAL128}
-         * in order to place some limit on untrusted input.
-         * @return a valid MathContext or null 
+         * Create a new BigMathFactory JavaValueFactory using the given MathContext.
+         * @param mc a valid MathContext or null
+         * @param bigIntegerBoundaryNeg negative value boundary
+         * @param bigIntegerBoundaryPos positive value boundary
+         * @param bigIntegerOverflow action on boundary overflow
          */
-        default MathContext getMathContext() {
-            return MathContext.DECIMAL128;
+        public BigMathFactory(
+            MathContext mc,
+            String bigIntegerBoundaryNeg,
+            String bigIntegerBoundaryPos,
+            BigMath.BigIntegerOverflow bigIntegerOverflow) {
+
+            super(mc,
+                bigIntegerBoundaryNeg,
+                bigIntegerBoundaryPos,
+                bigIntegerOverflow);
+        }
+
+        @Override
+        public Number getNumber(NumberText text) {
+            return NumberBuilder.build(text, false, this);
         }
     }
 
@@ -109,12 +135,33 @@ public interface JavaValueFactory extends ValueFactory.TransparentBuilder<
             return Double.valueOf(text.toString());
         }
     };
+
+    /**
+     * A singleton instance of {@link BigMathFactory} with 32-bit boundaries.
+     */
+    public static final BigMathFactory BIGMATH32 = new BigMathFactory(
+        MathContext.DECIMAL32,
+        BigMath.BIG_INTEGER32_BOUNDARY_NEG,
+        BigMath.BIG_INTEGER32_BOUNDARY_POS,
+        null);
     
     /**
-     * A singleton instance of {@link BigMath}.
+     * A singleton instance of {@link BigMathFactory} with 64-bit boundaries.
      */
-    public static final JavaValueFactory BIGMATH = new BigMath() {
-    };
+    public static final BigMathFactory BIGMATH64 = new BigMathFactory(
+        MathContext.DECIMAL64,
+        BigMath.BIG_INTEGER64_BOUNDARY_NEG,
+        BigMath.BIG_INTEGER64_BOUNDARY_POS,
+        null);
+    
+    /**
+     * A singleton instance of {@link BigMathFactory} with 128-bit boundaries.
+     */
+    public static final BigMathFactory BIGMATH128 = new BigMathFactory(
+        MathContext.DECIMAL128,
+        BigMath.BIG_INTEGER128_BOUNDARY_NEG,
+        BigMath.BIG_INTEGER128_BOUNDARY_POS,
+        null);
 
     /**
      * The null value.

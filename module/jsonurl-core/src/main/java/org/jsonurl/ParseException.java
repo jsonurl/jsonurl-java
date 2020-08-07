@@ -65,7 +65,7 @@ public class ParseException extends RuntimeException {
     public String toString() {
         StringBuilder sb = new StringBuilder(64);
 
-        sb.append("JSON-&gt;URL ")
+        sb.append("jsonurl ")
             .append(typeDescription())
             .append(": ")
             .append(getMessage());

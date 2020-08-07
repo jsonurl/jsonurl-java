@@ -54,7 +54,8 @@ public class JsonUrlParser extends Parser.TransparentBuilder<
      * @param factory a valid JsonOrgValueFactory
      * @see JsonOrgValueFactory#PRIMITIVE
      * @see JsonOrgValueFactory#DOUBLE
-     * @see JsonOrgValueFactory#BIGMATH
+     * @see JsonOrgValueFactory#BIGMATH64
+     * @see JsonOrgValueFactory#BIGMATH128
      */
     public JsonUrlParser(JsonOrgValueFactory factory) {
         super(factory);

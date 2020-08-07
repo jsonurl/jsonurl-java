@@ -19,6 +19,7 @@ package org.jsonurl.jsonp;
  * under the License.
  */
 
+import java.math.MathContext;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonNumber;
@@ -28,6 +29,9 @@ import javax.json.JsonString;
 import javax.json.JsonStructure;
 import javax.json.JsonValue;
 import org.jsonurl.AbstractParseTest;
+import org.jsonurl.BigMathProvider.BigIntegerOverflow;
+import org.jsonurl.ValueFactory;
+
 
 /**
  * Abstract base class for parser tests.
@@ -118,5 +122,35 @@ abstract class JsonpParseTest extends AbstractParseTest<
     @Override
     protected boolean getEmptyComposite(String key, JsonObject value) {
         return factory.isEmpty(value.get(key));
+    }
+
+    @Override
+    protected Number getNumberValue(JsonValue value) {
+        return value instanceof JsonNumber ? ((JsonNumber)value).numberValue() : null;
+    }
+
+    @Override
+    protected ValueFactory<
+            JsonValue,
+            JsonStructure,
+            JsonArrayBuilder,
+            JsonArray,
+            JsonObjectBuilder,
+            JsonObject,
+            JsonValue,
+            JsonNumber,
+            JsonValue,
+            JsonString> newBigMathFactory(
+                MathContext mc,
+                String boundNeg,
+                String boundPos,
+                BigIntegerOverflow over) {
+        return new JsonpValueFactory.BigMathFactory(
+            mc, boundNeg, boundPos, over);
+    }
+
+    @Override
+    protected boolean isBigIntegerOverflowInfinityOK() {
+        return false;
     }
 }

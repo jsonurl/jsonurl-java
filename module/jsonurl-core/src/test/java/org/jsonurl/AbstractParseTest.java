@@ -1,5 +1,3 @@
-package org.jsonurl;
-
 /*
  * Copyright 2019 David MacCormack
  * 
@@ -17,6 +15,14 @@ package org.jsonurl;
  * under the License.
  */
 
+package org.jsonurl;
+
+import static org.jsonurl.BigMathProvider.BIG_INTEGER128_BOUNDARY_NEG;
+import static org.jsonurl.BigMathProvider.BIG_INTEGER128_BOUNDARY_POS;
+import static org.jsonurl.NumberBuilderTest.TAG_BIG;
+import static org.jsonurl.NumberBuilderTest.TAG_DOUBLE;
+import static org.jsonurl.NumberBuilderTest.TAG_LONG;
+import static org.jsonurl.NumberBuilderTest.TAG_NUMBER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -24,8 +30,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.MathContext;
 import java.net.URLEncoder;
 import java.util.EnumSet;
+import org.jsonurl.BigMathProvider.BigIntegerOverflow;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -56,6 +66,24 @@ public abstract class AbstractParseTest<
         N extends V,
         S extends V> {
 
+    /** tag annotation. */
+    private static final String TAG_ARRAY = "array";
+
+    /** tag annotation. */
+    private static final String TAG_BOOLEAN = "boolean";
+
+    /** tag annotation. */
+    private static final String TAG_EXCEPTION = "exception";
+
+    /** tag annotation. */
+    private static final String TAG_OBJECT = "object";
+
+    /** tag annotation. */
+    private static final String TAG_PARSE = "parse";
+    
+    /** tag annotation. */
+    private static final String TAG_STRING = "string";
+
     protected ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory;
     
     private static final String PREFIX1 = "prefix 1";
@@ -64,6 +92,11 @@ public abstract class AbstractParseTest<
     private static final String SUFFIX2 = "number two suffix";
 
     private Parser<V,C,ABT,A,JBT,J,B,M,N,S> newParser() {
+        return new Parser<>(factory);
+    }
+    
+    private Parser<V,C,ABT,A,JBT,J,B,M,N,S> newParser(
+            ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
         return new Parser<>(factory);
     }
 
@@ -121,6 +154,15 @@ public abstract class AbstractParseTest<
             assertEquals(in.length(), JsonUrl.parseLiteralLength(in));
         }
     }
+    
+    private V parse(String s) {
+        StringBuilder sb = new StringBuilder(4096)
+            .append(PREFIX1)
+            .append(s)
+            .append(SUFFIX1);
+
+        return newParser().parse(sb.toString(), PREFIX1.length(), s.length());
+    }
 
     @SuppressWarnings("unchecked")
     private A parseArray(String jsonUrlText) {
@@ -144,9 +186,9 @@ public abstract class AbstractParseTest<
     }
 
     @ParameterizedTest
-    @Tag("parse")
-    @Tag("long")
-    @Tag("number")
+    @Tag(TAG_PARSE)
+    @Tag(TAG_LONG)
+    @Tag(TAG_NUMBER)
     @CsvSource({
         //
         // INPUT,OUTPUT
@@ -168,9 +210,9 @@ public abstract class AbstractParseTest<
     }
 
     @ParameterizedTest
-    @Tag("parse")
-    @Tag("long")
-    @Tag("number")
+    @Tag(TAG_PARSE)
+    @Tag(TAG_LONG)
+    @Tag(TAG_NUMBER)
     @ValueSource(strings = {
         "0", "-1", "123456", "-123456", "12345678905432132",
     })
@@ -188,9 +230,9 @@ public abstract class AbstractParseTest<
     }
 
     @ParameterizedTest
-    @Tag("parse")
-    @Tag("double")
-    @Tag("number")
+    @Tag(TAG_PARSE)
+    @Tag(TAG_DOUBLE)
+    @Tag(TAG_NUMBER)
     @ValueSource(strings = {
         "0.1", "-1.1",
         "1e-2", "-2e-1",
@@ -234,8 +276,8 @@ public abstract class AbstractParseTest<
     }
 
     @ParameterizedTest
-    @Tag("parse")
-    @Tag("boolean")
+    @Tag(TAG_PARSE)
+    @Tag(TAG_BOOLEAN)
     @ValueSource(strings = { "true", "false" })
     void testBoolean(String s) throws ParseException, IOException {
         B factoryValue = getFactoryBoolean(s);
@@ -284,12 +326,14 @@ public abstract class AbstractParseTest<
             s, factoryValue, false);
 
         String txt = new JsonUrlStringBuilder().addEmptyComposite().build();
-        assertEquals(String.valueOf(s), txt);
+        assertEquals(s, txt);
+
+        assertTrue(factory.isEmpty(newParser().parse(s)));
     }
 
     @ParameterizedTest
-    @Tag("parse")
-    @Tag("string")
+    @Tag(TAG_PARSE)
+    @Tag(TAG_STRING)
     @CsvSource({
         //
         // INPUT,OUTPUT
@@ -328,9 +372,8 @@ public abstract class AbstractParseTest<
     }
 
     @ParameterizedTest
-    @Tag("parse")
-    @Tag("string")
-    @Tag("autostring")
+    @Tag(TAG_PARSE)
+    @Tag(TAG_STRING)
     @ValueSource(strings = {
             "hello",
             "Bob's House",
@@ -356,9 +399,8 @@ public abstract class AbstractParseTest<
     }
     
     @ParameterizedTest
-    @Tag("parse")
-    @Tag("string")
-    @Tag("autostring")
+    @Tag(TAG_PARSE)
+    @Tag(TAG_STRING)
     @ValueSource(strings = {
             "hello",
             "t", "tr", "tru", "True", "tRue", "trUe", "truE",
@@ -390,11 +432,6 @@ public abstract class AbstractParseTest<
             .replace(",", "%2C")
             .replace(":", "%3A");
     }
-    
-    @Test
-    void testIsEmpty() {
-        assertTrue(factory.isEmpty(newParser().parse("()")));
-    }
 
     @Test
     void testSetterAndGetter() {
@@ -410,7 +447,8 @@ public abstract class AbstractParseTest<
     }
 
     @ParameterizedTest
-    @Tag("exception")
+    @Tag(TAG_PARSE)
+    @Tag(TAG_EXCEPTION)
     @ValueSource(strings = {
         "",
         "%2G",
@@ -426,7 +464,7 @@ public abstract class AbstractParseTest<
         "(a:'b'a)",
         "(a:b,'c'd)",
     })
-    void testSyntaxException(String s) throws ParseException {
+    void testExceptionSyntax(String s) throws ParseException {
         Parser<?, ?, ?, ?, ?, ?, ?, ?, ?, ?> p = newParser();
         assertThrows(
             SyntaxException.class,
@@ -434,14 +472,14 @@ public abstract class AbstractParseTest<
     }
     
     @ParameterizedTest
-    @Tag("parse")
-    @Tag("exception")
+    @Tag(TAG_PARSE)
+    @Tag(TAG_EXCEPTION)
     @CsvSource({
         "((1)), STRING",
         "(), STRING",
         "'(1,2)', STRING",
     })
-    void testSyntaxException2(String text, String type) throws ParseException {
+    void testExceptionSyntax2(String text, String type) throws ParseException {
         Parser<?, ?, ?, ?, ?, ?, ?, ?, ?, ?> p = newParser();
         ValueType valueType = ValueType.valueOf(type);
         assertThrows(
@@ -450,12 +488,12 @@ public abstract class AbstractParseTest<
     }
 
     @ParameterizedTest
-    @Tag("parse")
-    @Tag("exception")
+    @Tag(TAG_PARSE)
+    @Tag(TAG_EXCEPTION)
     @ValueSource(strings = {
         "%FA%80%80%80%80", //0x200000
     })
-    void testUtf8EncodingException(String text) throws ParseException {
+    void testExceptionUtf8Encoding(String text) throws ParseException {
         Parser<?, ?, ?, ?, ?, ?, ?, ?, ?, ?> p = newParser();
         assertThrows(
             IllegalArgumentException.class,
@@ -463,42 +501,51 @@ public abstract class AbstractParseTest<
     }
 
     @Test
-    @Tag("parse")
-    @Tag("exception")
-    void testException() throws ParseException {
-        {
-            Parser<?,?,?,?,?,?,?,?,?,?> p = newParser();
-            p.setMaxParseChars(2);
-            
-            assertThrows(
-                LimitException.class,
-                () -> {
-                    p.parse("true");
-                });
-        }
+    @Tag(TAG_PARSE)
+    @Tag(TAG_EXCEPTION)
+    void testExceptionMaxParseChars() throws ParseException {
+        Parser<?,?,?,?,?,?,?,?,?,?> p = newParser();
+        p.setMaxParseChars(2);
+        
+        assertThrows(
+            LimitException.class,
+            () -> {
+                p.parse("true");
+            });
+    }
+    
+    @Test
+    @Tag(TAG_PARSE)
+    @Tag(TAG_EXCEPTION)
+    void testExceptionMaxParseDepth() throws ParseException {
+        Parser<?,?,?,?,?,?,?,?,?,?> p = newParser();
+        p.setMaxParseDepth(2);
 
-        {
-            Parser<?,?,?,?,?,?,?,?,?,?> p = newParser();
-            p.setMaxParseDepth(2);
+        assertThrows(
+            LimitException.class,
+            () -> {
+                p.parse("(((1)))");
+            });
+    }
 
-            assertThrows(
-                LimitException.class,
-                () -> {
-                    p.parse("(((1)))");
-                });
-        }
+    @Test
+    @Tag(TAG_PARSE)
+    @Tag(TAG_EXCEPTION)
+    void testExceptionMaxParseValues() throws ParseException {
+        Parser<?,?,?,?,?,?,?,?,?,?> p = newParser();
+        p.setMaxParseValues(2);
 
-        {
-            Parser<?,?,?,?,?,?,?,?,?,?> p = newParser();
-            p.setMaxParseValues(2);
+        assertThrows(
+            LimitException.class,
+            () -> {
+                p.parse("(1,2,3)");
+            });
+    }
 
-            assertThrows(
-                LimitException.class,
-                () -> {
-                    p.parse("(1,2,3)");
-                });
-        }
-
+    @Test
+    @Tag(TAG_PARSE)
+    @Tag(TAG_EXCEPTION)
+    void testExceptionNoText() throws ParseException {
         ParseException pe = null;
         try {
             newParser().parse("");
@@ -516,7 +563,8 @@ public abstract class AbstractParseTest<
     }
 
     @ParameterizedTest
-    @Tag("parse")
+    @Tag(TAG_PARSE)
+    @Tag(TAG_ARRAY)
     @ValueSource(strings = {
         "(1)",
     })
@@ -541,7 +589,8 @@ public abstract class AbstractParseTest<
     }
     
     @ParameterizedTest
-    @Tag("parse")
+    @Tag(TAG_PARSE)
+    @Tag(TAG_OBJECT)
     @ValueSource(strings = {
         "(a:b)",
     })
@@ -565,8 +614,9 @@ public abstract class AbstractParseTest<
     }
 
     @ParameterizedTest
-    @Tag("parse")
-    @Tag("exception")
+    @Tag(TAG_PARSE)
+    @Tag(TAG_OBJECT)
+    @Tag(TAG_EXCEPTION)
     @ValueSource(strings = {
             "hello",
             "1", "2.3",
@@ -574,7 +624,7 @@ public abstract class AbstractParseTest<
             "null",
             "(1)",
     })
-    void testObjectException(String text) throws ParseException {
+    void testExceptionObject(String text) throws ParseException {
         Parser<?,?,?,?,?,?,?,?,?,?> p = newParser();
 
         assertThrows(
@@ -583,8 +633,9 @@ public abstract class AbstractParseTest<
     }
     
     @ParameterizedTest
-    @Tag("parse")
-    @Tag("exception")
+    @Tag(TAG_PARSE)
+    @Tag(TAG_ARRAY)
+    @Tag(TAG_EXCEPTION)
     @ValueSource(strings = {
             "hello",
             "1", "2.3",
@@ -592,12 +643,144 @@ public abstract class AbstractParseTest<
             "null",
             "(a:b)",
     })
-    void testArrayException(String text) throws ParseException {
+    void testExceptionArray(String text) throws ParseException {
         Parser<?,?,?,?,?,?,?,?,?,?> p = newParser();
 
         assertThrows(
             SyntaxException.class,
             () -> p.parseArray(text));
+    }
+    
+    @ParameterizedTest
+    @Tag(TAG_PARSE)
+    @Tag(TAG_BIG)
+    @Tag(TAG_NUMBER)
+    @ValueSource(strings = {
+        //
+        // https://mathshistory.st-andrews.ac.uk/HistTopics/2000_places/
+        // https://www.piday.org/million/
+        //
+        "3.14159265358979323846264338327950288419716939937510582097494459230781"
+        + "64062862089986280348253421170679821480865132823066470938446095505822"
+        + "31725359408128481117450284102701938521105559644622948954930381964428"
+        + "81097566593344612847564823378678316527120190914564856692346034861045"
+        + "43266482133936072602491412737245870066063155881748815209209628292540"
+        + "91715364367892590360011330530548820466521384146951941511609433057270"
+        + "36575959195309218611738193261179310511854807446237996274956735188575"
+        + "2724891227938183011949"
+    })
+    void testMathContext(String s) {
+        if (factory instanceof BigMathProvider) {
+            MathContext mc = ((BigMathProvider)factory).getMathContext();
+
+            if (mc == null) {
+                mc = MathContext.UNLIMITED;
+            }
+
+            BigDecimal expect = new BigDecimal(s, mc);
+            V parseResult = parse(s);
+
+            assertEquals(expect, getNumberValue(parseResult));
+        }
+    }
+    
+    void testBigInteger(String s, MathContext mc, BigIntegerOverflow over) {
+        if (over == BigIntegerOverflow.INFINITY
+                && !this.isBigIntegerOverflowInfinityOK()) {
+            //
+            // this is a hack to handle the fact that the reference
+            // implementation of JSR-374 doesn't support +Inf/-Inf.
+            //
+            return;
+        }
+        ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory = newBigMathFactory(
+            MathContext.DECIMAL128,
+            BIG_INTEGER128_BOUNDARY_NEG,
+            BIG_INTEGER128_BOUNDARY_POS,
+            over);
+        BigInteger bi = new BigInteger(s);
+        
+        if (bi.bitLength() > 128 && over == null) {
+            assertThrows(LimitException.class,
+                () -> newParser(factory).parse(s));
+
+        } else {
+            V parseResult = newParser(factory).parse(s);
+            Number n = getNumberValue(parseResult);
+
+            if (bi.bitLength() > 128) {
+                switch (over) {
+                case BIG_DECIMAL:
+                    assertEquals(
+                        new BigDecimal(s, MathContext.DECIMAL128),
+                        n);
+                    break;
+                case DOUBLE:
+                    assertEquals(
+                        Double.valueOf(s).doubleValue(),
+                        n.doubleValue());
+                    break;
+                case INFINITY:
+                    switch (bi.signum()) {
+                    case -1:
+                        assertEquals(BigMathProvider.NEGATIVE_INFINITY,
+                            n);
+                        break;
+                    default:
+                        assertEquals(BigMathProvider.POSITIVE_INFINITY,
+                            n);
+                        break;
+                    }
+                    break;
+                }
+            } else if (bi.bitLength() > 64) {
+                if (n instanceof BigInteger) {
+                    assertEquals(bi, (BigInteger)n);
+                } else {
+                    assertEquals(new BigDecimal(bi), n);
+                }
+            } else {
+                //
+                // some gymnastics to handle JSR-374
+                //
+                assertEquals(
+                    Long.valueOf(s).longValue(),
+                    n.longValue());
+            }
+        }
+    }
+    
+    void testBigInteger(String s, MathContext mc) {
+        testBigInteger(s, mc, null);
+
+        for (BigIntegerOverflow over : BigIntegerOverflow.values()) {
+            testBigInteger(s, mc, over);
+        } 
+    }
+    
+    @ParameterizedTest
+    @Tag(TAG_PARSE)
+    @Tag(TAG_BIG)
+    @Tag(TAG_NUMBER)
+    @ValueSource(strings = {
+        "1",
+        "-1",
+        Long.MAX_VALUE + "",
+        Long.MIN_VALUE + "",
+        Long.MAX_VALUE + "0",
+        Long.MIN_VALUE + "0",
+        '-' + BigMathProvider.BIG_INTEGER128_BOUNDARY_NEG,
+        BigMathProvider.BIG_INTEGER128_BOUNDARY_POS,
+        BigMathProvider.BIG_INTEGER128_BOUNDARY_POS + '0',
+        '-' + BigMathProvider.BIG_INTEGER128_BOUNDARY_NEG + '0',
+    })
+    void testBigInteger(String s) {
+        if (!(factory instanceof BigMathProvider)) {
+            return;
+        }
+
+        testBigInteger(s, null);
+        testBigInteger(s, MathContext.DECIMAL128);
     }
 
     // CHECKSTYLE:OFF
@@ -611,9 +794,20 @@ public abstract class AbstractParseTest<
     protected abstract J getObject(int index, A value);
     protected abstract M getNumber(int index, A value);
     protected abstract M getNumber(String key, J value);
+    protected abstract Number getNumberValue(V value);
+    protected abstract ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> newBigMathFactory(
+        MathContext mc,
+        String boundNeg,
+        String boundPos,
+        BigIntegerOverflow over);
+    
+    protected boolean isBigIntegerOverflowInfinityOK() {
+        return true;
+    }
     // CHECKSTYLE:ON
 
     @Test
+    @Tag(TAG_PARSE)
     void testJsonUrlText1() throws ParseException {
         J parseResult = (J)parseObject(
                 "(true:true,false:false,null:null,empty:(),"
@@ -654,6 +848,7 @@ public abstract class AbstractParseTest<
     }
 
     @Test
+    @Tag(TAG_PARSE)
     void testJsonUrlText2() throws ParseException {
         A parseResult = parseArray("(1)");
         
@@ -663,6 +858,7 @@ public abstract class AbstractParseTest<
     }
     
     @Test
+    @Tag(TAG_PARSE)
     void testJsonUrlText3() throws ParseException {
         A parseResult = parseArray("(1,(2))");
 
@@ -672,6 +868,7 @@ public abstract class AbstractParseTest<
     }
 
     @Test
+    @Tag(TAG_PARSE)
     void testJsonUrlText4() throws ParseException {
         A parseResult = parseArray("(1,(a:2),3)");
 
@@ -681,6 +878,7 @@ public abstract class AbstractParseTest<
     }
 
     @Test
+    @Tag(TAG_PARSE)
     void testJsonUrlText5() throws ParseException {
         J parseResult = parseObject("(age:64,name:(first:Fred))");
 
@@ -690,6 +888,7 @@ public abstract class AbstractParseTest<
     }
     
     @Test
+    @Tag(TAG_PARSE)
     @DisplayName("testJsonUrlText6: Deeply nested array: ((((1))))")
     void testJsonUrlText6() throws ParseException {
         A parseResult = parseArray("((((1))))");

@@ -32,6 +32,10 @@ public class LimitException extends ParseException {
     /** ERR_MSG_LIMIT_MAX_PARSE_DEPTH. */
     static final String ERR_MSG_LIMIT_MAX_PARSE_DEPTH =
             "input nesting is too deep";
+    
+    /** ERR_MSG_LIMIT_INTEGER. */
+    static final String ERR_MSG_LIMIT_INTEGER =
+            "integer overflow";
 
     /**
      * serialVersionUID.

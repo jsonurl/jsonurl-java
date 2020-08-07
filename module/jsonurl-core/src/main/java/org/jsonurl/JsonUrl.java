@@ -51,6 +51,21 @@ public final class JsonUrl {
       
         private Parse() {
         }
+        
+        static final NumberBuilder newNumberBuilder(
+            ValueFactory<?,?,?,?,?,?,?,?,?,?> factory) {
+            
+            final NumberBuilder ret = new NumberBuilder();
+
+            if (factory instanceof BigMathProvider) {
+                //
+                // use the factory as a BigMathProvider
+                //
+                ret.setMathContextProvider((BigMathProvider)factory);
+            }
+
+            return ret;
+        }
 
         private static final int percentDecode(
                 CharSequence s,
@@ -255,7 +270,12 @@ public final class JsonUrl {
             }
             
             if (num == null) {
-                num = new NumberBuilder();
+                //
+                // This will never build a Number (e.g. instance of BigInteger
+                // or BigDecimal), it's only used to parse the text, so it is
+                // safe to pass in null for the factory.
+                //
+                num = newNumberBuilder(null);
 
             } else {
                 num.reset();
@@ -302,7 +322,7 @@ public final class JsonUrl {
             }
 
             if (num == null) {
-                num = new NumberBuilder();
+                num = newNumberBuilder(factory);
 
             } else {
                 num.reset();
