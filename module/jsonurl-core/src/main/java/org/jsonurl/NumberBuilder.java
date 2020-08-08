@@ -700,7 +700,12 @@ public class NumberBuilder implements NumberText { // NOPMD
         case DOUBLE:
             return Double.valueOf(s);
         case BIG_DECIMAL:
-            MathContext mc = mcp == null ? null : mcp.getMathContext();
+            //
+            // I don't have to check for mcp == null here as the
+            // check above ensures that, if it's null, I'll throw
+            // an exception before I get here.
+            //
+            MathContext mc = mcp.getMathContext();
             return mc == null ? new BigDecimal(s) : new BigDecimal(s, mc);
         case INFINITY:
             return infinity;
