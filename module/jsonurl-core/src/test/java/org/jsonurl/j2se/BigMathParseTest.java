@@ -1,5 +1,3 @@
-package org.jsonurl.j2se;
-
 /*
  * Copyright 2019 David MacCormack
  * 
@@ -17,19 +15,57 @@ package org.jsonurl.j2se;
  * under the License.
  */
 
+package org.jsonurl.j2se;
+
 /**
- * Unit test using JavaValueFactory.BIGMATH
+ * Unit test using JavaValueFactory.BigMathFactory.
  *
  * @author jsonurl.org
  * @author David MacCormack
  * @since 2019-09-01
  */
-public class BigMathParseTest extends JavaValueFactoryParseTest {
+class BigMathParseTest extends JavaValueFactoryParseTest {
+
+    /**
+     * Unit test using JavaValueFactory.BIGMATH32.
+     */
+    static final class Test32 extends JavaValueFactoryParseTest {
+        /**
+         * Create a new Test32.
+         */
+        Test32() {
+            super(JavaValueFactory.BIGMATH32);
+        }
+    }
+
+    /**
+     * Unit test using JavaValueFactory.BIGMATH64.
+     */
+    static final class Test64 extends JavaValueFactoryParseTest {
+        /**
+         * Create a new Test64.
+         */
+        Test64() {
+            super(JavaValueFactory.BIGMATH64);
+        }
+    }
+
+    /**
+     * Unit test using JavaValueFactory.BIGMATH128.
+     */
+    static final class Test128 extends JavaValueFactoryParseTest {
+        /**
+         * Create a new Test128.
+         */
+        Test128() {
+            super(JavaValueFactory.BIGMATH128);
+        }
+    }
 
     /**
      * Create a new BigMathParseTest.
      */
-    public BigMathParseTest() {
-        super(JavaValueFactory.BIGMATH);
+    BigMathParseTest() {
+        super(new JavaValueFactory.BigMathFactory(null, null, null, null));
     }
 }

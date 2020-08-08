@@ -4,12 +4,13 @@
  * 
  * <p>The primary entry point for most use cases is
  * {@link org.jsonurl.jsonp.JsonUrlParser JsonUrlParser}, which parses
- * JSON&#x2192;URL text into instances of {@link javax.json.JsonObject}
- * and {@link javax.json.JsonArray}.
+ * JSON&#x2192;URL text into instances of {@link javax.json.JsonObject
+ * JsonObject} and {@link javax.json.JsonArray JsonArray}.
  *
  * <p>{@link org.jsonurl.jsonp.JsonUrlWriter JsonUrlWriter} has static methods
  * for creating JSON&#x2192;URL text from instances of
- * {@link javax.json.JsonObject} and {@link javax.json.JsonArray}.
+ * {@link javax.json.JsonObject JsonObject} and
+ * {@link javax.json.JsonArray JsonArray}.
  *
  * @author jsonurl.org
  * @author David MacCormack

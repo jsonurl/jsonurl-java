@@ -91,6 +91,14 @@ public interface NumberText {
     public Exponent getExponentType();
 
     /**
+     * Test if this text holds a negative number.
+     * @return true if the number is negative
+     */
+    default boolean isNegative() {
+        return this.getIntegerStartIndex() > this.getStartIndex();
+    }
+
+    /**
      * Test if this NumberText has a fractional part.
      */
     default boolean hasFractionalPart() {
@@ -105,9 +113,12 @@ public interface NumberText {
     }
     
     /**
-     * Test if this NumberText is an integer.
+     * Test if this NumberText is a non-fractional number.
+     * @return hasIntegerPart()
+     *     &amp;&amp; !hasFractionalPart()
+     *     &amp;&amp; getExponentType() != Exponent.NEGATIVE_VALUE;
      */
-    default boolean isInteger() {
+    default boolean isNonFractional() {
         return hasIntegerPart()
             && !hasFractionalPart()
             && getExponentType() != Exponent.NEGATIVE_VALUE;

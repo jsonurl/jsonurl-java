@@ -22,14 +22,17 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 
 /**
- * JavaValueParserTest.
+ * ParserTest.
  */
-@SuppressWarnings("PMD")
-class JavaValueParserTest {
+class ParserTest {
 
     @Test
     void testConstruct() {
-        assertNotNull(new JsonUrlParser());
-        assertNotNull(new JsonUrlParser(JavaValueFactory.PRIMITIVE));
+        assertNotNull(new JsonUrlParser(),
+            "new JsonUrlParser");
+
+        assertNotNull(
+            new JsonUrlParser(JavaValueFactory.PRIMITIVE),
+            "new JsonUrlParser");
     }
 }

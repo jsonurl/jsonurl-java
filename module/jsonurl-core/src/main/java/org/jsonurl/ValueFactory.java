@@ -52,7 +52,7 @@ public interface ValueFactory<
         M extends V,
         N extends V,
         S extends V> {
-    
+
     /**
      * A ValueFactory with transparent array and object builders.
      *
@@ -92,6 +92,35 @@ public interface ValueFactory<
         default J newObject(J builder) {
             return builder;
         }
+    }
+    
+    /**
+     * A ValueFactory that also implements the BigMathProvider interface.
+     * @author djm
+     *
+     * @param <V> value type (any JSON value)
+     * @param <C> composite type (array or object)
+     * @param <ABT> array builder type
+     * @param <A> array type
+     * @param <JBT> object builder type
+     * @param <J> object type
+     * @param <B> boolean type
+     * @param <M> number type
+     * @param <N> null type
+     * @param <S> string type
+     */
+    public interface BigMathFactory<
+        V,
+        C extends V,
+        ABT,
+        A extends C,
+        JBT,
+        J extends C,
+        B extends V,
+        M extends V,
+        N extends V,
+        S extends V> extends ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S>, BigMathProvider {
+        
     }
 
     /**

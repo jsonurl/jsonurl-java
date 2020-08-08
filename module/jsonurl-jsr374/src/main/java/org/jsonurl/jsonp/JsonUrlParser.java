@@ -50,13 +50,18 @@ public class JsonUrlParser extends Parser<
      * Instantiate a new Parser.
      */
     public JsonUrlParser() {
-        this(JsonpValueFactory.PRIMITIVE);
+        this(JsonpValueFactory.BIGMATH64);
     }
 
     /**
      * Instantiate a new Parser.
      *
      * @param factory a valid JsonOrgValueFactory
+     * @see JsonpValueFactory#PRIMITIVE
+     * @see JsonpValueFactory#DOUBLE
+     * @see JsonpValueFactory#BIGMATH32
+     * @see JsonpValueFactory#BIGMATH64
+     * @see JsonpValueFactory#BIGMATH128
      */
     public JsonUrlParser(JsonpValueFactory factory) {
         super(factory);

@@ -17,9 +17,12 @@ package org.jsonurl.jsonorg;
  * under the License.
  */
 
+import java.math.MathContext;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsonurl.AbstractParseTest;
+import org.jsonurl.BigMathProvider.BigIntegerOverflow;
+import org.jsonurl.ValueFactory;
 
 /**
  * Abstract base class for parser tests.
@@ -106,4 +109,31 @@ abstract class JsonOrgParseTest extends AbstractParseTest<
     protected boolean getEmptyComposite(String key, JSONObject value) {
         return factory.isEmpty(value.get(key));
     }
+
+    @Override
+    protected Number getNumberValue(Object value) {
+        return value instanceof Number ? (Number)value : null;
+    }
+
+    @Override
+    protected ValueFactory<
+            Object,
+            Object,
+            JSONArray,
+            JSONArray,
+            JSONObject,
+            JSONObject,
+            Boolean,
+            Number,
+            Object,
+            String> newBigMathFactory(
+                MathContext mc,
+                String boundNeg,
+                String boundPos,
+                BigIntegerOverflow over) {
+
+        return new JsonOrgValueFactory.BigMathFactory(
+            mc, boundNeg, boundPos, over);
+    }
+
 }

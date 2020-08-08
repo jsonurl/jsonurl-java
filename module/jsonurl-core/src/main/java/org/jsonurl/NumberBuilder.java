@@ -17,11 +17,16 @@ package org.jsonurl;
  * under the License.
  */
 
+import static org.jsonurl.BigMathProvider.NEGATIVE_INFINITY;
+import static org.jsonurl.BigMathProvider.POSITIVE_INFINITY;
 import static org.jsonurl.CharUtil.digits;
 import static org.jsonurl.CharUtil.isDigit;
+import static org.jsonurl.LimitException.ERR_MSG_LIMIT_INTEGER;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
+import org.jsonurl.BigMathProvider.BigIntegerOverflow;
 
 /**
  * A NumberBuilder implements the builder pattern for JSON&#x2192;URL number literals.
@@ -78,7 +83,7 @@ import java.math.BigInteger;
  * <pre>
  * boolean b = NumberBuilder.{@link #isNumber() isNumber("1234")};
  * boolean b = NumberBuilder.{@link #isNumber() isNumber("abcd")};
- * boolean b = NumberBuilder.{@link #isInteger() isInteger("1234.5")};
+ * boolean b = NumberBuilder.{@link #isNonFractional() isInteger("1234.5")};
  * </pre>
  *
  * @author jsonurl.org
@@ -88,10 +93,22 @@ import java.math.BigInteger;
 public class NumberBuilder implements NumberText { // NOPMD
 
     /**
-     * The maximum number of digits I consider when parsing a
-     * {@link java.lang.Long Long}. 
+     * The negative boundary for a long.
      */
-    private static final int LONG_MAX_DIGITS = 18;
+    private static final String LONG_BOUNDARY_NEG =
+        String.valueOf(Long.MIN_VALUE).substring(1);
+
+    /**
+     * The positive boundary for a long.
+     */
+    private static final String LONG_BOUNDARY_POS =
+        String.valueOf(Long.MAX_VALUE);
+
+    /**
+     * The maximum number of digits I consider when parsing a Long. 
+     */
+    private static final int LONG_MAX_DIGITS =
+        LONG_BOUNDARY_POS.length();
     
     /**
      * Lookup table for exponent values.
@@ -173,6 +190,11 @@ public class NumberBuilder implements NumberText { // NOPMD
      * {@link #parse(CharSequence, int, int)}.
      */
     private int expIndexStop = -1;
+    
+    /**
+     * The user supplied math context for use with BigDecimals.
+     */
+    private BigMathProvider mcp;
 
     /**
      * Create a new NumberBuilder.
@@ -259,6 +281,7 @@ public class NumberBuilder implements NumberText { // NOPMD
     /**
      * Calculate exponent string.
      */
+    // "PMD.CyclomaticComplexity" - but PMD compains about dup literals
     @SuppressWarnings("PMD")
     private static final NumberText.Exponent getExponentType(
             CharSequence s,
@@ -272,7 +295,8 @@ public class NumberBuilder implements NumberText { // NOPMD
         switch (s.charAt(start)) {
         case 'e':
         case 'E':
-            if (++start == stop) {
+            start++;
+            if (start == stop) {
                 return NumberText.Exponent.NONE;
             }
             break;
@@ -285,14 +309,16 @@ public class NumberBuilder implements NumberText { // NOPMD
 
         switch (c) {
         case '+':
-            if (++start == stop) {
+            start++;
+            if (start == stop) {
                 return NumberText.Exponent.NONE;
             }
             c = s.charAt(start);
             ret = NumberText.Exponent.POSITIVE_VALUE;
             break;
         case '-':
-            if (++start == stop) {
+            start++;
+            if (start == stop) {
                 return NumberText.Exponent.NONE;
             }
             c = s.charAt(start);
@@ -324,7 +350,9 @@ public class NumberBuilder implements NumberText { // NOPMD
         char c = s.charAt(start);
 
         if (c == '-') {
-            if (++pos == stop) {
+            pos++;
+
+            if (pos == stop) {
                 return false;
             }
 
@@ -390,7 +418,7 @@ public class NumberBuilder implements NumberText { // NOPMD
     /**
      * Determine if the given CharSequence is a valid JSON&#x2192;URL number literal.
      *
-     *<p>Convenience for {@link #isNumber(CharSequence, int, int, boolean)
+     * <p>Convenience for {@link #isNumber(CharSequence, int, int, boolean)
      * isNumber(s, 0, s.length(), false)}.
      */
     public static boolean isNumber(CharSequence s) {
@@ -400,11 +428,11 @@ public class NumberBuilder implements NumberText { // NOPMD
     /**
      * Determine if the given CharSequence is a valid JSON&#x2192;URL number literal.
      *
-     *<p>Convenience for {@link #isNumber(CharSequence, int, int, boolean)
+     * <p>Convenience for {@link #isNumber(CharSequence, int, int, boolean)
      * isNumber(s, 0, s.length(), isInteger)}.
      */
-    public static boolean isNumber(CharSequence s, boolean isInteger) {
-        return isNumber(s, 0, s.length(), isInteger);
+    public static boolean isNumber(CharSequence s, boolean isNonFractional) {
+        return isNumber(s, 0, s.length(), isNonFractional);
     }
     
     /**
@@ -429,19 +457,24 @@ public class NumberBuilder implements NumberText { // NOPMD
      * @param stop an index
      * @return true if the CharSequence is a JSON&#x2192;URL number
      */
-    @SuppressWarnings("PMD")
+    @SuppressWarnings({
+        "PMD.CyclomaticComplexity",
+        "PMD.DataflowAnomalyAnalysis",
+        "PMD.NPathComplexity"})
     public static boolean isNumber(
             CharSequence s,
             int start,
             int stop,
-            boolean isInteger) {
+            boolean isNonFractional) {
 
         int pos = start;
 
         char c = s.charAt(start);
 
         if (c == '-') {
-            if (++pos == stop) {
+            pos++;
+
+            if (pos == stop) {
                 return false;
             }
 
@@ -468,20 +501,20 @@ public class NumberBuilder implements NumberText { // NOPMD
         }
 
         if (hasFract(pos, stop, s)) {
-            if (isInteger) {
+            if (isNonFractional) {
                 return false;
             }
             pos = digits(s, pos + 1, stop);
         }
 
-        boolean isNegExp = false;
-
-        switch (getExponentType(s, pos, stop)) {
+        switch (getExponentType(s, pos, stop)) { // NOPMD - fall-through
         case JUST_VALUE:
             pos = digits(s, pos + 1, stop);
             break;
         case NEGATIVE_VALUE:
-            isNegExp = true;
+            if (isNonFractional) {
+                return false;
+            }
             // fall-through
         case POSITIVE_VALUE:
             pos = digits(s, pos + 2, stop);
@@ -490,7 +523,7 @@ public class NumberBuilder implements NumberText { // NOPMD
             break;
         }
 
-        return pos == stop && (!isInteger || !isNegExp); 
+        return pos == stop; 
     }
 
     /**
@@ -509,7 +542,7 @@ public class NumberBuilder implements NumberText { // NOPMD
      *<p>Convenience for {@link #isNumber(CharSequence, int, int, boolean)
      * isNumber(s, 0, s.length(), true)}.
      */
-    public static boolean isInteger(CharSequence s) {
+    public static boolean isNonFractional(CharSequence s) {
         return isNumber(s, 0, s.length(), true);
     }
 
@@ -519,7 +552,7 @@ public class NumberBuilder implements NumberText { // NOPMD
      *<p>Convenience for {@link #isNumber(CharSequence, int, int, boolean)
      * isNumber(s, start, stop, true)}.
      */
-    public static boolean isInteger(CharSequence s, int start, int stop) {
+    public static boolean isNonFractional(CharSequence s, int start, int stop) {
         return isNumber(s, start, stop, true);
     }
 
@@ -534,60 +567,85 @@ public class NumberBuilder implements NumberText { // NOPMD
      * Parse the given NumberText as a J2SE double.
      */
     public static final double toDouble(NumberText t) {
-        char[] s = toChars(
+        char[] chars = toChars(
                 t.getText(),
                 t.getStartIndex(),
                 t.getStopIndex());
 
-        return Double.parseDouble(new String(s));
+        return Double.parseDouble(new String(chars));
     }
 
     /**
      * Parse the given NumberText as a {@link java.math.BigDecimal}.
      */
-    public static final BigDecimal toBigDecimal(NumberText t) {
+    public static final BigDecimal toBigDecimal(
+            NumberText t,
+            BigMathProvider mcp) {
+
         char[] s = toChars(
                 t.getText(),
                 t.getStartIndex(),
                 t.getStopIndex());
 
-        return new BigDecimal(new String(s));
+        MathContext mc = mcp == null ? null : mcp.getMathContext();
+        return mc == null ? new BigDecimal(s) : new BigDecimal(s, mc);
     }
 
     /**
      * Parse the given NumberText as a {@link java.math.BigDecimal}.
      */
     public BigDecimal toBigDecimal() {
-        return toBigDecimal(this);
+        return toBigDecimal(this, mcp);
     }
 
     /**
      * Build a {@link java.lang.Number Number} from the given NumberText.
-     *
-     * <p>This simply calls {@link #build(NumberText, boolean)
-     * build(this, primitiveOnly)}.
+     * Convenience for {@link #build(NumberText, boolean, BigMathProvider)
+     * build(this, primitiveOnly, mcp)}.
      */
     public Number build(boolean primitiveOnly) {
-        return build(this, primitiveOnly);
+        return build(this, primitiveOnly, mcp);
+    }
+
+    /**
+     * Build a {@link java.lang.Number Number} from the given NumberText.
+     * Convenience for {@link #build(NumberText, boolean, BigMathProvider)
+     * build(t, false, mcp)}.
+     */
+    public static final Number build(
+            NumberText t,
+            BigMathProvider mcp) {
+        return build(t, false, mcp);
+    }
+
+    /**
+     * Build a {@link java.lang.Number Number} from the given NumberText.
+     * Convenience for {@link #build(NumberText, boolean, BigMathProvider)
+     * build(t, primitiveOnly, null)}.
+     */
+    public static final Number build(
+            NumberText t,
+            boolean primitiveOnly) {
+        return build(t, primitiveOnly, null);
     }
 
     /**
      * Build a {@link java.lang.Number Number} from the given NumberText.
      *
      * <p>The benefit of this method (over {@link #toDouble(NumberText)} or
-     * {@link #toBigDecimal(NumberText)}) is that it has the logic to return
-     * an Object tailored to the value itself. For example, if the value
-     * can be represented as a {@link Long} then it will be.
+     * {@link #toBigDecimal(NumberText, BigMathProvider)}) is that it has the
+     * logic to return a Number tailored to the value itself. For example, if
+     * the value can be represented as a {@link Long} then it will be.
      *
      * @param t a valid NumberText
-     * @param primitiveOnly if true, the returned Number will be a
-     * {@link java.lang.Long Long} or
-     * {@link java.lang.Double Double}. Otherwise, it may be a
-     * {@link java.math.BigInteger BigInteger} or
-     * {@link java.math.BigDecimal BigDecimal}. 
+     * @param primitiveOnly return a Long or Double
      * @return an instance of java.lang.Number
      */
-    public static final Number build(NumberText t, boolean primitiveOnly) {
+    public static final Number build(
+            NumberText t, 
+            boolean primitiveOnly,
+            BigMathProvider mcp) {
+
         if (!t.hasFractionalPart()) {
             switch (t.getExponentType()) { //NOPMD - no default
             case NEGATIVE_VALUE:
@@ -595,51 +653,216 @@ public class NumberBuilder implements NumberText { // NOPMD
             case JUST_VALUE:
             case POSITIVE_VALUE:
             case NONE:
-                return toNonFractional(t, primitiveOnly);
+                return toNonFractional(t, primitiveOnly, mcp);
             }
         }
 
-        return primitiveOnly ? toDouble(t) : toBigDecimal(t);
+        return primitiveOnly ? toDouble(t) : toBigDecimal(t, mcp);
     }
-    
+
     /**
-     * Build a non-fractional number from the given NumberText.
+     * Calculate an overflow value.
      */
-    private static final Number toNonFractional(
-            NumberText t,
-            boolean primitiveOnly) {
+    @SuppressWarnings("PMD.CyclomaticComplexity")
+    private static final Number getOverflow(
+        String strLimit,
+        Double infinity,
+        String s,
+        int digitCount,
+        BigMathProvider mcp) {
 
-        final CharSequence text = t.getText();
+        if (strLimit == null) {
+            // no limit, no overflow
+            return null;
+        }
 
-        final int expValue = parseInteger(
-            text,
+        if (digitCount < strLimit.length()) {
+            // definitely under limit
+            return null;
+        }
+
+        boolean isOver = digitCount > strLimit.length()
+            || s.compareTo(strLimit) > 0;
+            
+        if (!isOver) {
+            // close, but still within limit
+            return null;
+        }
+
+        final BigIntegerOverflow overOp =
+            mcp == null ? null : mcp.getBigIntegerOverflow();
+
+        if (overOp == null) {
+            throw new LimitException(ERR_MSG_LIMIT_INTEGER);
+        }
+
+        switch (overOp) { // NOPMD - no default case
+        case DOUBLE:
+            return Double.valueOf(s);
+        case BIG_DECIMAL:
+            //
+            // I don't have to check for mcp == null here as the
+            // check above ensures that, if it's null, I'll throw
+            // an exception before I get here.
+            //
+            MathContext mc = mcp.getMathContext();
+            return mc == null ? new BigDecimal(s) : new BigDecimal(s, mc);
+        case INFINITY:
+            return infinity;
+        }
+
+        return null;
+    }
+
+    /**
+     * get the value of the exponent in {@code t}.
+     */
+    private static final int getExponentValue(NumberText t) {
+        return t.getExponentType() == null ? 0 : parseInteger(
+            t.getText(),
             t.getExponentStartIndex(),
             t.getExponentStopIndex(),
             0);
-
+    }
+    
+    /**
+     * Test if the given NumberText can be stored in a {@code long}.
+     * @param t a valid NumberText
+     */
+    public static final boolean isLong(NumberText t) {
+        if (!t.isNonFractional()) {
+            return false;
+        }
+        final int expValue = getExponentValue(t);
         final int intIndexStart = t.getIntegerStartIndex();
         final int intIndexStop = t.getIntegerStopIndex();
-        int digitCount = (intIndexStop - intIndexStart) + expValue;
+        final int digitCount = (intIndexStop - intIndexStart) + expValue;
+
+        return isLong(
+            t.getText(),
+            intIndexStart,
+            intIndexStop,
+            digitCount,
+            t.isNegative());
+    }
     
-        if (digitCount <= LONG_MAX_DIGITS) {
+    private static final boolean isLong(
+        CharSequence text,
+        int start,
+        int stop,
+        int digitCount,
+        boolean isneg) {
+
+        if (digitCount < LONG_MAX_DIGITS) {
+            return true;
+        }
+        
+        if (digitCount > LONG_MAX_DIGITS) {
+            return false;
+        }
+
+        final String s = isneg ? LONG_BOUNDARY_NEG : LONG_BOUNDARY_POS; // NOPMD
+        
+        for (int i = start, j = 0; i < stop; i++, j++) { // NOPMD
+            char a = text.charAt(i);
+            char b = s.charAt(j);
+            
+            if (a < b) {
+                return true;
+            }
+            
+            if (a > b) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    /**
+     * Convert the given NumberText to a long value.
+     * 
+     * <p>You must call {@link #isLong(NumberText)} first to determine
+     * if the number is a valid long value. Otherwise, you may trigger an
+     * exception or get a nonsense result.
+     *
+     * @param t a valid NumberText
+     */
+    public static final long toLong(NumberText t) {
+        return toLong(
+            t.getText(),
+            t.getStartIndex(),
+            t.getIntegerStopIndex(),
+            getExponentValue(t));
+    }
+
+    /**
+     * Convert the given CharSequence to a long value.
+     */
+    private static final long toLong(
+            CharSequence text,
+            int start,
+            int stop,
+            int expValue) {
+        return parseLong(text, start, stop, 0) * E[expValue];
+    }
+    
+    /**
+     * Attempt to build a non-fractional Number from the given NumberText.
+     */
+    @SuppressWarnings({
+        "PMD.CyclomaticComplexity",
+        "PMD.NPathComplexity"})
+    private static final Number toNonFractional(
+            NumberText t,
+            boolean primitiveOnly,
+            BigMathProvider mcp) {
+
+        final CharSequence text = t.getText();
+
+        final int expValue = getExponentValue(t);
+        final int intIndexStart = t.getIntegerStartIndex();
+        final int intIndexStop = t.getIntegerStopIndex();
+        final int digitCount = (intIndexStop - intIndexStart) + expValue;
+        final boolean isneg = t.isNegative();
+
+        if (isLong(text, intIndexStart, intIndexStop, digitCount, isneg)) {
             //
             // this is the common case
             //
-            long value = parseLong(text, t.getStartIndex(), intIndexStop, 0);
-            value *= E[expValue];
-            return Long.valueOf(value);
+            return Long.valueOf(toLong(
+                text,
+                t.getStartIndex(),
+                intIndexStop,
+                expValue));
         }
-    
+
         if (primitiveOnly) {
+            //
+            // only option left
+            //
             return toDouble(t);
         }
-    
-        char[] s = toChars(
+
+        final char[] chars = toChars(
                 text,
                 t.getStartIndex(),
                 intIndexStop);
-    
-        BigInteger ret = new BigInteger(new String(s));
+
+        final String s = new String(chars);
+
+        final Number overflow = getOverflow(
+            mcp == null ? null : mcp.getBigIntegerBoundary(isneg),
+            isneg ? NEGATIVE_INFINITY : POSITIVE_INFINITY,
+            s,
+            digitCount,
+            mcp);
+
+        if (overflow != null) {
+            return overflow;
+        }
+
+        BigInteger ret = new BigInteger(s);
     
         if (expValue > 0) {
             ret = ret.multiply(BigInteger.TEN.pow(expValue));
@@ -661,7 +884,6 @@ public class NumberBuilder implements NumberText { // NOPMD
      * @param stop stop index
      * @return an integer
      */
-    @SuppressWarnings("PMD")
     private static int parseInteger(
             CharSequence s,
             int start,
@@ -692,7 +914,7 @@ public class NumberBuilder implements NumberText { // NOPMD
      * @param stop stop index
      * @return a long
      */
-    @SuppressWarnings("PMD")
+    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     private static long parseLong(
             CharSequence s,
             int start,
@@ -708,7 +930,7 @@ public class NumberBuilder implements NumberText { // NOPMD
 
         char c = s.charAt(start);
         
-        switch (c) {
+        switch (c) { // NOPMD - fall through
         case '-':
             isneg = true;
             // fall through
@@ -747,12 +969,12 @@ public class NumberBuilder implements NumberText { // NOPMD
                 text.getStopIndex());
     }
     
-    @SuppressWarnings("PMD")
+    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     private static final char[] toChars(CharSequence s, int start, int stop) {
         final int len = stop - start;
         final char[] ret = new char[len];
 
-        for (int i = start, j = 0; i < stop; i++, j++) {
+        for (int i = start, j = 0; i < stop; i++, j++) { // NOPMD - ForLoopVariableCount
             ret[j] = s.charAt(i);
         }
         
@@ -816,5 +1038,21 @@ public class NumberBuilder implements NumberText { // NOPMD
     @Override
     public int getStopIndex() {
         return this.stop;
+    }
+
+    /**
+     * Get the BigMathProvider for this NumberBuilder.
+     * @return a valid BigMathProvider or null
+     */
+    public BigMathProvider getMathContextProvider() {
+        return mcp;
+    }
+
+    /**
+     * Set the BigMathProvider for this NumberBuilder.
+     * @param mcp a valid BigMathProvider or null
+     */
+    public void setMathContextProvider(BigMathProvider mcp) {
+        this.mcp = mcp;
     }
 }

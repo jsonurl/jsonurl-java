@@ -18,18 +18,54 @@ package org.jsonurl.jsonorg;
  */
 
 /**
- * Unit test using JsonOrgValueFactory.BIGMATH
+ * Unit test using JsonOrgValueFactory.BigMathFactory.
  *
  * @author jsonurl.org
  * @author David MacCormack
  * @since 2019-09-01
  */
-public class BigMathParseTest extends JsonOrgParseTest {
+class BigMathParseTest extends JsonOrgParseTest {
+    
+    /**
+     * Unit test using JsonOrgValueFactory.BIGMATH32.
+     */
+    static final class Test32 extends JsonOrgParseTest {
+        /**
+         * Create a new Test32.
+         */
+        public Test32() {
+            super(JsonOrgValueFactory.BIGMATH32);
+        }
+    }
+    
+    /**
+     * Unit test using JsonOrgValueFactory.BIGMATH64.
+     */
+    static final class Test64 extends JsonOrgParseTest {
+        /**
+         * Create a new Test64.
+         */
+        public Test64() {
+            super(JsonOrgValueFactory.BIGMATH64);
+        }
+    }
+
+    /**
+     * Unit test using JsonOrgValueFactory.BIGMATH128.
+     */
+    static final class Test128 extends JsonOrgParseTest {
+        /**
+         * Create a new Test128.
+         */
+        public Test128() {
+            super(JsonOrgValueFactory.BIGMATH128);
+        }
+    }
 
     /**
      * Create a new BigMathParseTest.
      */
     public BigMathParseTest() {
-        super(JsonOrgValueFactory.BIGMATH);
+        super(new JsonOrgValueFactory.BigMathFactory(null, null, null, null));
     }
 }
