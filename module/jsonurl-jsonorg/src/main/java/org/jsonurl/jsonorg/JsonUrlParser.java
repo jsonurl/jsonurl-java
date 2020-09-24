@@ -1,7 +1,5 @@
-package org.jsonurl.jsonorg;
-
 /*
- * Copyright 2019 David MacCormack
+ * Copyright 2019-2020 David MacCormack
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -17,9 +15,11 @@ package org.jsonurl.jsonorg;
  * under the License.
  */
 
+package org.jsonurl.jsonorg;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.jsonurl.Parser;
+import org.jsonurl.ValueFactoryParser;
 
 /**
  * A JSON&#x2192;URL parser which uses classes from the
@@ -29,7 +29,7 @@ import org.jsonurl.Parser;
  * @author David MacCormack
  * @since 2019-09-01
  */
-public class JsonUrlParser extends Parser.TransparentBuilder<
+public class JsonUrlParser extends ValueFactoryParser.TransparentBuilder<
         Object,
         Object,
         JSONArray,

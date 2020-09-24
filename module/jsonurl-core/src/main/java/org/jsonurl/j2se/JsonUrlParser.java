@@ -1,5 +1,3 @@
-package org.jsonurl.j2se;
-
 /*
  * Copyright 2019-2020 David MacCormack
  * 
@@ -17,18 +15,26 @@ package org.jsonurl.j2se;
  * under the License.
  */
 
+package org.jsonurl.j2se;
+
 import java.util.List;
 import java.util.Map;
-import org.jsonurl.Parser;
+import org.jsonurl.ValueFactoryParser;
 
 /**
  * A {@link org.jsonurl.Parser Parser} based on Java SE data types.
+ * 
+ * <p>No state is maintained globally other than the {@link JavaValueFactory}
+ * given in the constructor, which can not be changed. So as single instance
+ * of this class is thread-safe as long as you follow the guidance outlined
+ * for {@link org.jsonurl.Parser}.
  *
  * @author jsonurl.org
  * @author David MacCormack
  * @since 2019-09-01
  */
-public class JsonUrlParser extends Parser.TransparentBuilder<Object,
+public class JsonUrlParser extends ValueFactoryParser.TransparentBuilder<
+    Object,
     Object,
     List<Object>,
     Map<String,Object>,

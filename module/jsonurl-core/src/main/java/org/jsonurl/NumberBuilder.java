@@ -21,7 +21,7 @@ import static org.jsonurl.BigMathProvider.NEGATIVE_INFINITY;
 import static org.jsonurl.BigMathProvider.POSITIVE_INFINITY;
 import static org.jsonurl.CharUtil.digits;
 import static org.jsonurl.CharUtil.isDigit;
-import static org.jsonurl.LimitException.ERR_MSG_LIMIT_INTEGER;
+import static org.jsonurl.LimitException.Message.MSG_LIMIT_INTEGER;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -40,14 +40,14 @@ import org.jsonurl.BigMathProvider.BigIntegerOverflow;
  * For example:
  * <pre>
  * // Example 1
- * {@link java.lang.Number Number} n = new NumberBuilder("1.234").build();
+ * {@link java.lang.Number Number} n = new NumberBuilder("1.234").{@link #build()};
  * 
  * // Example 2
  * NumberBuilder nb = new NumberBuilder("1.234");
- * if (!nb.isNumber()) {
+ * if (!nb.{@link #isNumber()}) {
  *     // handle error
  * }
- * double d = new NumberBuilder().toDouble();
+ * double d = nb.{@link #toDouble()};
  * </pre>
  *
  * <h2>Reuse</h2>
@@ -56,7 +56,7 @@ import org.jsonurl.BigMathProvider.BigIntegerOverflow;
  * {@link #reset()} method.
  * <pre>
  * NumberBuilder nb = new NumberBuilder();
- * if (!nb.parse("1.234")) {
+ * if (!nb.{@link #parse(CharSequence, int, int) parse("1.234")}) {
  *     // handle the error
  * }
  *
@@ -336,7 +336,12 @@ public class NumberBuilder implements NumberText { // NOPMD
     }
 
     /**
-     * parse the given character sequence.
+     * Parse the given character sequence.
+     * 
+     * <p>Any {@link BigMathProvider} given
+     * in the constructor is not used in this method, so it is safe to assume
+     * you can parse text without regard to how a number might be built later
+     * via the {@link #build(boolean)} method.
      *
      * @param s a valid CharSequence
      * @param start an index
@@ -592,25 +597,45 @@ public class NumberBuilder implements NumberText { // NOPMD
     }
 
     /**
-     * Parse the given NumberText as a {@link java.math.BigDecimal}.
+     * Build a {@link java.math.BigDecimal BigDecimal}.
+     * This simply calls
+     * {@link #toBigDecimal(NumberText, BigMathProvider)
+     * toBigDecimal(this, getBigMathProvider())}.
+     * @see #setBigMathProvider(BigMathProvider)
      */
     public BigDecimal toBigDecimal() {
         return toBigDecimal(this, mcp);
     }
 
     /**
-     * Build a {@link java.lang.Number Number} from the given NumberText.
+     * Build a {@link java.lang.Number Number}.
      * Convenience for {@link #build(NumberText, boolean, BigMathProvider)
-     * build(this, primitiveOnly, mcp)}.
+     * build(this, true, getBigMathProvider())}.
+     * @see #setBigMathProvider(BigMathProvider)
+     */
+    public Number build() {
+        return build(this, true, mcp);
+    }
+
+    /**
+     * Build a {@link java.lang.Number Number}.
+     * Convenience for {@link #build(NumberText, boolean, BigMathProvider)
+     * build(this, primitiveOnly, getBigMathProvider())}.
+     *
+     * @param primitiveOnly return a Long or Double
+     * @see #setBigMathProvider(BigMathProvider)
      */
     public Number build(boolean primitiveOnly) {
         return build(this, primitiveOnly, mcp);
     }
 
     /**
-     * Build a {@link java.lang.Number Number} from the given NumberText.
+     * Build a {@link java.lang.Number Number}.
      * Convenience for {@link #build(NumberText, boolean, BigMathProvider)
      * build(t, false, mcp)}.
+     * 
+     * @param t a valid NumberText
+     * @param mcp a valid BigMathProvider or null
      */
     public static final Number build(
             NumberText t,
@@ -622,6 +647,9 @@ public class NumberBuilder implements NumberText { // NOPMD
      * Build a {@link java.lang.Number Number} from the given NumberText.
      * Convenience for {@link #build(NumberText, boolean, BigMathProvider)
      * build(t, primitiveOnly, null)}.
+     * 
+     * @param t a valid NumberText
+     * @param primitiveOnly return a Long or Double
      */
     public static final Number build(
             NumberText t,
@@ -639,6 +667,7 @@ public class NumberBuilder implements NumberText { // NOPMD
      *
      * @param t a valid NumberText
      * @param primitiveOnly return a Long or Double
+     * @param mcp a valid BigMathProvider or null
      * @return an instance of java.lang.Number
      */
     public static final Number build(
@@ -693,7 +722,7 @@ public class NumberBuilder implements NumberText { // NOPMD
             mcp == null ? null : mcp.getBigIntegerOverflow();
 
         if (overOp == null) {
-            throw new LimitException(ERR_MSG_LIMIT_INTEGER);
+            throw new LimitException(MSG_LIMIT_INTEGER);
         }
 
         switch (overOp) { // NOPMD - no default case
@@ -879,6 +908,7 @@ public class NumberBuilder implements NumberText { // NOPMD
      *
      * <p>Since this private, and I will never call this with a +/-
      * prefix, I've removed that logic.
+     *
      * @param s a non-null character sequence
      * @param start start index
      * @param stop stop index
@@ -1044,7 +1074,7 @@ public class NumberBuilder implements NumberText { // NOPMD
      * Get the BigMathProvider for this NumberBuilder.
      * @return a valid BigMathProvider or null
      */
-    public BigMathProvider getMathContextProvider() {
+    public BigMathProvider getBigMathProvider() {
         return mcp;
     }
 
@@ -1052,7 +1082,7 @@ public class NumberBuilder implements NumberText { // NOPMD
      * Set the BigMathProvider for this NumberBuilder.
      * @param mcp a valid BigMathProvider or null
      */
-    public void setMathContextProvider(BigMathProvider mcp) {
+    public void setBigMathProvider(BigMathProvider mcp) {
         this.mcp = mcp;
     }
 }

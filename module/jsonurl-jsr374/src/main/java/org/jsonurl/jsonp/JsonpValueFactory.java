@@ -365,7 +365,7 @@ public interface JsonpValueFactory extends ValueFactory<
         if (JsonValue.NULL == value) {
             return types.contains(ValueType.NULL);
         }
-        if (isEmpty(value)) {
+        if (isEmptyComposite(value)) {
             return types.contains(ValueType.OBJECT)
                 || types.contains(ValueType.ARRAY);
         }

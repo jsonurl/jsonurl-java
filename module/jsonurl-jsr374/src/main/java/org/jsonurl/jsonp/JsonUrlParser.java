@@ -1,7 +1,5 @@
-package org.jsonurl.jsonp;
-
 /*
- * Copyright 2019 David MacCormack
+ * Copyright 2019-2020 David MacCormack
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -17,6 +15,8 @@ package org.jsonurl.jsonp;
  * under the License.
  */
 
+package org.jsonurl.jsonp;
+
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonNumber;
@@ -25,7 +25,7 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonString;
 import javax.json.JsonStructure;
 import javax.json.JsonValue;
-import org.jsonurl.Parser;
+import org.jsonurl.ValueFactoryParser;
 
 /**
  * A JSON&#x2192;URL parser which uses the JSR-374 interface.
@@ -34,7 +34,7 @@ import org.jsonurl.Parser;
  * @author David MacCormack
  * @since 2019-09-01
  */
-public class JsonUrlParser extends Parser<
+public class JsonUrlParser extends ValueFactoryParser<
         JsonValue,
         JsonStructure,
         JsonArrayBuilder,
@@ -47,7 +47,8 @@ public class JsonUrlParser extends Parser<
         JsonString> {
 
     /**
-     * Instantiate a new Parser.
+     * Instantiate a new Parser using {@link
+     * JsonpValueFactory#BIGMATH64}.
      */
     public JsonUrlParser() {
         this(JsonpValueFactory.BIGMATH64);

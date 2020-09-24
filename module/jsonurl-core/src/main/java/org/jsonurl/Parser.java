@@ -1,7 +1,5 @@
-package org.jsonurl;
-
 /*
- * Copyright 2019 David MacCormack
+ * Copyright 2019-2020 David MacCormack
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -17,22 +15,21 @@ package org.jsonurl;
  * under the License.
  */
 
-import static org.jsonurl.JsonUrl.Parse.literal;
-import static org.jsonurl.JsonUrl.Parse.literalToJavaString;
-import static org.jsonurl.JsonUrl.Parse.newNumberBuilder;
-import static org.jsonurl.JsonUrl.parseLiteralLength;
-import static org.jsonurl.LimitException.ERR_MSG_LIMIT_MAX_PARSE_CHARS;
-import static org.jsonurl.LimitException.ERR_MSG_LIMIT_MAX_PARSE_DEPTH;
-import static org.jsonurl.LimitException.ERR_MSG_LIMIT_MAX_PARSE_VALUES;
-import static org.jsonurl.SyntaxException.ERR_MSG_EXPECT_LITERAL;
-import static org.jsonurl.SyntaxException.ERR_MSG_EXPECT_OBJVALUE;
-import static org.jsonurl.SyntaxException.ERR_MSG_EXPECT_STRUCTCHAR;
-import static org.jsonurl.SyntaxException.ERR_MSG_EXPECT_TYPE;
-import static org.jsonurl.SyntaxException.ERR_MSG_EXTRACHARS;
-import static org.jsonurl.SyntaxException.ERR_MSG_NOTEXT;
-import static org.jsonurl.SyntaxException.ERR_MSG_STILLOPEN;
+package org.jsonurl;
 
-import java.util.Deque;
+import static org.jsonurl.JsonUrl.parseLiteralLength;
+import static org.jsonurl.LimitException.Message.MSG_LIMIT_MAX_PARSE_CHARS;
+import static org.jsonurl.LimitException.Message.MSG_LIMIT_MAX_PARSE_DEPTH;
+import static org.jsonurl.LimitException.Message.MSG_LIMIT_MAX_PARSE_VALUES;
+import static org.jsonurl.SyntaxException.Message.MSG_BAD_CHAR;
+import static org.jsonurl.SyntaxException.Message.MSG_EXPECT_LITERAL;
+import static org.jsonurl.SyntaxException.Message.MSG_EXPECT_OBJECT_VALUE;
+import static org.jsonurl.SyntaxException.Message.MSG_EXPECT_STRUCT_CHAR;
+import static org.jsonurl.SyntaxException.Message.MSG_EXPECT_TYPE;
+import static org.jsonurl.SyntaxException.Message.MSG_EXTRA_CHARS;
+import static org.jsonurl.SyntaxException.Message.MSG_NO_TEXT;
+import static org.jsonurl.SyntaxException.Message.MSG_STILL_OPEN;
+
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.Set;
@@ -40,43 +37,28 @@ import java.util.Set;
 /**
  * A JSON&#x2192;URL text parser.
  * 
- * <p>An instance of this class may be used to parse JSON&#x2192;URL text and
- * instantiate JVM heap objects. The interface allows you to control the
- * types and values of the Objects created.
- *
- * <p>Normally this class isn't used by directly but rather it's subclassed
- * with specific types and an instance of
- * {@link org.jsonurl.ValueFactory ValueFactory}. If you don't need
- * control over types you may use
- * {@link org.jsonurl.j2se.JsonUrlParser JsonUrlParser}. 
- *
- * @param V value type (any JSON value)
- * @param C composite type (array or object)
- * @param ABT array builder type
- * @param A array type
- * @param JBT object builder type
- * @param J object type
- * @param B boolean type
- * @param M number type
- * @param N null type
- * @param S string type
- *
+ * <p>An instance of this class may be used to parse JSON&#x2192;URL text. Each
+ * instance maintains a set of limits that are applied any time the
+ * {@link #parse(CharSequence, int, int, ValueType, ValueFactory)}
+ * (or any of the related convenience methods are called). No other state
+ * maintained globally, so a single instance of this class is thread-safe so
+ * long as you:
+ * <ul>
+ * <li>Set limits in a single-threaded context and don't change them in
+ * individual threads.
+ * <li>Provide proper locking around the setter/getter methods on this
+ * class. 
+ * </ul>
+ * 
  * @author jsonurl.org
  * @author David MacCormack
  * @since 2019-09-01
  */
-@SuppressWarnings("PMD")
-public class Parser<
-        V,
-        C extends V,
-        ABT,
-        A extends C,
-        JBT,
-        J extends C,
-        B extends V,
-        M extends V,
-        N extends V,
-        S extends V> {
+@SuppressWarnings({
+    "PMD.CyclomaticComplexity",
+    "PMD.GodClass",
+    "PMD.ExcessiveClassLength"})
+public class Parser {
 
     /**
      * Parse state.
@@ -91,223 +73,539 @@ public class Parser<
     }
 
     /**
-     * A {@code Parser} with transparent array and object builders.
-     *
-     * <p>A {@code Parser} whose JSON array and JSON array builder are the
-     * same instance of the same class, and whose JSON object and JSON object
-     * builder are the same instance of the same class. 
-     *
-     * @param V value type (any JSON value)
-     * @param C composite type (array or object)
-     * @param A array type
-     * @param J object type
-     * @param B boolean type
-     * @param M number type
-     * @param N null type
-     * @param S string type
-     *
-     * @author jsonurl.org
-     * @author David MacCormack
-     * @since 2019-09-01
+     * Default {@link #setMaxParseChars(int)}.
      */
-    public static class TransparentBuilder<
-            V,
-            C extends V,
-            A extends C,
-            J extends C,
-            B extends V,
-            M extends V,
-            N extends V,
-            S extends V> extends Parser<V,C,A,A,J,J,B,M,N,S> {
-
-        /**
-         * Instantiate a new Parser.
-         *
-         * @param factory a valid ValueFactory
-         */
-        public TransparentBuilder(ValueFactory<V,C,A,A,J,J,B,M,N,S> factory) {
-            super(factory);
-        }
-    }
-
     public static final int DEFAULT_MAX_PARSE_CHARS = 1 << 13;
-    public static final int DEFAULT_MAX_PARSE_DEPTH = 1 << 4;
-    public static final int DEFAULT_MAX_PARSE_VALUES = 1 << 10;
-    
-    private static final EnumSet<ValueType> TYPE_VALUE_ANY =
-        EnumSet.allOf(ValueType.class);
-
-    private static final EnumSet<ValueType> TYPE_VALUE_OBJECT =
-        EnumSet.of(ValueType.OBJECT);
-
-    private static final EnumSet<ValueType> TYPE_VALUE_ARRAY =
-        EnumSet.of(ValueType.ARRAY);
-
-    private StringBuilder buf = new StringBuilder(64);
-    private int maxParseDepth = DEFAULT_MAX_PARSE_DEPTH;
-    private int maxParseChars = DEFAULT_MAX_PARSE_CHARS;
-    private int maxParseValues = DEFAULT_MAX_PARSE_VALUES;
-    private ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory;
-
-    private C emptyValue;
 
     /**
-     * Instantiate a new Parser.
-     *
-     * @param factory a valid ValueFactory
+     * Default {@link #setMaxParseDepth(int)}.
      */
-    public Parser(ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
-        this.factory = factory;
-        this.emptyValue = factory.getEmptyComposite();
-    }
+    public static final int DEFAULT_MAX_PARSE_DEPTH = 1 << 4;
+    
+    /**
+     * Default {@link #setMaxParseValues(int)}.
+     */
+    public static final int DEFAULT_MAX_PARSE_VALUES = 1 << 10;
 
+    /**
+     * EnumSet.of(ValueType.OBJECT).
+     */
+    static final EnumSet<ValueType> TYPE_VALUE_OBJECT =
+        EnumSet.of(ValueType.OBJECT);
+
+    /**
+     * EnumSet.of(ValueType.ARRAY).
+     */
+    static final EnumSet<ValueType> TYPE_VALUE_ARRAY =
+        EnumSet.of(ValueType.ARRAY);
+
+    /**
+     * Maximum parse depth.
+     */
+    private int maxParseDepth = DEFAULT_MAX_PARSE_DEPTH;
+
+    /**
+     * Maximum number of parsed chars.
+     */
+    private int maxParseChars = DEFAULT_MAX_PARSE_CHARS;
+
+    /**
+     * Maximum number of parsed values.
+     */
+    private int maxParseValues = DEFAULT_MAX_PARSE_VALUES;
+
+    /**
+     * Allow application/x-www-form-urlencoded style separators.
+     */
+    private boolean wwwFormUrlEncoded;
+
+    /**
+     * Allow empty unquoted keys.
+     */
+    private boolean allowEmptyUnquotedKey;
+
+    /**
+     * Allow empty unquoted values.
+     */
+    private boolean allowEmptyUnquotedValue;
+
+    /**
+     * Get the maximum number of parsed characters.
+     * @see #setMaxParseChars(int)
+     */
     public int getMaxParseChars() {
         return maxParseChars;
     }
 
+    /**
+     * Set the maximum number of parsed characters.
+     * This provides a limit on the maximum number of characters that will
+     * be parsed before throwing an exception. The default value is
+     * {@link #DEFAULT_MAX_PARSE_CHARS}.
+     */
+    public void setMaxParseChars(int maxParseChars) {
+        this.maxParseChars = maxParseChars;
+    }
+
+    /**
+     * Get the maximum parse depth.
+     * @see #setMaxParseDepth(int)
+     */
     public int getMaxParseDepth() {
         return maxParseDepth;
     }
 
+    /**
+     * Set the maximum parse depth.
+     * This provides a limit on the depth of a JSON&#x2192;URL object/array
+     * before an exception of thrown. The default value is
+     * {@link #DEFAULT_MAX_PARSE_DEPTH}.
+     */
+    public void setMaxParseDepth(int maxParseDepth) {
+        this.maxParseDepth = maxParseDepth;
+    }
+
+    /**
+     * Get the maximum number of parsed values.
+     * @see #setMaxParseValues(int)
+     */
     public int getMaxParseValues() {
         return maxParseValues;
     }
 
     /**
-     * increment a limit value, throwing an exception if the limit is reached.
+     * Set the maximum number of parsed values.
+     * This provides a limit on the number of values that will be
+     * parsed/instantiated before an exception is thrown. The default value is
+     * {@link #DEFAULT_MAX_PARSE_VALUES}.
      */
-    private int incrementLimit(String msg, int c, int pos) {
-        if (++c > this.maxParseValues) {
-            throw new LimitException(msg, pos);
-        }
-        return c;
+    public void setMaxParseValues(int maxParseValues) {
+        this.maxParseValues = maxParseValues;
     }
 
     /**
-     * Parse a character sequence.
-     *
-     * <p>This is equivalent to {@link #parseObject(CharSequence, int, int)
-     * parseObject(s, 0, s.length())}.
-     * @return a factory-typed JSON Object
+     * Returns true if application/x-www-form-urlencoded style separators are
+     * allowed for an implied top-level object or array.
+     * @see #setAllowFormUrlEncoded(boolean) 
+     */
+    public boolean getAllowFormUrlEncoded() {
+        return wwwFormUrlEncoded;
+    }
+
+    /**
+     * Set this to true if you want to allow {@code &amp} to be used as a
+     * top-level value separator and {@code =} to be used as top-level name
+     * separator. 
+     * 
+     * @param wwwFormUrlEncoded true or false
+     */
+    public void setAllowFormUrlEncoded(boolean wwwFormUrlEncoded) {
+        this.wwwFormUrlEncoded = wwwFormUrlEncoded;
+    }
+
+    /**
+     * Returns true if the parser accepts empty, unquoted keys.
+     * @see #setAllowEmptyUnquotedKey(boolean) 
+     */
+    public boolean getAllowEmptyUnquotedKey() {
+        return allowEmptyUnquotedKey;
+    }
+
+    /**
+     * Set this to true if you want the parser to accept empty, unquoted keys.
+     * For example, {@code (:value)}.
+     * @param allow boolean
+     */
+    public void setAllowEmptyUnquotedKey(boolean allow) {
+        this.allowEmptyUnquotedKey = allow;
+    }
+
+    /**
+     * Returns true if the parser accepts empty, unquoted values.
+     * @see #setAllowEmptyUnquotedValue(boolean) 
+     */
+    public boolean getAllowEmptyUnquotedValue() {
+        return allowEmptyUnquotedValue;
+    }
+
+    /**
+     * Set this to true if you want the parser to accept empty, unquoted values.
+     * For example, {@code (1,,3)}.
+     * @param allow boolean
+     */
+    public void setAllowEmptyUnquotedValue(boolean allow) {
+        this.allowEmptyUnquotedValue = allow;
+    }
+
+    /**
+     * Parse a character sequence as a JSON object. This simply calls
+     * {@link #parse(CharSequence, int, int, ValueType, ValueFactory)
+     * parse(s, 0, s.length(), EnumSet.of(ValueType.OBJECT), factory)}.
+     */
+    @SuppressWarnings("unchecked") // NOPMD 
+    public <V,
+            C extends V,
+            ABT,
+            A extends C,
+            JBT,
+            J extends C,
+            B extends V,
+            M extends V,
+            N extends V,
+            S extends V> J parseObject(
+                CharSequence s,
+                ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
+        return (J)parse(s, 0, s.length(), TYPE_VALUE_OBJECT, factory);
+    }
+
+    /**
+     * Parse a character sequence as a JSON object. This simply calls
+     * {@link #parse(CharSequence, int, int, ValueType, ValueFactory)
+     * parse(s, off, length, EnumSet.of(ValueType.OBJECT), factory)}.
      */
     @SuppressWarnings("unchecked")
-    public J parseObject(CharSequence s) {
-        return (J)parse(s, 0, s.length(), TYPE_VALUE_OBJECT);
+    public <V,
+            C extends V,
+            ABT,
+            A extends C,
+            JBT,
+            J extends C,
+            B extends V,
+            M extends V,
+            N extends V,
+            S extends V> J parseObject(
+                CharSequence s,
+                int off,
+                int length,
+                ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
+        return (J)parse(s, off, length, TYPE_VALUE_OBJECT, factory);
     }
 
     /**
-     * Parse a character sequence.
-     *
-     * <p>Parse the given JSON&#x2192;URL text and return an object.
-     * @param s the text to be parsed
-     * @param off offset of the first character to be parsed
-     * @param length the number of characters to be parsed
-     * @return a factory-typed JSON Object  
+     * Parse a character sequence as a JSON object. This simply calls
+     * {@link #parse(CharSequence, int, int, ValueType, ValueFactory)
+     * parse(s, 0, s.length(), EnumSet.of(ValueType.OBJECT), factory)}.
+     */
+    @SuppressWarnings("unchecked") // NOPMD 
+    public <V,
+            C extends V,
+            ABT,
+            A extends C,
+            JBT,
+            J extends C,
+            B extends V,
+            M extends V,
+            N extends V,
+            S extends V> J parseObject(
+                CharSequence s,
+                ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory,
+                JBT impliedObject) {
+
+        return (J)parse(s, 0, s.length(), TYPE_VALUE_OBJECT,
+            new ValueFactoryParseResultFacade<>(factory, null, impliedObject));
+    }
+
+    /**
+     * Parse a character sequence as a JSON object. This simply calls
+     * {@link #parse(CharSequence, int, int, ValueType, ValueFactory)
+     * parse(s, off, length, EnumSet.of(ValueType.OBJECT), factory)}.
      */
     @SuppressWarnings("unchecked")
-    public J parseObject(CharSequence s, int off, int length) {
-        return (J)parse(s, off, length, TYPE_VALUE_OBJECT);
+    public <V,
+            C extends V,
+            ABT,
+            A extends C,
+            JBT,
+            J extends C,
+            B extends V,
+            M extends V,
+            N extends V,
+            S extends V> J parseObject(
+                CharSequence s,
+                int off,
+                int length,
+                ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory,
+                JBT impliedObject) {
+
+        return (J)parse(s, off, length, TYPE_VALUE_OBJECT,
+            new ValueFactoryParseResultFacade<>(factory, null, impliedObject));
     }
 
     /**
-     * Parse a character sequence.
-     *
-     * <p>This is equivalent to {@link #parseArray(CharSequence, int, int)
-     * parseObject(s, 0, s.length())}.
-     * @return a factory-typed JSON Object  
+     * Parse a character sequence as a JSON array. This simply calls
+     * {@link #parse(CharSequence, int, int, ValueType, ValueFactory)
+     * parse(s, 0, s.length(), EnumSet.of(ValueType.ARRAY), factory)}.
      */
     @SuppressWarnings("unchecked")
-    public A parseArray(CharSequence s) {
-        return (A)parse(s, 0, s.length(), TYPE_VALUE_ARRAY);
+    public <V,
+            C extends V,
+            ABT,
+            A extends C,
+            JBT,
+            J extends C,
+            B extends V,
+            M extends V,
+            N extends V,
+            S extends V> A parseArray(
+                CharSequence s,
+                ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
+
+        return (A)parse(s, 0, s.length(), TYPE_VALUE_ARRAY, factory);
     }
 
     /**
-     * Parse a character sequence.
-     *
-     * <p>Parse the given JSON&#x2192;URL text and return an array.
-     * @param s the text to be parsed
-     * @param off offset of the first character to be parsed
-     * @param length the number of characters to be parsed
-     * @return a factory-typed JSON Object  
+     * Parse a character sequence as a JSON array. This simply calls
+     * {@link #parse(CharSequence, int, int, ValueType, ValueFactory)
+     * parse(s, off, length, EnumSet.of(ValueType.ARRAY), factory)}.
      */
     @SuppressWarnings("unchecked")
-    public A parseArray(CharSequence s, int off, int length) {
-        return (A)parse(s, off, length, TYPE_VALUE_ARRAY);
+    public <V,
+            C extends V,
+            ABT,
+            A extends C,
+            JBT,
+            J extends C,
+            B extends V,
+            M extends V,
+            N extends V,
+            S extends V> A parseArray(
+                CharSequence s,
+                int off,
+                int length,
+                ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
+        return (A)parse(s, off, length, TYPE_VALUE_ARRAY, factory);
     }
 
     /**
-     * Parse a character sequence.
-     *
-     * <p>This simply calls {@link #parse(CharSequence, int, int)
-     * parse(s,0,s.length())}.
-     * @see #parse(CharSequence, int, int)
+     * Parse a character sequence as a JSON array. This simply calls
+     * {@link #parse(CharSequence, int, int, ValueType, ValueFactory)
+     * parse(s, 0, s.length(), EnumSet.of(ValueType.ARRAY), factory)}.
      */
-    public V parse(CharSequence s) {
-        return parse(s, 0, s.length(), (EnumSet<ValueType>)null);
+    @SuppressWarnings("unchecked")
+    public <V,
+            C extends V,
+            ABT,
+            A extends C,
+            JBT,
+            J extends C,
+            B extends V,
+            M extends V,
+            N extends V,
+            S extends V> A parseArray(
+                CharSequence s,
+                ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory,
+                ABT impliedArray) {
+
+        return (A)parse(s, 0, s.length(), TYPE_VALUE_ARRAY,
+            new ValueFactoryParseResultFacade<>(factory, impliedArray, null));
     }
 
     /**
-     * Parse a character sequence.
+     * Parse a character sequence as a JSON array. This simply calls
+     * {@link #parse(CharSequence, int, int, ValueType, ValueFactory)
+     * parse(s, off, length, EnumSet.of(ValueType.ARRAY), factory)}.
+     */
+    @SuppressWarnings("unchecked")
+    public <V,
+            C extends V,
+            ABT,
+            A extends C,
+            JBT,
+            J extends C,
+            B extends V,
+            M extends V,
+            N extends V,
+            S extends V> A parseArray(
+                CharSequence s,
+                int off,
+                int length,
+                ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory,
+                ABT impliedArray) {
+
+        return (A)parse(s, off, length, TYPE_VALUE_ARRAY,
+            new ValueFactoryParseResultFacade<>(factory, impliedArray, null));
+    }
+
+    /**
+     * Parse a character sequence. This simply calls
+     * {@link #parse(CharSequence, int, int, ValueType, ValueFactory)
+     * parse(s, 0, s.length(), null, factory)}.
+     */
+    public <V,
+            C extends V,
+            ABT,
+            A extends C,
+            JBT,
+            J extends C,
+            B extends V,
+            M extends V,
+            N extends V,
+            S extends V> V parse(
+                CharSequence s,
+                ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
+        return parse(s, 0, s.length(), (EnumSet<ValueType>)null, factory);
+    }
+
+    /**
+     * Parse a character sequence. This simply calls
+     * {@link #parse(CharSequence, int, int, ValueType, ValueFactory)
+     * parse(s, off, length, null, factory)}.  
+     */
+    public <V,
+            C extends V,
+            ABT,
+            A extends C,
+            JBT,
+            J extends C,
+            B extends V,
+            M extends V,
+            N extends V,
+            S extends V> V parse(
+                CharSequence s,
+                int off,
+                int length,
+                ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
+        return parse(s, off, length, (EnumSet<ValueType>)null, factory);
+    }
+
+    /**
+     * Parse a character sequence. This simply calls
+     * {@link #parse(CharSequence, int, int, Set, ValueFactory)
+     * parse(s, off, length, EnumSet.of(canReturn), factory)}.
+     */
+    public <V,
+            C extends V,
+            ABT,
+            A extends C,
+            JBT,
+            J extends C,
+            B extends V,
+            M extends V,
+            N extends V,
+            S extends V> V parse(
+                CharSequence s,
+                int off,
+                int length,
+                ValueType canReturn,
+                ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
+        return parse(s, off, length, EnumSet.of(canReturn), factory);
+    }
+
+    /**
+     * Parse a character sequence. This simply calls
+     * {@link #parse(CharSequence, int, int, Set, ValueFactory)
+     * parse(s, 0, s.length(), EnumSet.of(canReturn), factory)}.
+     */
+    public <V,
+            C extends V,
+            ABT,
+            A extends C,
+            JBT,
+            J extends C,
+            B extends V,
+            M extends V,
+            N extends V,
+            S extends V> V parse(
+                CharSequence s,
+                ValueType canReturn,
+                ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
+        return parse(s, 0, s.length(), EnumSet.of(canReturn), factory);
+    }
+
+    /**
+     * Parse the given JSON&#x2192;URL text and return a JSON value.
+     * The parse will start at the character offset given by {@code off}, and
+     * {@code length} total characters will be parsed.
+     * 
+     * <p>The provided factory will be used to instantiate values, so this
+     * method is target API agnostic. The {@code canReturn} value may be used
+     * to limit what types are allowed in the response. If an invalid value
+     * type is found then a {@link ParseException} will be thrown.
      *
-     * <p>Parse the given JSON&#x2192;URL text and return a typed value.
      * @param s the text to be parsed
      * @param off offset of the first character to be parsed
-     * @param length the number of characters to be parsed
-     * @return a factory-typed value  
-     */
-    public V parse(CharSequence s, int off, int length) {
-        return parse(s, off, length, (EnumSet<ValueType>)null);
-    }
-    
-    /**
-     * Parse a character sequence. Simple calls
-     * {@link #parse(CharSequence, int, int, Set)
-     * parse(s, off, length, EnumSet.of(canReturn))}.
-     */
-    public V parse(CharSequence s, int off, int length, ValueType canReturn) {
-        return parse(s, off, length, EnumSet.of(canReturn));
-    }
-
-    /**
-     * Parse a character sequence. Simple calls
-     * {@link #parse(CharSequence, int, int, Set)
-     * parse(s, off, length, EnumSet.of(canReturn))}.
-     */
-    public V parse(CharSequence s, ValueType canReturn) {
-        return parse(s, 0, s.length(), EnumSet.of(canReturn));
-    }
-
-    /**
-     * Parse a character sequence.
-     *
-     * <p>Parse the given JSON&#x2192;URL text and return a typed value.
-     * @param s the text to be parsed
-     * @param off offset of the first character to be parsed
-     * @param length the number of characters to be parsed
+     * @param length a <em>length</em>, not an offset
      * @param canReturn set of allowed return types
+     * @param factory a valid ValueFactory
      * @return a factory-typed value
      */
-    public V parse(
+    public <V,
+            C extends V,
+            ABT,
+            A extends C,
+            JBT,
+            J extends C,
+            B extends V,
+            M extends V,
+            N extends V,
+            S extends V> V parse(
+                CharSequence s,
+                int off,
+                int length,
+                Set<ValueType> canReturn,
+                ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
+
+        return parse(s, off, length, canReturn,
+            new ValueFactoryParseResultFacade<>(factory, null, null));
+    }
+
+    /**
+     * Parse a character sequence.
+     * 
+     * <p>This is the "real" parse function that all the convenience methods
+     * call.
+     */
+    @SuppressWarnings({
+        "PMD.NPathComplexity",
+        "PMD.ExcessiveMethodLength",
+        "PMD.DataflowAnomalyAnalysis",
+        "PMD.AvoidDuplicateLiterals",
+        "PMD.SwitchDensity"})
+    private <R> R parse(
             CharSequence s,
             int off,
             int length,
-            Set<ValueType> canReturn) {
+            final Set<ValueType> canReturn,
+            ParseResultFacade<R> result) {
+
+        result.setLocation(1);
 
         if (length == 0) {
-            throw new SyntaxException(ERR_MSG_NOTEXT, 0);
+            throw new SyntaxException(MSG_NO_TEXT, 0);
         }
         if (length >= this.maxParseChars) {
-            throw new LimitException(ERR_MSG_LIMIT_MAX_PARSE_CHARS);
-        }
-        if (canReturn == null) {
-            canReturn = TYPE_VALUE_ANY;
+            throw new LimitException(MSG_LIMIT_MAX_PARSE_CHARS);
         }
 
-        NumberBuilder numb = newNumberBuilder(factory);
+        final int stop = off + length;
+        final boolean impliedArray = result.isImpliedArray();
+        final boolean impliedObject = result.isImpliedObject();
 
-        char c = s.charAt(off);
+        //
+        // the current parse position
+        //
+        int pos = off;
+        
+        //
+        // I only need to run the type check once so I track it with this
+        // boolean. If canReturn == null then there's nothing to check.
+        //
+        boolean isDoneTypeCheck = canReturn == null;
 
-        if (c != '(') {
+        //
+        // parse state stack
+        //
+        final LinkedList<State> stateStack = new LinkedList<>();
+
+        if (impliedObject) {
+            stateStack.push(State.IN_OBJECT);
+            isDoneTypeCheck = true;
+
+        } else if (impliedArray) {
+            stateStack.push(State.IN_ARRAY);
+            isDoneTypeCheck = true;
+
+        } else if (s.charAt(off) != '(') {
             //
             // not composite; parse as a single literal value
             //
@@ -318,42 +616,47 @@ public class Parser<
             // structural characters) but not valid when inside a composite.
             // I don't think I want that.
             //
-            int litlen = parseLiteralLength(s, off, off + length, null);
+            int litlen = parseLiteralLength(s, off, stop, null);
             if (litlen != length) {
-                throw new SyntaxException(ERR_MSG_EXPECT_LITERAL);
+                throw new SyntaxException(
+                    MSG_EXPECT_LITERAL);
             }
 
-            V ret = literal(buf, numb, s, off, off + length, factory);
+            R ret = result.getResult(s, off, stop, allowEmptyUnquotedValue);
 
-            if (!factory.isValid(canReturn, ret)) {
+            if (canReturn != null && !result.isValid(canReturn, ret)) {
                 throw new SyntaxException(
-                    String.format("%s: %s", ERR_MSG_EXPECT_TYPE, canReturn));
+                    MSG_EXPECT_TYPE,
+                    String.format("%s: %s",
+                        MSG_EXPECT_TYPE.getMessageText(),
+                        canReturn));
             }
 
             return ret;
-        }
 
-        LinkedList<State> stateStack = new LinkedList<>();
-        Deque<V> valueStack = new LinkedList<>();
-        Deque<String> keyStack = new LinkedList<>();
-        Deque<Object> builderStack = new LinkedList<>();
+        } else {
+            //
+            // composite and no implied object/array
+            //
+            stateStack.push(State.PAREN);
+            pos++;
+        }
+        
+        final boolean isImplied = impliedArray || impliedObject;
+        final boolean allowEmptyUnquotedKey = this.allowEmptyUnquotedKey;
+        final boolean wwwFormUrlEncoded = this.wwwFormUrlEncoded;
+
         int parseDepth = 1;
         int parseValueCount = 0;
-        final int stop = off + length;
-        boolean isDoneTypeCheck = false;
-
-        stateStack.push(State.PAREN);
-
-        int pos = off + 1;
 
         for (;;) {
             if (pos == stop) {
-                throw new SyntaxException(ERR_MSG_STILLOPEN, pos);
+                throw new SyntaxException(MSG_STILL_OPEN, pos);
             }
 
-            c = s.charAt(pos);
+            char c = s.charAt(pos);
 
-            switch (stateStack.peek()) {
+            switch (stateStack.peek()) { // NOPMD - no default
             case PAREN:
                 switch (c) {
                 case '(':
@@ -364,26 +667,30 @@ public class Parser<
                     if (!isDoneTypeCheck) {
                         if (!canReturn.contains(ValueType.ARRAY)) {
                             throw new SyntaxException(
+                                MSG_EXPECT_TYPE,
                                 String.format("%s: %s",
-                                    ERR_MSG_EXPECT_TYPE,
+                                    MSG_EXPECT_TYPE,
                                     canReturn));
                         }
                         isDoneTypeCheck = true;
                     }
 
                     parseValueCount = incrementLimit(
-                            ERR_MSG_LIMIT_MAX_PARSE_VALUES,
+                            MSG_LIMIT_MAX_PARSE_VALUES,
+                            this.maxParseValues,
                             parseValueCount,
                             pos);
 
                     stateStack.set(0, State.ARRAY_AFTER_ELEMENT);
                     stateStack.push(State.PAREN);
-                    builderStack.push(factory.newArrayBuilder());
+                    result.setLocation(pos).beginArray();
 
-                    if (++parseDepth > this.maxParseDepth) {
-                        throw new LimitException(
-                                ERR_MSG_LIMIT_MAX_PARSE_DEPTH, pos);
-                    }
+                    parseDepth = incrementLimit(
+                        MSG_LIMIT_MAX_PARSE_DEPTH,
+                        this.maxParseDepth,
+                        parseDepth,
+                        pos);
+
                     pos++;
                     continue;
 
@@ -395,35 +702,51 @@ public class Parser<
                     if (!isDoneTypeCheck) {
                         if (!ValueType.containsComposite(canReturn)) {
                             throw new SyntaxException(
+                                MSG_EXPECT_TYPE,
                                 String.format("%s: %s",
-                                    ERR_MSG_EXPECT_TYPE,
+                                    MSG_EXPECT_TYPE.getMessageText(),
                                     canReturn),
                                 pos);
                         }
                         isDoneTypeCheck = true;
                     }
 
-                    if (--parseDepth == 0) {
-                        if (pos + 1 != stop) {
-                            throw new SyntaxException(ERR_MSG_EXTRACHARS, pos);   
+                    parseDepth--;
+                    pos++;
+
+                    if (parseDepth == 0) {
+                        if (pos == stop) {
+                            //
+                            // In theory this should return resultBuilder.getResult()
+                            // but if parseDepth is zero then I know I can simply
+                            // return the empty-composite value.
+                            //
+                            return result.getEmptyComposite();
                         }
 
-                        //
-                        // In theory should return valueStack.peek() here, 
-                        // but if parseDepth is zero here then I know I can
-                        // simply return the emptyValue.
-                        //
-                        return emptyValue;
+                        throw new SyntaxException(MSG_EXTRA_CHARS, pos);
                     }
 
                     parseValueCount = incrementLimit(
-                            ERR_MSG_LIMIT_MAX_PARSE_VALUES,
+                            MSG_LIMIT_MAX_PARSE_VALUES,
+                            this.maxParseValues,
                             parseValueCount,
                             pos);
 
                     stateStack.pop();
-                    valueStack.push(this.emptyValue);
-                    pos++;
+                    result.setLocation(pos).addEmptyComposite();
+
+                    if (pos == stop && parseDepth == 1 && isImplied) {
+                        if (impliedArray) {
+                            result.addArrayElement().endArray();
+
+                        } else {
+                            result.addObjectElement().endObject();
+                        }
+
+                        return result.getResult();
+                    }
+
                     continue;
 
                 default:
@@ -434,15 +757,21 @@ public class Parser<
                 // paren followed by a literal.  I need to lookahead
                 // one token to see if this is an object or array.
                 //
-                int litlen = parseLiteralLength(s, pos, stop, ERR_MSG_STILLOPEN);
+                int litlen = parseLiteralLength(s, pos, stop, MSG_STILL_OPEN);
 
                 parseValueCount = incrementLimit(
-                        ERR_MSG_LIMIT_MAX_PARSE_VALUES,
+                        MSG_LIMIT_MAX_PARSE_VALUES,
+                        this.maxParseValues,
                         parseValueCount,
                         pos);
 
                 int litpos = pos;
                 pos += litlen;
+
+                if (pos == stop) {
+                    throw new SyntaxException(MSG_STILL_OPEN, pos);
+                }
+
                 c = s.charAt(pos);
 
                 switch (c) {
@@ -453,21 +782,27 @@ public class Parser<
                     if (!isDoneTypeCheck) {
                         if (!canReturn.contains(ValueType.ARRAY)) {
                             throw new SyntaxException(
+                                MSG_EXPECT_TYPE,
                                 String.format("%s: %s",
-                                    ERR_MSG_EXPECT_TYPE,
+                                    MSG_EXPECT_TYPE.getMessageText(),
                                     canReturn));
                         }
                         isDoneTypeCheck = true;
                     }
 
                     parseValueCount = incrementLimit(
-                            ERR_MSG_LIMIT_MAX_PARSE_VALUES,
+                            MSG_LIMIT_MAX_PARSE_VALUES,
+                            this.maxParseValues,
                             parseValueCount,
                             pos);
 
                     stateStack.set(0, State.ARRAY_AFTER_ELEMENT);
-                    builderStack.push(factory.newArrayBuilder());
-                    valueStack.push(literal(buf, numb, s, litpos, pos, factory));
+
+                    result
+                        .setLocation(litpos)
+                        .beginArray()
+                        .addLiteral(s, litpos, pos, allowEmptyUnquotedValue);
+
                     continue;
 
                 case ')':
@@ -477,30 +812,59 @@ public class Parser<
                     if (!isDoneTypeCheck) {
                         if (!canReturn.contains(ValueType.ARRAY)) {
                             throw new SyntaxException(
+                                MSG_EXPECT_TYPE,
                                 String.format("%s: %s",
-                                    ERR_MSG_EXPECT_TYPE,
+                                    MSG_EXPECT_TYPE.getMessageText(),
                                     canReturn),
                                 pos);
                         }
                         isDoneTypeCheck = true;
                     }
+                    
+                    result
+                        .setLocation(litpos)
+                        .addSingleElementArray(s, litpos, pos, allowEmptyUnquotedValue);
 
-                    ABT sea = factory.newArrayBuilder();
-
-                    factory.add(sea, literal(buf, numb, s, litpos, pos, factory));
-
-                    valueStack.push(factory.newArray(sea));
-
-                    if (--parseDepth == 0) {
-                        if (pos + 1 == stop) {
-                            return valueStack.peek();
-                        }
-                        throw new SyntaxException(ERR_MSG_EXTRACHARS, pos);
-                    }
-                    stateStack.pop();
+                    parseDepth--;
                     pos++;
+                    
+                    switch (parseDepth) {
+                    case 0:
+                        if (pos == stop) {
+                            return result.getResult();
+                        }
+                        throw new SyntaxException(MSG_EXTRA_CHARS, pos);
+
+                    case 1:
+                        if (pos == stop) {
+                            if (impliedArray) {
+                                return result
+                                    .addArrayElement()
+                                    .endArray()
+                                    .getResult();
+                            }
+                            if (impliedObject) {
+                                return result
+                                    .addObjectElement()
+                                    .endObject()
+                                    .getResult();
+                            }
+                            throw new SyntaxException(MSG_STILL_OPEN, pos);    
+                        }
+                        break;
+
+                    default:
+                        break;
+                    }
+
+                    stateStack.pop();
                     continue;
 
+                case '=':
+                    if (!wwwFormUrlEncoded || parseDepth != 1) {
+                        throw new SyntaxException(MSG_BAD_CHAR, pos);
+                    }
+                    // fall through
                 case ':':
                     //
                     // key name for object
@@ -508,22 +872,28 @@ public class Parser<
                     if (!isDoneTypeCheck) {
                         if (!canReturn.contains(ValueType.OBJECT)) {
                             throw new SyntaxException(
+                                MSG_EXPECT_TYPE,
                                 String.format("%s: %s",
-                                    ERR_MSG_EXPECT_TYPE,
+                                    MSG_EXPECT_TYPE.getMessageText(),
                                     canReturn));
                         }
                         isDoneTypeCheck = true;
                     }
 
                     stateStack.set(0, State.OBJECT_HAVE_KEY);
-                    builderStack.push(factory.newObjectBuilder());
-                    keyStack.push(literalToJavaString(buf, numb, s, litpos, pos));
+
+                    result
+                        .setLocation(litpos)
+                        .beginObject()
+                        .addObjectKey(s, litpos, pos, allowEmptyUnquotedKey);
+
                     pos++;
                     continue;
 
                 default:
-                    throw new SyntaxException(ERR_MSG_EXPECT_LITERAL, pos);
+                    break;
                 }
+                throw new SyntaxException(MSG_EXPECT_LITERAL, pos);
 
             case IN_ARRAY:
                 if (c == '(') {
@@ -531,7 +901,8 @@ public class Parser<
                     stateStack.push(State.PAREN);
 
                     parseDepth = incrementLimit(
-                            ERR_MSG_LIMIT_MAX_PARSE_DEPTH,
+                            MSG_LIMIT_MAX_PARSE_DEPTH,
+                            this.maxParseDepth,
                             parseDepth,
                             pos);
                     pos++;
@@ -539,27 +910,32 @@ public class Parser<
                 }
 
                 litpos = pos;
-                litlen = parseLiteralLength(s, pos, stop, ERR_MSG_STILLOPEN);
+                litlen = parseLiteralLength(s, pos, stop, MSG_STILL_OPEN);
 
                 parseValueCount = incrementLimit(
-                        ERR_MSG_LIMIT_MAX_PARSE_VALUES,
+                        MSG_LIMIT_MAX_PARSE_VALUES,
+                        this.maxParseValues,
                         parseValueCount,
                         pos);
 
                 pos += litlen;
 
                 stateStack.set(0, State.ARRAY_AFTER_ELEMENT);
-                valueStack.push(literal(buf, numb, s, litpos, pos, factory));
+                result
+                    .setLocation(litpos)
+                    .addLiteral(s, litpos, pos, allowEmptyUnquotedValue);
 
+                if (pos == stop) {
+                    if (parseDepth == 1 && impliedArray) {
+                        return result.addArrayElement().endArray().getResult();
+                    }
+
+                    throw new SyntaxException(MSG_STILL_OPEN, stop);
+                }
                 continue;
 
             case ARRAY_AFTER_ELEMENT:
-                V topval = valueStack.pop();
-
-                @SuppressWarnings("unchecked")
-                ABT destArray = (ABT)builderStack.peek();
-
-                factory.add(destArray, topval);
+                result.setLocation(pos).addArrayElement();
 
                 switch (c) {
                 case ',':
@@ -568,23 +944,41 @@ public class Parser<
                     continue;
 
                 case ')':
-                    @SuppressWarnings("unchecked")
-                    ABT ab = (ABT)builderStack.pop();
-                    valueStack.push(factory.newArray(ab));
+                    result.endArray();
 
-                    if (--parseDepth == 0) {
-                        if (pos + 1 == stop) {
-                            return valueStack.peek();
-                        }
-                        throw new SyntaxException(ERR_MSG_EXTRACHARS, pos);
-                    }
-                    stateStack.pop();
+                    parseDepth--;
                     pos++;
+
+                    switch (parseDepth) {
+                    case 0:
+                        if (pos == stop && !impliedArray) {
+                            return result.getResult();
+                        }
+                        throw new SyntaxException(MSG_EXTRA_CHARS, pos);
+
+                    case 1:
+                        if (pos == stop) {
+                            if (impliedArray) {
+                                return result.addArrayElement().endArray().getResult();
+                            }
+                            if (impliedObject) {
+                                return result.addObjectElement().endObject().getResult();
+                            }
+                            throw new SyntaxException(MSG_STILL_OPEN, pos);
+                        }
+                        break;
+
+                    default:
+                        break;
+                    }
+
+                    stateStack.pop();
                     continue;
+
                 default:
                     break;
                 }
-                throw new SyntaxException(ERR_MSG_EXPECT_STRUCTCHAR, pos);
+                throw new SyntaxException(MSG_EXPECT_STRUCT_CHAR, pos);
 
             case OBJECT_HAVE_KEY:
                 if (c == '(') {
@@ -592,7 +986,8 @@ public class Parser<
                     stateStack.push(State.PAREN);
 
                     parseDepth = incrementLimit(
-                            ERR_MSG_LIMIT_MAX_PARSE_DEPTH,
+                            MSG_LIMIT_MAX_PARSE_DEPTH,
+                            this.maxParseDepth,
                             parseDepth,
                             pos);
 
@@ -601,78 +996,130 @@ public class Parser<
                 }
 
                 litpos = pos;
-                litlen = parseLiteralLength(s, pos, stop, ERR_MSG_STILLOPEN);
+                litlen = parseLiteralLength(s, pos, stop, MSG_STILL_OPEN);
 
                 parseValueCount = incrementLimit(
-                        ERR_MSG_LIMIT_MAX_PARSE_VALUES,
+                        MSG_LIMIT_MAX_PARSE_VALUES,
+                        this.maxParseValues,
                         parseValueCount,
                         pos);
 
                 pos += litlen;
 
                 stateStack.set(0, State.OBJECT_AFTER_ELEMENT);
-                valueStack.push(literal(buf, numb, s, litpos, pos, factory));
+                result
+                    .setLocation(litpos)
+                    .addLiteral(s, litpos, pos, allowEmptyUnquotedValue);
+                
+                if (pos == stop) {
+                    if (parseDepth == 1 && impliedObject) {
+                        return result.addObjectElement().endObject().getResult();    
+                    }
+
+                    throw new SyntaxException(MSG_STILL_OPEN, stop);
+                }
 
                 continue;
 
             case OBJECT_AFTER_ELEMENT:
-                topval = valueStack.pop();
-                String key = keyStack.pop();
-
-                @SuppressWarnings("unchecked") JBT jb = (JBT)builderStack.peek();
-                factory.put(jb, key, topval);
+                result.setLocation(pos).addObjectElement();
 
                 switch (c) {
+                case '&':
+                    if (!wwwFormUrlEncoded || parseDepth != 1) {
+                        throw new SyntaxException(MSG_BAD_CHAR, pos);
+                    }
+                    // fall through
                 case ',':
                     stateStack.set(0, State.IN_OBJECT);
                     pos++;
                     continue;
 
                 case ')':
-                    builderStack.pop();
-                    valueStack.push(factory.newObject(jb));
+                    result.endObject();
 
-                    if (--parseDepth == 0) {
-                        if (pos + 1 == stop) {
-                            return valueStack.peek();
-                        }
-                        throw new SyntaxException(ERR_MSG_EXTRACHARS, pos);
-                    }
-                    stateStack.pop();
+                    parseDepth--;
                     pos++;
+
+                    switch (parseDepth) {
+                    case 0:
+                        if (pos == stop && !impliedObject) {
+                            return result.getResult();
+                        }
+                        throw new SyntaxException(MSG_EXTRA_CHARS, pos);
+
+                    case 1:
+                        if (pos == stop) {
+                            if (impliedArray) {
+                                return result.addArrayElement().endArray().getResult();
+                            }
+                            if (impliedObject) {
+                                return result.addObjectElement().endObject().getResult();
+                            }
+                            throw new SyntaxException(MSG_EXTRA_CHARS, pos);    
+                        }
+                        break;
+
+                    default:
+                        break;
+                    }
+
+                    stateStack.pop();
                     continue;
                 default:
                     break;
                 }
-                throw new SyntaxException(ERR_MSG_EXPECT_STRUCTCHAR, pos);
+                throw new SyntaxException(MSG_EXPECT_STRUCT_CHAR, pos);
 
             case IN_OBJECT:
                 litpos = pos;
-                litlen = parseLiteralLength(s, pos, stop, ERR_MSG_STILLOPEN);
+                litlen = parseLiteralLength(s, pos, stop, MSG_STILL_OPEN);
                 pos += litlen;
 
+                if (pos == stop) {
+                    throw new SyntaxException(MSG_STILL_OPEN, pos);
+                }
+
                 c = s.charAt(pos);
-                if (c != ':') {
-                    throw new SyntaxException(ERR_MSG_EXPECT_OBJVALUE, pos);
+
+                switch (c) {
+                case '=':
+                    if (!wwwFormUrlEncoded || parseDepth != 1) {
+                        throw new SyntaxException(MSG_BAD_CHAR, pos);
+                    }
+                    // fall through
+                case ':':
+                    break;
+
+                default:
+                    throw new SyntaxException(MSG_EXPECT_OBJECT_VALUE, pos);
                 }
 
                 stateStack.set(0, State.OBJECT_HAVE_KEY);
-                keyStack.push(literalToJavaString(buf, numb, s, litpos, pos));
+
+                result
+                    .setLocation(litpos)
+                    .addObjectKey(s, litpos, pos, allowEmptyUnquotedKey);
+
                 pos++;
                 continue;
             }
         }
     }
 
-    public void setMaxParseChars(int maxParseChars) {
-        this.maxParseChars = maxParseChars;
-    }
+    /**
+     * increment a limit value, throwing an exception if the limit is reached.
+     */
+    private static final int incrementLimit(
+            LimitException.Message msg,
+            int limit,
+            int value,
+            int pos) {
+        value++;
 
-    public void setMaxParseDepth(int maxParseDepth) {
-        this.maxParseDepth = maxParseDepth;
-    }
-
-    public void setMaxParseValues(int maxParseValues) {
-        this.maxParseValues = maxParseValues;
+        if (value > limit) {
+            throw new LimitException(msg, pos);
+        }
+        return value;
     }
 }

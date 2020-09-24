@@ -27,64 +27,119 @@ public class SyntaxException extends ParseException {
      */
     private static final long serialVersionUID = 1L;
 
-    /** ERR_MSG_BADCHAR. */
-    static final String ERR_MSG_BADCHAR = "invalid character";
+    /**
+     * Enumeration of messages.
+     */
+    public enum Message {
+        /** Invalid character. */
+        MSG_BAD_CHAR("invalid character"),
+        /** Non-terminated string literal. */
+        MSG_BAD_QSTR("non-terminated string literal"),
+        /** Invalid percent-encoded sequence. */
+        MSG_BAD_PCT_ENC("invalid percent-encoded sequence"),
+        /** Invalid encoded UTF-8 sequence. */
+        MSG_BAD_UTF8("invalid encoded UTF-8 sequence"),
+        /** Text missing. */
+        MSG_NO_TEXT("text missing"),
+        /** Expected literal value. */
+        MSG_EXPECT_LITERAL("expected literal value"),
+        /** Expected array. */
+        MSG_EXPECT_ARRAY("expected array"),
+        /** Expected object. */
+        MSG_EXPECT_OBJECT("expected object"),
+        /** Expected type. */
+        MSG_EXPECT_TYPE("expected type"),
+        /** Expected structural character. */
+        MSG_EXPECT_STRUCT_CHAR("expected structural character"),
+        /** Expected object value. */
+        MSG_EXPECT_OBJECT_VALUE("expected object value"),
+        /** Unexpected array. */
+        MSG_UNEXPECTED_ARRAY("unexpected array"),
+        /** Unexpected boolean. */
+        MSG_UNEXPECTED_BOOLEAN("unexpected boolean"),
+        /** Unexpected empty composite. */
+        MSG_UNEXPECTED_EMPTY_COMPOSITE("unexpected empty composite"),
+        /** Unexpected null. */
+        MSG_UNEXPECTED_NULL("unexpected null"),
+        /** Unexpected number. */
+        MSG_UNEXPECTED_NUMBER("unexpected number"),
+        /** Unexpected object. */
+        MSG_UNEXPECTED_OBJECT("unexpected object"),
+        /** Unexpected string. */
+        MSG_UNEXPECTED_STRING("unexpected string"),
+        /** Unexpected end-of-input inside composite. */
+        MSG_STILL_OPEN("unexpected end-of-input inside composite"),
+        /** Unexpected text after composite. */
+        MSG_EXTRA_CHARS("unexpected text after composite");
 
-    /** ERR_MSG_BADQSTR. */
-    static final String ERR_MSG_BADQSTR = "non-terminated string literal";
+        private final String text;
 
-    /** ERR_MSG_BADPCTENC. */
-    static final String ERR_MSG_BADPCTENC = "invalid percent-encoded sequence";
+        private Message(String text) {
+            this.text = text;
+        }
 
-    /** ERR_MSG_BADUTF8. */
-    static final String ERR_MSG_BADUTF8 = "invalid encoded UTF-8 sequence";
+        /**
+         * Get the message text.
+         */
+        public String getMessageText() {
+            return text;
+        }
+    }
 
-    /** ERR_MSG_NOTEXT. */
-    static final String ERR_MSG_NOTEXT = "text missing";
-
-    /** ERR_MSG_EXPECT_LITERAL. */
-    static final String ERR_MSG_EXPECT_LITERAL = "expected literal value";
-
-    /** ERR_MSG_EXPECT_ARRAY. */
-    static final String ERR_MSG_EXPECT_ARRAY = "expected array";
-
-    /** ERR_MSG_EXPECT_OBJECT. */
-    static final String ERR_MSG_EXPECT_OBJECT = "expected object";
-    
-    /** ERR_MSG_EXPECT_TYPE. */
-    static final String ERR_MSG_EXPECT_TYPE = "expected type";
-
-    /** ERR_MSG_EXPECT_STRUCTCHAR. */
-    static final String ERR_MSG_EXPECT_STRUCTCHAR = "expected structural character";
-
-    /** ERR_MSG_EXPECT_OBJVALUE. */
-    static final String ERR_MSG_EXPECT_OBJVALUE = "expected object value";
-
-    /** ERR_MSG_STILLOPEN. */
-    static final String ERR_MSG_STILLOPEN = "unexpected end-of-input inside composite";
-
-    /** ERR_MSG_EXTRACHARS. */
-    static final String ERR_MSG_EXTRACHARS = "unexpected text after composite";
+    /**
+     * My message.
+     */
+    private final Message message;
 
     /**
      * Create a new SyntaxException.
      * @param msg exception message
      */
-    public SyntaxException(String msg) {
-        super(msg);
+    public SyntaxException(Message msg) {
+        super(msg.getMessageText());
+        this.message = msg;
     }
 
     /**
-     * Create a new LimitException.
+     * Create a new SyntaxException.
      * @param msg exception message
      * @param position position in input where the exception occurred.
      */
-    public SyntaxException(String msg, int position) {
-        super(msg, position);
+    public SyntaxException(Message msg, int position) {
+        super(msg.getMessageText(), position);
+        this.message = msg;
+    }
+
+    /**
+     * Create a new SyntaxException.
+     * @param msg exception message
+     * @param position position in input where the exception occurred.
+     * @param text exception message text
+     */
+    public SyntaxException(Message msg, String text, int position) {
+        super(text, position);
+        this.message = msg;
+    }
+
+    /**
+     * Create a new SyntaxException.
+     * @param msg exception message
+     * @param text exception message text
+     */
+    public SyntaxException(Message msg, String text) {
+        super(text);
+        this.message = msg;
     }
 
     @Override
     protected String typeDescription() {
         return "syntax error";
+    }
+
+    /**
+     * Get this exception's message value.
+     */
+    public Message getMessageValue() {
+        return this.message;
     }
 }

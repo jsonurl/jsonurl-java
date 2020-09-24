@@ -1,7 +1,5 @@
-package org.jsonurl;
-
 /*
- * Copyright 2019 David MacCormack
+ * Copyright 2019-2020 David MacCormack
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -17,6 +15,8 @@ package org.jsonurl;
  * under the License.
  */
 
+package org.jsonurl;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,13 +24,18 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 
 /**
- * Unit test for writing JSON&#x2192;URL text.
+ * Unit test for writing JSON&#x2192;URL text via JSON text.
+ *
+ * <p>These unit tests are designed to test against an existing JSON API,
+ * such as JSR-374. It requires a valid/functioning JSON parser as it uses it
+ * to parse JSON to verify that semantically equivalent JSON&#x2192;URL produces
+ * equivalent in-memory classes for the target API.
  *
  * @author jsonurl.org
  * @author David MacCormack
  * @since 2019-09-01
  */
-public abstract class AbstractWriteTest<V,C extends V,A extends C,J extends C> {
+public abstract class AbstractJsonApiWriteTest<V,C extends V,A extends C,J extends C> {
 
     /**
      * Write the given value.
@@ -59,7 +64,7 @@ public abstract class AbstractWriteTest<V,C extends V,A extends C,J extends C> {
      * Create a new implementation-defined JSON&#x2192;URL parser.
      * @return a valid Parser instance
      */
-    public abstract Parser<V,C,?,A,?,J,?,?,?,?> newParser();
+    public abstract ValueFactoryParser<V,C,?,A,?,J,?,?,?,?> newParser();
 
     /**
      * Create a string for the given implementation-defined value.
@@ -101,7 +106,7 @@ public abstract class AbstractWriteTest<V,C extends V,A extends C,J extends C> {
         write(sb, obj);
         String jsonUriText = sb.build();
         
-        Parser<V,C,?,A,?,J,?,?,?,?> p = newParser();
+        ValueFactoryParser<V,C,?,A,?,J,?,?,?,?> p = newParser();
         V obj2 = p.parse(jsonUriText);
         String jsonText = valueToString(obj2);
         assertEquals(s, jsonText);

@@ -1,10 +1,5 @@
-package org.jsonurl;
-
-import java.util.EnumSet;
-import java.util.Set;
-
 /*
- * Copyright 2019 David MacCormack
+ * Copyright 2019-2020 David MacCormack
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -20,11 +15,15 @@ import java.util.Set;
  * under the License.
  */
 
+package org.jsonurl;
+
+import java.util.EnumSet;
+import java.util.Set;
+
 /**
  * A ValueFactory allows {@link org.jsonurl.Parser Parser}
- * to be implementation independent. A ValueFactory provides
- * implementation-defined values for JSON&#x2192;URL
- * objects, arrays, and literals.
+ * to be implementation independent. It abstracts the classes, interfaces, and
+ * values specific to each implementation (json.org, JSR-374, etc).
  * 
  * @param <V> value type (any JSON value)
  * @param <C> composite type (array or object)
@@ -56,9 +55,13 @@ public interface ValueFactory<
     /**
      * A ValueFactory with transparent array and object builders.
      *
-     * <p>A TransparentBuilder is a ValueFactory whose JSON array and JSON
-     * array builder are the same instance of the same class, and whose JSON
-     * object and JSON object builder are the same instance of the same class. 
+     * <p>ValueFactory defines separate types for JSON array and object
+     * builders vs arrays and objects themselves. That is useful for an
+     * API like JSR-374. However, in other APIs there is no distinction to
+     * be made. A TransparentBuilder is a ValueFactory whose JSON array
+     * builders and arrays are the same instance of the same class,
+     * and whose JSON object builders and objects are the same instance of the
+     * same class. 
      *
      * @param V value type (any JSON value)
      * @param C composite type (array or object)
@@ -96,7 +99,6 @@ public interface ValueFactory<
     
     /**
      * A ValueFactory that also implements the BigMathProvider interface.
-     * @author djm
      *
      * @param <V> value type (any JSON value)
      * @param <C> composite type (array or object)
@@ -268,12 +270,12 @@ public interface ValueFactory<
     public boolean isValid(Set<ValueType> types, V value);
 
     /**
-     * Test if the given object is the empty value.
+     * Test if the given object is the empty composite value.
      *
      * @param obj a Java Object
      * @return true if obj is the empty composite; false otherwise.
      */
-    default boolean isEmpty(Object obj) {
+    default boolean isEmptyComposite(Object obj) {
         return obj == getEmptyComposite();
     }
 
@@ -284,7 +286,7 @@ public interface ValueFactory<
      * @return true if obj is the null value; false otherwise.
      */
     default boolean isNull(Object obj) {
-        return obj == getNull();
+        return obj == null || obj == getNull();
     }
 
     /**

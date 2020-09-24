@@ -1,13 +1,9 @@
-package org.jsonurl.jsonp;
-
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Copyright 2019-2020 David MacCormack
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
  *
  *  http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -19,6 +15,8 @@ package org.jsonurl.jsonp;
  * under the License.
  */
 
+package org.jsonurl.jsonp;
+
 import java.io.StringReader;
 import java.io.StringWriter;
 import javax.json.Json;
@@ -28,9 +26,9 @@ import javax.json.JsonReader;
 import javax.json.JsonStructure;
 import javax.json.JsonValue;
 import javax.json.stream.JsonGenerator;
-import org.jsonurl.AbstractWriteTest;
+import org.jsonurl.AbstractJsonApiWriteTest;
 import org.jsonurl.JsonTextBuilder;
-import org.jsonurl.Parser;
+import org.jsonurl.ValueFactoryParser;
 
 /**
  * Unit test for writing JSON&#x2192;URL text.
@@ -39,7 +37,7 @@ import org.jsonurl.Parser;
  * @author David MacCormack
  * @since 2019-09-01
  */
-public class JsonpWriteTest extends AbstractWriteTest<
+public class JsonpWriteTest extends AbstractJsonApiWriteTest<
         JsonValue,
         JsonStructure,
         JsonArray,
@@ -61,7 +59,7 @@ public class JsonpWriteTest extends AbstractWriteTest<
     }
 
     @Override
-    public Parser<
+    public ValueFactoryParser<
             JsonValue,
             JsonStructure,
             ?,
