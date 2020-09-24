@@ -134,8 +134,8 @@ class NumberBuilderTest {
 
         final String sin = String.valueOf(in);
         NumberBuilder nb = newNumberBuilder(sin);
-        nb.setMathContextProvider(mcp);
-        assertEquals(mcp, nb.getMathContextProvider(), sin);
+        nb.setBigMathProvider(mcp);
+        assertEquals(mcp, nb.getBigMathProvider(), sin);
         BigDecimal bd = nb.toBigDecimal();
         assertEquals(expect, bd.doubleValue());
     }

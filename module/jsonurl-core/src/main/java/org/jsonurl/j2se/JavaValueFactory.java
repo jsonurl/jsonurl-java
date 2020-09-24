@@ -21,6 +21,7 @@ import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,10 +47,12 @@ import org.jsonurl.ValueType;
  * @author David MacCormack
  * @since 2019-09-01
  */
-public interface JavaValueFactory extends ValueFactory.TransparentBuilder<
+public interface JavaValueFactory extends ValueFactory<
         Object,
         Object,
         List<Object>,
+        List<Object>,
+        Map<String,Object>,
         Map<String,Object>,
         Boolean,
         Number,
@@ -112,8 +115,8 @@ public interface JavaValueFactory extends ValueFactory.TransparentBuilder<
      * boxed primitives.
      * 
      * <p>This factory uses an instance of {@link java.lang.Long Long} for
-     * (most) numbers which fall between {@link Long#MIN_VALUE} and
-     * {@link Long#MAX_VALUE}, and  an instance of
+     * numbers with no fractional value that fall between {@link Long#MIN_VALUE}
+     * and {@link Long#MAX_VALUE}, and  an instance of
      * {@link java.lang.Double Double} for everything else.
      */
     public static final JavaValueFactory PRIMITIVE = new JavaValueFactory() {
@@ -164,12 +167,12 @@ public interface JavaValueFactory extends ValueFactory.TransparentBuilder<
         null);
 
     /**
-     * The null value.
+     * The default null value.
      */
-    public static final String NULL = "null";
+    public static final Object NULL = new Object();
 
     /**
-     * The empty composite value.
+     * The default empty composite value.
      */
     public static final Map<String,Object> EMPTY = Collections.emptyMap();
 
@@ -185,12 +188,29 @@ public interface JavaValueFactory extends ValueFactory.TransparentBuilder<
 
     @Override
     default List<Object> newArrayBuilder() {
-        return new ArrayList<>(4);
+        return new LinkedList<>();
     }
 
     @Override
     default Map<String,Object> newObjectBuilder() {
         return new HashMap<>(4);
+    }
+    
+    @Override
+    default List<Object> newArray(List<Object> builder) {
+        //
+        // create an ArrayList from a LinkedList; space optimized now that the
+        // size is known.
+        //
+        return new ArrayList<>(builder);
+    }
+    
+    @Override
+    default Map<String,Object> newObject(Map<String,Object> builder) {
+        //
+        // just use the builder
+        //
+        return builder;
     }
 
     @Override
@@ -232,7 +252,7 @@ public interface JavaValueFactory extends ValueFactory.TransparentBuilder<
         if (isNull(value)) {
             return types.contains(ValueType.NULL);
         }
-        if (isEmpty(value)) {
+        if (isEmptyComposite(value)) {
             return ValueType.containsComposite(types);
         }
         if (value instanceof String) {

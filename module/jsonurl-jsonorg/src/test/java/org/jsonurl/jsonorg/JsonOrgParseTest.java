@@ -18,6 +18,7 @@ package org.jsonurl.jsonorg;
  */
 
 import java.math.MathContext;
+import java.util.Objects;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsonurl.AbstractParseTest;
@@ -84,10 +85,15 @@ abstract class JsonOrgParseTest extends AbstractParseTest<
     }
 
     @Override
+    protected String getString(int index, JSONArray value) {
+        return (String)value.get(index);
+    }
+
+    @Override
     protected String getString(String key, JSONObject value) {
         return (String)value.get(key);
     }
-    
+
     @Override
     protected boolean getBoolean(String key, JSONObject value) {
         Object ret = value.get(key);
@@ -107,7 +113,12 @@ abstract class JsonOrgParseTest extends AbstractParseTest<
     
     @Override
     protected boolean getEmptyComposite(String key, JSONObject value) {
-        return factory.isEmpty(value.get(key));
+        return factory.isEmptyComposite(value.get(key));
+    }
+
+    @Override
+    protected boolean getEmptyComposite(int index, JSONArray value) {
+        return factory.isEmptyComposite(value.get(index));
     }
 
     @Override
@@ -136,4 +147,24 @@ abstract class JsonOrgParseTest extends AbstractParseTest<
             mc, boundNeg, boundPos, over);
     }
 
+    @Override
+    protected boolean isEqual(Object a, Object b) {
+        if (a == null) {
+            return b == null;
+        }
+
+        if (b == null) {
+            return false;
+        }
+
+        if (a instanceof JSONArray) {
+            return ((JSONArray)a).toList().equals(((JSONArray)b).toList());
+        }
+
+        if (a instanceof JSONObject) {
+            return ((JSONObject)a).toMap().equals(((JSONObject)b).toMap());
+        }
+
+        return Objects.equals(a, b);
+    }
 }

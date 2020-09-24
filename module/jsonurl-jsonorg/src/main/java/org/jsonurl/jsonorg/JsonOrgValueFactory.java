@@ -221,7 +221,7 @@ public interface JsonOrgValueFactory extends ValueFactory.TransparentBuilder<
         if (isNull(value)) {
             return types.contains(ValueType.NULL);
         }
-        if (isEmpty(value)) {
+        if (isEmptyComposite(value)) {
             return types.contains(ValueType.OBJECT)
                 || types.contains(ValueType.ARRAY);
         }

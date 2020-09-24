@@ -23,12 +23,12 @@ import static org.jsonurl.CharUtil.IS_QSCHAR;
 import static org.jsonurl.CharUtil.IS_QUOTE;
 import static org.jsonurl.CharUtil.IS_STRUCTCHAR;
 import static org.jsonurl.CharUtil.hexDecode;
-import static org.jsonurl.SyntaxException.ERR_MSG_BADCHAR;
-import static org.jsonurl.SyntaxException.ERR_MSG_BADPCTENC;
-import static org.jsonurl.SyntaxException.ERR_MSG_BADQSTR;
-import static org.jsonurl.SyntaxException.ERR_MSG_BADUTF8;
-import static org.jsonurl.SyntaxException.ERR_MSG_EXPECT_LITERAL;
-import static org.jsonurl.SyntaxException.ERR_MSG_NOTEXT;
+import static org.jsonurl.SyntaxException.Message.MSG_BAD_CHAR;
+import static org.jsonurl.SyntaxException.Message.MSG_BAD_PCT_ENC;
+import static org.jsonurl.SyntaxException.Message.MSG_BAD_QSTR;
+import static org.jsonurl.SyntaxException.Message.MSG_BAD_UTF8;
+import static org.jsonurl.SyntaxException.Message.MSG_EXPECT_LITERAL;
+import static org.jsonurl.SyntaxException.Message.MSG_NO_TEXT;
 
 import java.io.IOException;
 import java.nio.charset.MalformedInputException;
@@ -61,7 +61,7 @@ public final class JsonUrl {
                 //
                 // use the factory as a BigMathProvider
                 //
-                ret.setMathContextProvider((BigMathProvider)factory);
+                ret.setBigMathProvider((BigMathProvider)factory);
             }
 
             return ret;
@@ -73,14 +73,14 @@ public final class JsonUrl {
                 int len) {
 
             if (off + 2 > len) {
-                throw new SyntaxException(ERR_MSG_BADPCTENC, off);
+                throw new SyntaxException(MSG_BAD_PCT_ENC, off);
             }
 
             int c1 = hexDecode(s.charAt(off));
             int c2 = hexDecode(s.charAt(off + 1));
 
             if (c1 < 0 || c2 < 0) {
-                throw new SyntaxException(ERR_MSG_BADPCTENC, off);
+                throw new SyntaxException(MSG_BAD_PCT_ENC, off);
             }
 
             return ((c1 << 4) | c2);
@@ -150,7 +150,8 @@ public final class JsonUrl {
                 CharSequence s,
                 int start,
                 int stop,
-                boolean quoted) {
+                boolean quoted,
+                boolean isEmptyUnquotedStringOK) {
 
             boolean needEndQuote = quoted;
 
@@ -229,10 +230,16 @@ public final class JsonUrl {
                 }
             }
             if (needEndQuote) {
-                throw new SyntaxException(ERR_MSG_BADQSTR, stop);
+                throw new SyntaxException(MSG_BAD_QSTR, stop);
             }
             if (more > 0) {
-                throw new SyntaxException(ERR_MSG_BADUTF8, stop);
+                throw new SyntaxException(MSG_BAD_UTF8, stop);
+            }
+            
+            if (!quoted && !isEmptyUnquotedStringOK && buf.length() == 0) {
+                throw new SyntaxException(
+                    SyntaxException.Message.MSG_EXPECT_LITERAL,
+                    start);
             }
 
             return buf.toString();
@@ -251,21 +258,23 @@ public final class JsonUrl {
          * @param start the start index
          * @param stop the stop index
          */
-        @SuppressWarnings("PMD")
         static final String literalToJavaString(
                 StringBuilder buf,
                 NumberBuilder num,
                 CharSequence s,
                 int start,
-                int stop) {
+                int stop,
+                boolean isEmptyUnquotedStringOK) {
 
-            String ret;
+            
             
             if (s.charAt(start) == '\'') {
-                return string(buf, s, start + 1, stop, true);
+                return string(buf, s, start + 1, stop, true, isEmptyUnquotedStringOK);
             }
 
-            if ((ret = getTrueFalseNull(s, start, stop)) != null) {
+            String ret = getTrueFalseNull(s, start, stop);
+
+            if (ret != null) {
                 return ret;
             }
             
@@ -282,10 +291,10 @@ public final class JsonUrl {
             }
 
             if (num.parse(s, start, stop)) {
-                return num.toString();
+                return s.subSequence(start, stop).toString();
             }
 
-            return string(buf, s, start, stop, false);
+            return string(buf, s, start, stop, false, isEmptyUnquotedStringOK);
         }
 
         /**
@@ -309,10 +318,12 @@ public final class JsonUrl {
                 CharSequence s,
                 int start,
                 int stop,
-                ValueFactory<V,?,?,?,?,?,?,?,?,?> factory) {
+                ValueFactory<V,?,?,?,?,?,?,?,?,?> factory,
+                boolean isEmptyUnquotedStringOK) {
 
             if (s.charAt(start) == '\'') {
-                return factory.getString(string(buf, s, start + 1, stop, true));
+                return factory.getString(string(
+                    buf, s, start + 1, stop, true, isEmptyUnquotedStringOK));
             }
 
             V ret = factory.getTrueFalseNull(s, start, stop);
@@ -332,7 +343,8 @@ public final class JsonUrl {
                 return factory.getNumber(num);
             }
 
-            return factory.getString(string(buf, s, start, stop, false));
+            return factory.getString(string(
+                buf, s, start, stop, false, isEmptyUnquotedStringOK));
         }
     }
 
@@ -497,7 +509,7 @@ public final class JsonUrl {
      * Determine the length of a literal value.
      *
      * <p>This simply calls
-     * {@link #parseLiteralLength(CharSequence, int, int, String)
+     * {@link #parseLiteralLength(CharSequence, int, int, org.jsonurl.SyntaxException.Message)
      * parseLiteralLength(s, start, stop, null)}.
      * 
      * @param s text to be parsed
@@ -522,7 +534,8 @@ public final class JsonUrl {
      * <p>This method will stop when the first structural character
      * is found or when ``stop'' is reached, whichever comes first.
      * Note, because it is static no limits are enforced as is with
-     * {@link org.jsonurl.Parser#parse(CharSequence, int, int) parse}.
+     * {@link org.jsonurl.Parser#parse(CharSequence, ValueFactory)
+     * parse}.
      * 
      * @param s text to be parsed
      * @param start start position in text
@@ -535,7 +548,7 @@ public final class JsonUrl {
             CharSequence s,
             int start,
             int stop,
-            String errmsg) {
+            SyntaxException.Message errmsg) {
         
         int ret = 0;
 
@@ -561,9 +574,9 @@ public final class JsonUrl {
                         break;
                     }
                 }
-                throw new SyntaxException(ERR_MSG_BADCHAR, start);
+                throw new SyntaxException(MSG_BAD_CHAR, start);
             }
-            throw new SyntaxException(ERR_MSG_BADQSTR, start);
+            throw new SyntaxException(MSG_BAD_QSTR, start);
         }
 
         for (; start < stop; start++) {
@@ -580,7 +593,7 @@ public final class JsonUrl {
                     break;
                 }
             }
-            throw new SyntaxException(ERR_MSG_BADCHAR, start);
+            throw new SyntaxException(MSG_BAD_CHAR, start);
         }
         
         if (start != stop && errmsg != null) {
@@ -591,7 +604,7 @@ public final class JsonUrl {
 
     /**
      * Determine the length of a literal value.
-     * @see #parseLiteralLength(CharSequence, int, int, String)
+     * @see #parseLiteralLength(CharSequence, int, int, org.jsonurl.SyntaxException.Message)
      */
     public static final int parseLiteralLength(CharSequence s) {
         return parseLiteralLength(s, 0, s.length(), null);
@@ -608,8 +621,8 @@ public final class JsonUrl {
      * <li>string
      * </ul>
      * No limits are enforced (as is with
-     * {@link org.jsonurl.Parser#parse(CharSequence, int, int) parse})
-     * because this method is static.
+     * {@link org.jsonurl.Parser#parse(CharSequence, ValueFactory)
+     * parse}) because this method is static.
      * 
      * <p>Note, the third argument is a length not a position. It indicates
      * the number of characters to be parsed.
@@ -623,55 +636,62 @@ public final class JsonUrl {
             CharSequence s,
             int start,
             int length,
-            ValueFactory<V,?,?,?,?,?,?,?,?,?> factory) {
+            ValueFactory<V,?,?,?,?,?,?,?,?,?> factory,
+            boolean isEmptyUnquotedStringOK) {
 
         if (length == 0) {
-            throw new SyntaxException(ERR_MSG_NOTEXT);
+            throw new SyntaxException(MSG_NO_TEXT);
         }
 
         int stop = start + length;
-        parseLiteralLength(s, start, stop, ERR_MSG_EXPECT_LITERAL);
+        parseLiteralLength(s, start, stop, MSG_EXPECT_LITERAL);
 
-        return Parse.literal(null, null, s, start, stop, factory);
+        return Parse.literal(null, null, s, start, stop, factory, isEmptyUnquotedStringOK);
     }
 
     /**
      * Parse a single literal value.
      *
      * <p>This simply calls
-     * {@link #parseLiteral(CharSequence, int, int, ValueFactory)
-     * parseLiteral(s, start, length, JavaValueFactory.PRIMITIVE)}.
-     * @see JsonUrl#parseLiteral(CharSequence, int, int, ValueFactory)
+     * {@link #parseLiteral(CharSequence, int, int, ValueFactory, boolean)
+     * parseLiteral(s, start, length, JavaValueFactory.PRIMITIVE, false)}.
+     *
+     * @see JsonUrl#parseLiteral(CharSequence, int, int, ValueFactory, boolean)
      * @see JavaValueFactory#PRIMITIVE
      */
     public static final Object parseLiteral(
             CharSequence s,
             int start,
             int length) {
-        return parseLiteral(s, start, length, JavaValueFactory.PRIMITIVE);
+        return parseLiteral(s, start, length, JavaValueFactory.PRIMITIVE, false);
     }
 
     /**
      * Parse a single literal value.
      *
      * <p>This simply calls
-     * {@link #parseLiteral(CharSequence, int, int, ValueFactory)
-     * parseLiteral(s, 0, s.length(), JavaValueFactory.PRIMITIVE)}.
-     * @see JsonUrl#parseLiteral(CharSequence, int, int, ValueFactory)
+     * {@link #parseLiteral(CharSequence, int, int, ValueFactory, boolean)
+     * parseLiteral(s, 0, s.length(), JavaValueFactory.PRIMITIVE, false)}.
+     *
+     * @see JsonUrl#parseLiteral(CharSequence, int, int, ValueFactory, boolean)
+     * @see JavaValueFactory#PRIMITIVE
      */
     public static final Object parseLiteral(CharSequence s) {
-        return parseLiteral(s, 0, s.length(), JavaValueFactory.PRIMITIVE);
+        return parseLiteral(s, 0, s.length(), JavaValueFactory.PRIMITIVE, false);
     }
 
     /**
      * Parse a single literal value.
      *
-     * @see JsonUrl#parseLiteral(CharSequence, int, int, ValueFactory)
+     * <p>This simply calls
+     * {@link #parseLiteral(CharSequence, int, int, ValueFactory, boolean)
+     * parseLiteral(s, 0, s.length(), factory, false)}.
+     * @see JsonUrl#parseLiteral(CharSequence, int, int, ValueFactory, boolean)
      */
     public static final <V> V parseLiteral(
             CharSequence s,
             ValueFactory<V,?,?,?,?,?,?,?,?,?> factory) {
-        return parseLiteral(s, 0, s.length(), factory);
+        return parseLiteral(s, 0, s.length(), factory, false);
     }
 
     /**

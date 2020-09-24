@@ -72,12 +72,17 @@ abstract class JavaValueFactoryParseTest extends AbstractParseTest<
         Object ret = value.get(key);
         return factory.getNull() == ret;
     }
-    
+
     @Override
     protected boolean getEmptyComposite(String key, Map<String,Object> value) {
-        return factory.isEmpty(value.get(key));
+        return factory.isEmptyComposite(value.get(key));
     }
 
+    @Override
+    protected boolean getEmptyComposite(int index, List<Object> value) {
+        return factory.isEmptyComposite(value.get(index));
+    }
+    
     @SuppressWarnings("unchecked") //NOPMD
     @Override
     protected List<Object> getArray(String key, Map<String,Object> value) {
@@ -115,6 +120,11 @@ abstract class JavaValueFactoryParseTest extends AbstractParseTest<
     @Override
     protected String getString(String key, Map<String,Object> value) {
         return (String)value.get(key);
+    }
+
+    @Override
+    protected String getString(int index, List<Object> value) {
+        return (String)value.get(index);
     }
 
     @Override

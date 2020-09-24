@@ -21,21 +21,36 @@ package org.jsonurl;
  * A exception that occurs when a limit is exceeded.
  */
 public class LimitException extends ParseException {
-    /** ERR_MSG_LIMIT_MAX_PARSE_CHARS. */
-    static final String ERR_MSG_LIMIT_MAX_PARSE_CHARS =
-            "input has too many characters";
-
-    /** ERR_MSG_LIMIT_MAX_PARSE_VALUES. */
-    static final String ERR_MSG_LIMIT_MAX_PARSE_VALUES =
-            "input has too many values";
-
-    /** ERR_MSG_LIMIT_MAX_PARSE_DEPTH. */
-    static final String ERR_MSG_LIMIT_MAX_PARSE_DEPTH =
-            "input nesting is too deep";
     
-    /** ERR_MSG_LIMIT_INTEGER. */
-    static final String ERR_MSG_LIMIT_INTEGER =
-            "integer overflow";
+    /**
+     * Enumeration of messages.
+     */
+    public enum Message {
+        /** Input has too many characters. */
+        MSG_LIMIT_MAX_PARSE_CHARS("input has too many characters"),
+
+        /** Input has too many values. */
+        MSG_LIMIT_MAX_PARSE_VALUES("input has too many values"),
+        
+        /** Input nesting is too deep. */
+        MSG_LIMIT_MAX_PARSE_DEPTH("input nesting is too deep"),
+
+        /** Integer overflow. */
+        MSG_LIMIT_INTEGER("integer overflow");
+        
+        private final String text;
+
+        private Message(String text) {
+            this.text = text;
+        }
+
+        /**
+         * Get the message text.
+         */
+        public String getMessageText() {
+            return text;
+        }
+    }
 
     /**
      * serialVersionUID.
@@ -43,11 +58,17 @@ public class LimitException extends ParseException {
     private static final long serialVersionUID = 1L;
 
     /**
+     * My message.
+     */
+    private final Message message;
+
+    /**
      * Create a new LimitException.
      * @param msg exception message
      */
-    public LimitException(String msg) {
-        super(msg);
+    public LimitException(Message msg, String txt) {
+        super(txt);
+        this.message = msg;
     }
 
     /**
@@ -55,7 +76,34 @@ public class LimitException extends ParseException {
      * @param msg exception message
      * @param position position in input where the exception occurred.
      */
-    public LimitException(String msg, int position) {
-        super(msg, position);
+    public LimitException(Message msg, String text, int position) {
+        super(text, position);
+        this.message = msg;
+    }
+    
+    /**
+     * Create a new LimitException.
+     * @param msg exception message
+     */
+    public LimitException(Message msg) {
+        super(msg.getMessageText());
+        this.message = msg;
+    }
+
+    /**
+     * Create a new LimitException.
+     * @param msg exception message
+     * @param position position in input where the exception occurred.
+     */
+    public LimitException(Message msg, int position) {
+        super(msg.getMessageText(), position);
+        this.message = msg;
+    }
+
+    /**
+     * Get this exception's message value.
+     */
+    public Message getMessageValue() {
+        return this.message;
     }
 }

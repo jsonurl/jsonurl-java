@@ -1,5 +1,3 @@
-package org.jsonurl.j2se;
-
 /*
  * Copyright 2019 David MacCormack
  * 
@@ -17,8 +15,14 @@ package org.jsonurl.j2se;
  * under the License.
  */
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+package org.jsonurl.j2se;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+
+import org.jsonurl.Parser;
+import org.jsonurl.ValueFactoryParser;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -34,5 +38,34 @@ class ParserTest {
         assertNotNull(
             new JsonUrlParser(JavaValueFactory.PRIMITIVE),
             "new JsonUrlParser");
+    }
+    
+    @Test
+    void testGetFactory() {
+        assertSame(
+            JavaValueFactory.PRIMITIVE,
+            new ValueFactoryParser<>(JavaValueFactory.PRIMITIVE).getFactory(),
+            "getFactory");        
+    }
+
+    @Test
+    void testMaxParseChars() {
+        Parser p = new Parser();
+        p.setMaxParseChars(13);
+        assertEquals(13, p.getMaxParseChars(), "getMaxParseChars");
+    }
+
+    @Test
+    void testMaxParseDepth() {
+        Parser p = new Parser();
+        p.setMaxParseDepth(13);
+        assertEquals(13, p.getMaxParseDepth(), "getMaxParseDepth");
+    }
+
+    @Test
+    void testMaxParseValues() {
+        Parser p = new Parser();
+        p.setMaxParseValues(13);
+        assertEquals(13, p.getMaxParseValues(), "getMaxParseValues");
     }
 }

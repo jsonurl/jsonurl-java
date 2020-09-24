@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 David MacCormack
+ * Copyright 2019-2020 David MacCormack
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -35,6 +35,7 @@ import java.math.BigInteger;
 import java.math.MathContext;
 import java.net.URLEncoder;
 import java.util.EnumSet;
+import java.util.Objects;
 import org.jsonurl.BigMathProvider.BigIntegerOverflow;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -44,7 +45,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /**
- * JsonUrl parser test implementation.
+ * JSON&#x2192;URL parser test implementation.
  *
  * <p>Any implementation of the {@link ValueFactory} interface may use this
  * class to implement parser unit tests.
@@ -53,7 +54,14 @@ import org.junit.jupiter.params.provider.ValueSource;
  * @author David MacCormack
  * @since 2019-09-01
  */
-@SuppressWarnings("PMD")
+@SuppressWarnings({
+    "PMD.DataflowAnomalyAnalysis",
+    "PMD.CyclomaticComplexity",
+    "PMD.AvoidDuplicateLiterals",
+    "PMD.CommentRequired",
+    "PMD.ExcessiveClassLength",
+    "PMD.GodClass"
+    })
 public abstract class AbstractParseTest<
         V,
         C extends V,
@@ -65,6 +73,15 @@ public abstract class AbstractParseTest<
         M extends V,
         N extends V,
         S extends V> {
+    
+    /** true. */
+    private static final String TRUE = "true";
+
+    /** false. */
+    private static final String FALSE = "false";
+
+    /** null. */
+    private static final String NULL = "null";
 
     /** tag annotation. */
     private static final String TAG_ARRAY = "array";
@@ -73,38 +90,55 @@ public abstract class AbstractParseTest<
     private static final String TAG_BOOLEAN = "boolean";
 
     /** tag annotation. */
+    private static final String TAG_EMPTY = "empty";
+
+    /** tag annotation. */
     private static final String TAG_EXCEPTION = "exception";
+
+    /** tag annotation. */
+    private static final String TAG_NULL = NULL;
 
     /** tag annotation. */
     private static final String TAG_OBJECT = "object";
 
     /** tag annotation. */
     private static final String TAG_PARSE = "parse";
-    
+
     /** tag annotation. */
     private static final String TAG_STRING = "string";
 
-    protected ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory;
-    
+    /** Nonsense prefix to test parse start/end support. */
     private static final String PREFIX1 = "prefix 1";
+
+    /** Nonsense prefix to test parse start/end support. */
     private static final String PREFIX2 = "number 2 prefix";
+
+    /** Nonsense suffix to test parse start/end support. */
     private static final String SUFFIX1 = "suffix 1";
+    
+    /** Nonsense suffix to test parse start/end support. */
     private static final String SUFFIX2 = "number two suffix";
 
-    private Parser<V,C,ABT,A,JBT,J,B,M,N,S> newParser() {
-        return new Parser<>(factory);
-    }
-    
-    private Parser<V,C,ABT,A,JBT,J,B,M,N,S> newParser(
+    /** ValueFactory. */
+    protected ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory;
+
+    /** Create a new AbstractParseTest. */
+    public AbstractParseTest(
             ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
-        return new Parser<>(factory);
+        this.factory = factory;
     }
 
-    public AbstractParseTest(ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
-        this.factory = factory;    
+
+    private ValueFactoryParser<V,C,ABT,A,JBT,J,B,M,N,S> newFactoryParser() {
+        return newParser(factory);
     }
     
-    private void parse(
+    private ValueFactoryParser<V,C,ABT,A,JBT,J,B,M,N,S> newParser(
+            ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
+        return new ValueFactoryParser<>(factory);
+    }
+
+    private void parseLiteral(
             ValueType allow,
             String in,
             Object out) {
@@ -114,7 +148,7 @@ public abstract class AbstractParseTest<
     private void parse(
             EnumSet<ValueType> allow,
             String in,
-            Object out,
+            Object expect,
             boolean isLiteral) {
 
         StringBuilder sb = new StringBuilder(1 << 10);
@@ -124,14 +158,25 @@ public abstract class AbstractParseTest<
         //
         sb.append(PREFIX1).append(in).append(SUFFIX1);
 
-        V parseResult = newParser().parse(
+        V parseResult = newFactoryParser().parse(
             sb.toString(), PREFIX1.length(), in.length());
+        
+        if (expect == null) {
+            //
+            // just test that prefix and non/prefix are the same
+            //
+            expect = newFactoryParser().parse(in);
+        }
 
-        Object parseCompare = out; //out.equals(parseResult) || out2 == null ? out : out2;
-        assertEquals(parseCompare, parseResult);
+        //
+        // I should just use assertEquals() here but the json.org
+        // implementation doesn't override Object.equals().
+        //
+        // assertEquals(expect, parseResult, in)
+        assertTrue(isEqual(expect, parseResult), in);
 
         if (allow != null) {
-            assertTrue(factory.isValid(allow, parseResult));
+            assertTrue(factory.isValid(allow, parseResult), in);            
         }
 
         //
@@ -142,47 +187,86 @@ public abstract class AbstractParseTest<
             sb.append(PREFIX2).append(in).append(SUFFIX2);
     
             V litResult = JsonUrl.parseLiteral(
-                sb.toString(), PREFIX2.length(), in.length(), factory);
+                sb.toString(), PREFIX2.length(), in.length(), factory, false);
     
-            Object litCompare = out; //out.equals(litResult) ? out : out2;
-            assertEquals(litCompare, litResult);
+            Object litCompare = expect;
+            assertEquals(litCompare, litResult, in);
     
             if (allow != null) {
-                assertTrue(factory.isValid(allow, litResult));
+                assertTrue(factory.isValid(allow, litResult), in);
             }
     
-            assertEquals(in.length(), JsonUrl.parseLiteralLength(in));
+            assertEquals(in.length(), JsonUrl.parseLiteralLength(in), in);
         }
     }
-    
+
     private V parse(String s) {
         StringBuilder sb = new StringBuilder(4096)
             .append(PREFIX1)
             .append(s)
             .append(SUFFIX1);
 
-        return newParser().parse(sb.toString(), PREFIX1.length(), s.length());
+        return newFactoryParser().parse(sb.toString(), PREFIX1.length(), s.length());
     }
 
-    @SuppressWarnings("unchecked")
-    private A parseArray(String jsonUrlText) {
-        Parser<V, C, ABT, A, JBT, J, B, M, N, S> p = new Parser<>(factory);
-        return (A)p.parse(jsonUrlText);
+    /**
+     * Remove leading and trailing chars to build an implied array or object.
+     */
+    static final String makeImplied(String s) {
+        StringBuilder sb = new StringBuilder(s.length());
+        if (s == null || s.length() < 2) {
+            return "";
+        }
+        sb.append(s, 1, s.length() - 1);
+
+        return sb.toString();
     }
 
-    @SuppressWarnings("unchecked")
-    private J parseObject(String jsonUrlText) {
-        Parser<V, C, ABT, A, JBT, J, B, M, N, S> p = new Parser<>(factory);
-        return (J)p.parse(jsonUrlText);
+    private A parseFactoryArray(String jsonUrlText) {
+        ValueFactoryParser<V, C, ABT, A, JBT, J, B, M, N, S> p = newFactoryParser();
+        return p.parseArray(jsonUrlText);
     }
-    
+
+    private A parseImpliedFactoryArray(String jsonUrlText) {
+        ValueFactoryParser<V, C, ABT, A, JBT, J, B, M, N, S> p = newFactoryParser();
+        return p.parseArray(makeImplied(jsonUrlText), factory.newArrayBuilder());
+    }
+
+    private A parseImpliedFactoryArray(String jsonUrlText, int off, int len) {
+        ValueFactoryParser<V, C, ABT, A, JBT, J, B, M, N, S> p = newFactoryParser();
+        return p.parseArray(
+            makeImplied(jsonUrlText),
+            off,
+            Math.max(0, len - 2),
+            factory.newArrayBuilder());
+    }
+
+    private J parseFactoryObject(String jsonUrlText) {
+        ValueFactoryParser<V, C, ABT, A, JBT, J, B, M, N, S> p = newFactoryParser();
+        return p.parseObject(jsonUrlText);
+    }
+
+    private J parseImpliedFactoryObject(String jsonUrlText) {
+        ValueFactoryParser<V, C, ABT, A, JBT, J, B, M, N, S> p = newFactoryParser();
+        return p.parseObject(makeImplied(jsonUrlText), factory.newObjectBuilder());
+    }
+
+    private J parseImpliedFactoryObject(String jsonUrlText, int off, int len) {
+        ValueFactoryParser<V, C, ABT, A, JBT, J, B, M, N, S> p = newFactoryParser();
+        return p.parseObject(
+            makeImplied(jsonUrlText),
+            off,
+            Math.max(0, len - 2),
+            factory.newObjectBuilder());
+    }
+
     private void assertLong(
             String expect,
             String actual,
             M factoryValue) {
 
-        assertEquals(expect, actual);
-        assertEquals(factoryValue, JsonUrl.parseLiteral(actual, factory));
+        assertEquals(expect, actual, expect);
+        assertEquals(factoryValue, JsonUrl.parseLiteral(actual, factory), expect);
     }
 
     @ParameterizedTest
@@ -200,9 +284,9 @@ public abstract class AbstractParseTest<
         "'-2e+1',-20",
         "'4e17',400000000000000000",
     })
-    void testLong(String in, String out) throws ParseException, IOException {
+    void testLong(String in, String out) throws IOException {
         M factoryValue = getFactoryLong(out);
-        parse(ValueType.NUMBER, in, factoryValue);
+        parseLiteral(ValueType.NUMBER, in, factoryValue);
 
         Long nativeValue = Long.valueOf(out);
         String txt = new JsonUrlStringBuilder().add(nativeValue).build();
@@ -216,11 +300,11 @@ public abstract class AbstractParseTest<
     @ValueSource(strings = {
         "0", "-1", "123456", "-123456", "12345678905432132",
     })
-    void testLong(String s) throws ParseException, IOException {
+    void testLong(String s) throws IOException {
         M factoryValue = getFactoryLong(s);
-        parse(ValueType.NUMBER, s, factoryValue);
+        parseLiteral(ValueType.NUMBER, s, factoryValue);
 
-        Long nativeValue = Double.valueOf(s).longValue();
+        Long nativeValue = Long.parseLong(s);
         String txt = new JsonUrlStringBuilder().add(nativeValue).build();
         assertLong(s, txt, factoryValue);
     }
@@ -240,9 +324,9 @@ public abstract class AbstractParseTest<
         "156.9e-2", "-276.8e-1",
         "156.911e+2", "-276.833e+4",
     })
-    void testDouble(String s) throws ParseException, IOException {
+    void testDouble(String s) throws IOException {
         M factoryValue = getFactoryDouble(s);
-        parse(ValueType.NUMBER, s, factoryValue);
+        parseLiteral(ValueType.NUMBER, s, factoryValue);
 
         Number nativeValue = Double.valueOf(s);
 
@@ -250,13 +334,13 @@ public abstract class AbstractParseTest<
         // test JsonUrlStringBuilder
         //
         String txt = new JsonUrlStringBuilder().add(nativeValue).build();
-        assertEquals(String.valueOf(nativeValue), txt);
+        assertEquals(String.valueOf(nativeValue), txt, s);
         
         //
         // test that parseLiteral eventually returns the same value that I
         // get directly from the factory
         //
-        assertEquals(factoryValue, JsonUrl.parseLiteral(s, factory));
+        assertEquals(factoryValue, JsonUrl.parseLiteral(s, factory), s);
 
         //
         // test that parse and parse literal return the same value.
@@ -268,7 +352,8 @@ public abstract class AbstractParseTest<
         //
         assertEquals(
             Double.valueOf(factoryValue.toString()),
-            Double.valueOf(JsonUrl.parseLiteral(txt, factory).toString()));
+            Double.valueOf(JsonUrl.parseLiteral(txt, factory).toString()),
+            txt);
     }
 
     private M getFactoryDouble(String s) {
@@ -278,15 +363,15 @@ public abstract class AbstractParseTest<
     @ParameterizedTest
     @Tag(TAG_PARSE)
     @Tag(TAG_BOOLEAN)
-    @ValueSource(strings = { "true", "false" })
-    void testBoolean(String s) throws ParseException, IOException {
+    @ValueSource(strings = { TRUE, FALSE })
+    void testBoolean(String s) throws IOException {
         B factoryValue = getFactoryBoolean(s);
-        parse(ValueType.BOOLEAN, s, factoryValue);
+        parseLiteral(ValueType.BOOLEAN, s, factoryValue);
 
         Boolean nativeValue = Boolean.valueOf(s);
         String txt = new JsonUrlStringBuilder().add(nativeValue).build();
-        assertEquals(String.valueOf(nativeValue), txt);
-        assertEquals(factoryValue, JsonUrl.parseLiteral(txt, factory));
+        assertEquals(String.valueOf(nativeValue), txt, s);
+        assertEquals(factoryValue, JsonUrl.parseLiteral(txt, factory), s);
     }
 
     private B getFactoryBoolean(String s) {
@@ -294,41 +379,41 @@ public abstract class AbstractParseTest<
     }
 
     @ParameterizedTest
-    @Tag("parse")
-    @Tag("null")
-    @ValueSource(strings = { "null" })
-    void testNull(String s) throws ParseException, IOException {
+    @Tag(TAG_PARSE)
+    @Tag(TAG_NULL)
+    @ValueSource(strings = { NULL })
+    void testNull(String s) throws IOException {
         N factoryValue = factory.getNull();
         factory.isValid(ValueType.NULL, factoryValue);
-        parse(ValueType.NULL, s, factoryValue);
+        parse(EnumSet.of(ValueType.NULL), s, factoryValue, true);
 
         String txt = new JsonUrlStringBuilder().addNull().build();
-        assertEquals(String.valueOf(s), txt);
-        assertEquals(factoryValue, JsonUrl.parseLiteral(txt, factory));
+        assertEquals(String.valueOf(s), txt, s);
+        assertEquals(factoryValue, JsonUrl.parseLiteral(txt, factory), s);
 
-        assertEquals(factoryValue, newParser().parse(s, ValueType.NULL));
+        assertEquals(factoryValue, newFactoryParser().parse(s, ValueType.NULL), s);
         assertEquals(
             factoryValue,
-            newParser().parse(s, 0, s.length(), ValueType.NULL));
+            newFactoryParser().parse(s, 0, s.length(), ValueType.NULL),
+            s);
     }
 
     @ParameterizedTest
-    @Tag("parse")
-    @Tag("empty")
+    @Tag(TAG_PARSE)
+    @Tag(TAG_EMPTY)
     @ValueSource(strings = { "()" })
-    void testEmptyComposite(String s) throws ParseException, IOException {
+    void testEmptyComposite(String s) throws IOException {
         V factoryValue = factory.getEmptyComposite();
         factory.isValid(ValueType.OBJECT, factoryValue);
         factory.isValid(ValueType.ARRAY, factoryValue);
 
-        parse(
-            EnumSet.of(ValueType.OBJECT, ValueType.ARRAY),
+        parse(EnumSet.of(ValueType.OBJECT, ValueType.ARRAY),
             s, factoryValue, false);
 
         String txt = new JsonUrlStringBuilder().addEmptyComposite().build();
-        assertEquals(s, txt);
+        assertEquals(s, txt, s);
 
-        assertTrue(factory.isEmpty(newParser().parse(s)));
+        assertTrue(factory.isEmptyComposite(newFactoryParser().parse(s)), s);
     }
 
     @ParameterizedTest
@@ -361,21 +446,21 @@ public abstract class AbstractParseTest<
         "1e-,",
         "'1.2.3',",
     })
-    void testString2(String in, String out) throws ParseException, IOException {
+    void testString2(String in, String out) throws IOException {
         String nativeValue = out == null ? in : out;
         S factoryValue = getFactoryString(nativeValue); 
-        parse(ValueType.STRING, in, factoryValue);
+        parseLiteral(ValueType.STRING, in, factoryValue);
 
         String txt = new JsonUrlStringBuilder().add(nativeValue).build();
-        assertEquals(in, txt);
-        assertEquals(factoryValue, JsonUrl.parseLiteral(txt, factory));
+        assertEquals(in, txt, in);
+        assertEquals(factoryValue, JsonUrl.parseLiteral(txt, factory), in);
     }
 
     @ParameterizedTest
     @Tag(TAG_PARSE)
     @Tag(TAG_STRING)
     @ValueSource(strings = {
-            "hello",
+            "hello", // NOPMD
             "Bob's House",
             "Hello, World!",
             "World: Hello!",
@@ -389,13 +474,13 @@ public abstract class AbstractParseTest<
         //
         // encoded
         //
-        parse(ValueType.STRING, urlEncodeAndEscapeStructChars(s), value);
+        parseLiteral(ValueType.STRING, urlEncodeAndEscapeStructChars(s), value);
 
         //
         // quoted
         //
         String in = urlEncode(s).replace("'", "%27");
-        parse(ValueType.STRING, "'" + in + "'", value);
+        parseLiteral(ValueType.STRING, "'" + in + "'", value);
     }
     
     @ParameterizedTest
@@ -408,7 +493,7 @@ public abstract class AbstractParseTest<
             "n", "nu", "nul", "Null", "nUll", "nuLl", "nulL",
     })
     void testString(String s) throws IOException {
-        parse(ValueType.STRING, s, getFactoryString(s));
+        parseLiteral(ValueType.STRING, s, getFactoryString(s));
     }
 
     private S getFactoryString(String s) {
@@ -433,44 +518,224 @@ public abstract class AbstractParseTest<
             .replace(":", "%3A");
     }
 
-    @Test
-    void testSetterAndGetter() {
-        Parser<?,?,?,?,?,?,?,?,?,?> p = newParser();
+    @ParameterizedTest
+    @Tag(TAG_PARSE)
+    @Tag(TAG_EXCEPTION)
+    @ValueSource(strings = {
+        "",
+        "%2",
+        "1,",
+        "(",
+        "(1",
+        "(1,a",
+        "(1,a,(",
+        "(1,a,()",
+        "((",
+        "((a",
+        "((a)",
+        // "((),)",
+        "(((1))",
+        "()1",
+        "(1)1",
+        "('1'1)",
+        "(1,'2'1)",
+        "(1,2,3)a",
+        "(a:b",
+        "(a:b,)",
+        "(a:b,c)",
+        "(a:b)a",
+        "(a:'b'a)",
+        "(a:b,'c'd)",
+        "(a:()a)",
+        "(a:(b:(1))",
+    })
+    void testExceptionSyntax(String text) {
+        assertThrows(
+            SyntaxException.class,
+            () -> parse(text));
 
-        p.setMaxParseChars(13);
-        p.setMaxParseDepth(13);
-        p.setMaxParseValues(13);
+        assertThrows(
+            SyntaxException.class,
+            () -> parseImpliedFactoryObject(text));
+        
+        assertThrows(
+            SyntaxException.class,
+            () -> parseImpliedFactoryObject(text, 0, text.length()));
 
-        assertEquals(13, p.getMaxParseChars());
-        assertEquals(13, p.getMaxParseDepth());
-        assertEquals(13, p.getMaxParseValues());
+        assertThrows(
+            SyntaxException.class,
+            () -> parseImpliedFactoryArray(text));
+        
+        assertThrows(
+            SyntaxException.class,
+            () -> parseImpliedFactoryArray(text, 0, text.length()));
+    }
+
+    private void assertAllowEmptyUnquotedKey(String text, J actual) {
+        assertFalse(getBoolean("", actual), text);
     }
 
     @ParameterizedTest
     @Tag(TAG_PARSE)
     @Tag(TAG_EXCEPTION)
     @ValueSource(strings = {
-        "",
-        "%2G",
-        "%2",
-        "1,",
-        "(1,",
-        "()1",
-        "(1)1",
-        "('1'1)",
-        "(1,'2'1)",
-        "(1,2,3)a",
-        "(a:b)a",
-        "(a:'b'a)",
-        "(a:b,'c'd)",
+        "(:false)"
     })
-    void testExceptionSyntax(String s) throws ParseException {
-        Parser<?, ?, ?, ?, ?, ?, ?, ?, ?, ?> p = newParser();
+    void testAllowEmptyUnquotedKey(String text) {
+        Parser p = new Parser();
+
         assertThrows(
             SyntaxException.class,
-            () -> p.parse(s));
+            () -> p.parse(text, this.factory),
+            text);
+        
+        p.setAllowEmptyUnquotedKey(true);
+        
+        assertTrue(p.getAllowEmptyUnquotedKey(), text);
+
+        assertAllowEmptyUnquotedKey(text, p.parseObject(text, factory));
+
+        assertAllowEmptyUnquotedKey(
+            text,
+            p.parseObject(
+                makeImplied(text),
+                factory,
+                factory.newObjectBuilder()));
     }
     
+    private void assertAllowEmptyUnquotedArrayValue(String text, A actual) {
+        assertEquals(
+            factory.getNumber(new NumberBuilder("1")),
+            getNumber(0, actual),
+            text);
+
+        assertEquals(
+            factory.getString(""),
+            getString(1, actual),
+            text);
+
+        assertEquals(
+            factory.getNumber(new NumberBuilder("3")),
+            getNumber(2, actual),
+            text);
+    }
+
+    @ParameterizedTest
+    @Tag(TAG_PARSE)
+    @Tag(TAG_EXCEPTION)
+    @ValueSource(strings = {
+        "(1,,3)",
+    })
+    void testAllowEmptyUnquotedArrayValue(String text) {
+        Parser p = new Parser();
+
+        assertThrows(
+            SyntaxException.class,
+            () -> p.parse(text, this.factory),
+            text);
+        
+        p.setAllowEmptyUnquotedValue(true);
+
+        assertTrue(p.getAllowEmptyUnquotedValue(), text);
+
+        assertAllowEmptyUnquotedArrayValue(text, p.parseArray(text, factory));
+
+        assertAllowEmptyUnquotedArrayValue(
+            text,
+            p.parseArray(
+                makeImplied(text),
+                factory,
+                factory.newArrayBuilder()));
+    }
+    
+    private void assertAllowEmptyUnquotedObjectValue(String text, J actual) {
+        assertEquals(
+            factory.getString(""),
+            getString("a", actual),
+            text);
+
+        assertTrue(getBoolean("b", actual), text);
+    }
+    
+    @ParameterizedTest
+    @Tag(TAG_PARSE)
+    @Tag(TAG_EXCEPTION)
+    @ValueSource(strings = {
+        "(a:,b:true)"
+    })
+    void testAllowEmptyUnquotedObjectValue(String text) {
+        Parser p = new Parser();
+
+        assertThrows(
+            SyntaxException.class,
+            () -> p.parse(text, this.factory),
+            text);
+        
+        p.setAllowEmptyUnquotedValue(true);
+
+        assertTrue(p.getAllowEmptyUnquotedValue(), text);
+
+        assertAllowEmptyUnquotedObjectValue(
+            text,
+            p.parseObject(text, this.factory));
+        
+        assertAllowEmptyUnquotedObjectValue(
+            text,
+            p.parseObject(makeImplied(text), factory, factory.newObjectBuilder()));
+    }
+
+
+    private void assertAllowFormUrlEncoded(String text, J actual) {
+        assertEquals(
+            factory.getString("b"),
+            getString("a", actual),
+            text);
+
+        assertEquals(
+            factory.getString("d"),
+            getString("c", actual),
+            text);
+    }
+
+    @ParameterizedTest
+    @Tag(TAG_PARSE)
+    @Tag(TAG_EXCEPTION)
+    @ValueSource(strings = {
+        "(a:b&c:d)",
+        "(a:b&c=d)",
+        "(a=b&c:d)",
+        "(a=b&c=d&e=false&f=1.234&g=null&h=()&i=(1,2,3)&j=(a:d,b:a))",
+    })
+    void testAllowFormUrlEncoded(String text) {
+        Parser p = new Parser();
+
+        assertThrows(
+            SyntaxException.class,
+            () -> p.parse(text, factory),
+            text);
+        
+        assertThrows(
+            SyntaxException.class,
+            () -> p.parseObject(
+                makeImplied(text),
+                factory,
+                factory.newObjectBuilder()),
+            text);
+
+        p.setAllowFormUrlEncoded(true);
+
+        assertTrue(p.getAllowFormUrlEncoded(), text);
+
+        assertAllowFormUrlEncoded(text, p.parseObject(text, factory));
+
+        assertAllowFormUrlEncoded(
+            text,
+            p.parseObject(
+                makeImplied(text),
+                factory,
+                factory.newObjectBuilder()));
+    }
+
     @ParameterizedTest
     @Tag(TAG_PARSE)
     @Tag(TAG_EXCEPTION)
@@ -479,12 +744,32 @@ public abstract class AbstractParseTest<
         "(), STRING",
         "'(1,2)', STRING",
     })
-    void testExceptionSyntax2(String text, String type) throws ParseException {
-        Parser<?, ?, ?, ?, ?, ?, ?, ?, ?, ?> p = newParser();
+    void testExceptionSyntax2(String text, String type) {
+        Parser p = newFactoryParser();
         ValueType valueType = ValueType.valueOf(type);
         assertThrows(
             SyntaxException.class,
-            () -> p.parse(text, valueType));
+            () -> p.parse(text, valueType, factory));
+    }
+    
+    @ParameterizedTest
+    @Tag(TAG_PARSE)
+    @Tag(TAG_EXCEPTION)
+    @ValueSource(strings = {
+        "%2G",
+        "(1,",
+        "(1,a,",
+        "((a)1",
+        "(a:b,",
+    })
+    void testExceptionSyntax3(String s) {
+        //
+        // like testExceptionSyntax() but does not test implied values
+        // (which would otherwise succeed).
+        //
+        assertThrows(
+            SyntaxException.class,
+            () -> parse(s));
     }
 
     @ParameterizedTest
@@ -493,73 +778,67 @@ public abstract class AbstractParseTest<
     @ValueSource(strings = {
         "%FA%80%80%80%80", //0x200000
     })
-    void testExceptionUtf8Encoding(String text) throws ParseException {
-        Parser<?, ?, ?, ?, ?, ?, ?, ?, ?, ?> p = newParser();
+    void testExceptionUtf8Encoding(String text) {
+        Parser p = newFactoryParser();
         assertThrows(
             IllegalArgumentException.class,
-            () -> p.parse(text));
+            () -> p.parse(text, factory));
     }
 
     @Test
     @Tag(TAG_PARSE)
     @Tag(TAG_EXCEPTION)
-    void testExceptionMaxParseChars() throws ParseException {
-        Parser<?,?,?,?,?,?,?,?,?,?> p = newParser();
+    void testExceptionMaxParseChars() {
+        Parser p = newFactoryParser();
         p.setMaxParseChars(2);
         
         assertThrows(
             LimitException.class,
-            () -> {
-                p.parse("true");
-            });
+            () -> p.parse(TRUE, factory));
     }
-    
+
     @Test
     @Tag(TAG_PARSE)
     @Tag(TAG_EXCEPTION)
-    void testExceptionMaxParseDepth() throws ParseException {
-        Parser<?,?,?,?,?,?,?,?,?,?> p = newParser();
+    void testExceptionMaxParseDepth() {
+        Parser p = newFactoryParser();
         p.setMaxParseDepth(2);
 
         assertThrows(
             LimitException.class,
-            () -> {
-                p.parse("(((1)))");
-            });
+            () -> p.parse("(((1)))", factory));
     }
 
     @Test
     @Tag(TAG_PARSE)
     @Tag(TAG_EXCEPTION)
-    void testExceptionMaxParseValues() throws ParseException {
-        Parser<?,?,?,?,?,?,?,?,?,?> p = newParser();
+    void testExceptionMaxParseValues() {
+        Parser p = newFactoryParser();
         p.setMaxParseValues(2);
 
         assertThrows(
             LimitException.class,
-            () -> {
-                p.parse("(1,2,3)");
-            });
+            () -> p.parse("(1,2,3)", factory));
     }
 
     @Test
     @Tag(TAG_PARSE)
     @Tag(TAG_EXCEPTION)
-    void testExceptionNoText() throws ParseException {
+    void testParseException() {
         ParseException pe = null;
         try {
-            newParser().parse("");
+            newFactoryParser().parse("");
 
         } catch (ParseException e) {
             pe = e;
         }
 
-        assertEquals(0, pe.getPosition());
-        assertEquals("text missing", pe.getMessage());
-        assertTrue(pe.toString().endsWith("text missing at 0"));
+        final String message = "empty string";
+        assertEquals(0, pe.getPosition(), message);
+        assertEquals("text missing", pe.getMessage(), message);
+        assertTrue(pe.toString().endsWith("text missing at 0"), message);
 
-        assertTrue(new ParseException("a").toString().endsWith("a"));
-        assertTrue(new SyntaxException("a").toString().endsWith("a"));
+        assertTrue(new ParseException("a").toString().endsWith("a"), message);
     }
 
     @ParameterizedTest
@@ -567,11 +846,21 @@ public abstract class AbstractParseTest<
     @Tag(TAG_ARRAY)
     @ValueSource(strings = {
         "(1)",
+        "(hello)",
+        "(true)",
+        "(null)",
+        "(())",
+        "(1,2)",
+        "(hello,world)",
+        "(true,false)",
+        "(null,null)",
+        "((),())",
+        "(1,(a:b))",
     })
-    void testArray(String text) throws ParseException {
-        A obj1 = newParser().parseArray(text);
+    void testArray(String text) {
+        A obj1 = newFactoryParser().parseArray(text);
 
-        A obj2 = newParser().parseArray(
+        A obj2 = newFactoryParser().parseArray(
             PREFIX1 + text + SUFFIX1,
             PREFIX1.length(),
             text.length());
@@ -579,13 +868,41 @@ public abstract class AbstractParseTest<
         for (ValueType t : ValueType.values()) {
             assertEquals(
                 t == ValueType.ARRAY,
-                factory.isValid(t, obj1));
+                factory.isValid(t, obj1),
+                text);
             
             assertEquals(
                 t == ValueType.ARRAY,
-                factory.isValid(t, obj2));
+                factory.isValid(t, obj2),
+                text);
         }
 
+        parse(EnumSet.of(ValueType.ARRAY), text, null, false);
+        
+        //
+        // direct call to Parser.parseArray()
+        //
+        // using assertTrue() because json.org doesn't implement
+        // JSONObject.equals()
+        //
+        A objA = new Parser().parseArray(text, factory);
+        A objB = new Parser().parseArray(text, 0, text.length(), factory);
+        assertTrue(isEqual(objA, objB), text);
+
+        V objC = new Parser().parse(text, factory);
+        assertTrue(isEqual(objA, objC), text);
+        
+        V objD = new Parser().parse(text, 0, text.length(), factory);
+        assertTrue(isEqual(objA, objD), text);
+        
+        V objE = new Parser().parse(text, ValueType.ARRAY, factory);
+        assertTrue(isEqual(objA, objE), text);
+
+        V objF = new Parser().parse(text, 0, text.length(), ValueType.ARRAY, factory);
+        assertTrue(isEqual(objA, objF), text);
+
+        V objG = newFactoryParser().parseArray(makeImplied(text), factory.newArrayBuilder());
+        assertTrue(isEqual(objA, objG), text);
     }
     
     @ParameterizedTest
@@ -593,11 +910,13 @@ public abstract class AbstractParseTest<
     @Tag(TAG_OBJECT)
     @ValueSource(strings = {
         "(a:b)",
+        "(a:(b))",
+        "(a:(b,c))",
     })
-    void testObject(String text) throws ParseException {
-        J obj1 = newParser().parseObject(text);
+    void testObject(String text) {
+        J obj1 = parseFactoryObject(text);
 
-        J obj2 = newParser().parseObject(
+        J obj2 = newFactoryParser().parseObject(
             PREFIX1 + text + SUFFIX1,
             PREFIX1.length(),
             text.length());
@@ -605,12 +924,41 @@ public abstract class AbstractParseTest<
         for (ValueType t : ValueType.values()) {
             assertEquals(
                 t == ValueType.OBJECT,
-                factory.isValid(t, obj1));
+                factory.isValid(t, obj1),
+                text);
 
             assertEquals(
                 t == ValueType.OBJECT,
-                factory.isValid(t, obj2));
+                factory.isValid(t, obj2),
+                text);
         }
+
+        parse(EnumSet.of(ValueType.OBJECT), text, null, false);
+
+        //
+        // direct call to Parser.parseObject()
+        //
+        // using assertTrue() because org.json.JSONObject doesn't implement
+        // an equals method
+        //
+        J objA = new Parser().parseObject(text, factory);
+        J objB = new Parser().parseObject(text, 0, text.length(), factory);
+        assertTrue(isEqual(objA, objB), text);
+
+        V objC = new Parser().parse(text, factory);
+        assertTrue(isEqual(objA, objC), text);
+
+        V objD = new Parser().parse(text, 0, text.length(), factory);
+        assertTrue(isEqual(objA, objD), text);
+
+        V objE = new Parser().parse(text, ValueType.OBJECT, factory);
+        assertTrue(isEqual(objA, objE), text);
+
+        V objF = new Parser().parse(text, 0, text.length(), ValueType.OBJECT, factory);
+        assertTrue(isEqual(objA, objF), text);
+
+        V objG = newFactoryParser().parseObject(makeImplied(text), factory.newObjectBuilder());
+        assertTrue(isEqual(objA, objG), text);
     }
 
     @ParameterizedTest
@@ -622,14 +970,27 @@ public abstract class AbstractParseTest<
             "1", "2.3",
             "true", "false",
             "null",
-            "(1)",
     })
-    void testExceptionObject(String text) throws ParseException {
-        Parser<?,?,?,?,?,?,?,?,?,?> p = newParser();
-
+    void testExceptionComposite(String text) {
         assertThrows(
             SyntaxException.class,
-            () -> p.parseObject(text));
+            () -> parseFactoryObject(text));
+        assertThrows(
+            SyntaxException.class,
+            () -> parseFactoryArray(text));
+    }
+
+    @ParameterizedTest
+    @Tag(TAG_PARSE)
+    @Tag(TAG_OBJECT)
+    @Tag(TAG_EXCEPTION)
+    @ValueSource(strings = {
+            "(1)",
+    })
+    void testExceptionObject(String text) {
+        assertThrows(
+            SyntaxException.class,
+            () -> parseFactoryObject(text));
     }
     
     @ParameterizedTest
@@ -637,18 +998,12 @@ public abstract class AbstractParseTest<
     @Tag(TAG_ARRAY)
     @Tag(TAG_EXCEPTION)
     @ValueSource(strings = {
-            "hello",
-            "1", "2.3",
-            "true", "false",
-            "null",
             "(a:b)",
     })
-    void testExceptionArray(String text) throws ParseException {
-        Parser<?,?,?,?,?,?,?,?,?,?> p = newParser();
-
+    void testExceptionArray(String text) {
         assertThrows(
             SyntaxException.class,
-            () -> p.parseArray(text));
+            () -> parseFactoryArray(text));
     }
     
     @ParameterizedTest
@@ -680,7 +1035,7 @@ public abstract class AbstractParseTest<
             BigDecimal expect = new BigDecimal(s, mc);
             V parseResult = parse(s);
 
-            assertEquals(expect, getNumberValue(parseResult));
+            assertEquals(expect, getNumberValue(parseResult), s);
         }
     }
     
@@ -712,40 +1067,36 @@ public abstract class AbstractParseTest<
                 switch (over) {
                 case BIG_DECIMAL:
                     assertEquals(
-                        new BigDecimal(s, MathContext.DECIMAL128),
-                        n);
+                        new BigDecimal(s, MathContext.DECIMAL128), n, s);
                     break;
                 case DOUBLE:
                     assertEquals(
-                        Double.valueOf(s).doubleValue(),
-                        n.doubleValue());
+                        Double.parseDouble(s),
+                        n.doubleValue(),
+                        s);
                     break;
                 case INFINITY:
-                    switch (bi.signum()) {
-                    case -1:
-                        assertEquals(BigMathProvider.NEGATIVE_INFINITY,
-                            n);
-                        break;
-                    default:
-                        assertEquals(BigMathProvider.POSITIVE_INFINITY,
-                            n);
-                        break;
+                    if (bi.signum() == -1) {
+                        assertEquals(BigMathProvider.NEGATIVE_INFINITY, n, s);
+                    } else {
+                        assertEquals(BigMathProvider.POSITIVE_INFINITY,n, s);
                     }
                     break;
                 }
             } else if (bi.bitLength() > 64) {
                 if (n instanceof BigInteger) {
-                    assertEquals(bi, (BigInteger)n);
+                    assertEquals(bi, (BigInteger)n, s);
                 } else {
-                    assertEquals(new BigDecimal(bi), n);
+                    assertEquals(new BigDecimal(bi), n, s);
                 }
             } else {
                 //
                 // some gymnastics to handle JSR-374
                 //
                 assertEquals(
-                    Long.valueOf(s).longValue(),
-                    n.longValue());
+                    Long.parseLong(s),
+                    n.longValue(),
+                    s);
             }
         }
     }
@@ -765,8 +1116,8 @@ public abstract class AbstractParseTest<
     @ValueSource(strings = {
         "1",
         "-1",
-        Long.MAX_VALUE + "",
-        Long.MIN_VALUE + "",
+        Long.MAX_VALUE + "", // NOPMD - need a string literal
+        Long.MIN_VALUE + "", // NOPMD - need a string literal
         Long.MAX_VALUE + "0",
         Long.MIN_VALUE + "0",
         '-' + BigMathProvider.BIG_INTEGER128_BOUNDARY_NEG,
@@ -785,9 +1136,11 @@ public abstract class AbstractParseTest<
 
     // CHECKSTYLE:OFF
     protected abstract boolean getBoolean(String key, J value);
-    protected abstract String getString(String key, J value);
+    protected abstract S getString(String key, J value);
+    protected abstract S getString(int index, A value);
     protected abstract boolean getNull(String key, J value);
     protected abstract boolean getEmptyComposite(String key, J value);
+    protected abstract boolean getEmptyComposite(int index, A value);
     protected abstract A getArray(String key, J value);
     protected abstract A getArray(int index, A value);
     protected abstract J getObject(String key, J value);
@@ -804,98 +1157,196 @@ public abstract class AbstractParseTest<
     protected boolean isBigIntegerOverflowInfinityOK() {
         return true;
     }
+    
+    protected boolean isEqual(Object a, Object b) {
+        return Objects.equals(a, b);
+    }
     // CHECKSTYLE:ON
 
-    @Test
-    @Tag(TAG_PARSE)
-    void testJsonUrlText1() throws ParseException {
-        J parseResult = (J)parseObject(
-                "(true:true,false:false,null:null,empty:(),"
-                + "single:(0),nested:((1)),many:(-1,2.0,3e1,4e-2,5e+0))");
-
-        assertTrue(getBoolean("true", parseResult));
-        assertFalse(getBoolean("false", parseResult));
-        assertTrue(getNull("null", parseResult));
-        assertTrue(getEmptyComposite("empty", parseResult));
+    private void assertJsonUrlText1(String text, J actual) {
+        assertTrue(getBoolean("true", actual), text);
+        assertFalse(getBoolean("false", actual), text);
+        assertTrue(getNull("null", actual), text);
+        assertTrue(getEmptyComposite("empty", actual), text);
 
         assertEquals(
                 factory.getNumber(new NumberBuilder("0")),
-                getNumber(0, getArray("single", parseResult)));
+                getNumber(0, getArray("single", actual)),
+                text);
         
         assertEquals(
                 factory.getNumber(new NumberBuilder("-1")),
-                getNumber(0, getArray("many", parseResult)));
+                getNumber(0, getArray("many", actual)),
+                text);
         
         assertEquals(
                 factory.getNumber(new NumberBuilder("2.0")),
-                getNumber(1, getArray("many", parseResult)));
+                getNumber(1, getArray("many", actual)),
+                text);
         
         assertEquals(
                 factory.getNumber(new NumberBuilder("3e1")),
-                getNumber(2, getArray("many", parseResult)));
+                getNumber(2, getArray("many", actual)),
+                text);
         
         assertEquals(
                 factory.getNumber(new NumberBuilder("4e-2")),
-                getNumber(3, getArray("many", parseResult)));
+                getNumber(3, getArray("many", actual)),
+                text);
         
         assertEquals(
                 factory.getNumber(new NumberBuilder("5e+0")),
-                getNumber(4, getArray("many", parseResult)));
+                getNumber(4, getArray("many", actual)),
+                text);
         
         assertEquals(
                 factory.getNumber(new NumberBuilder("1")),
-                getNumber(0, getArray(0, getArray("nested", parseResult))));
-    }
+                getNumber(0, getArray(0, getArray("nested", actual))),
+                text);
 
-    @Test
-    @Tag(TAG_PARSE)
-    void testJsonUrlText2() throws ParseException {
-        A parseResult = parseArray("(1)");
+        assertEquals(
+            factory.getNumber(new NumberBuilder("2")),
+            getNumber(1, getArray(0, getArray("nested2", actual))),
+            text);
         
         assertEquals(
-                factory.getNumber(new NumberBuilder("1")),
-                getNumber(0, parseResult));
+            factory.getString("world"),
+            getString("hello", actual),
+            text);
+    }
+
+    @Test
+    @Tag(TAG_PARSE)
+    @Tag(TAG_OBJECT)
+    void testJsonUrlText1()  {
+        final String text = "(true:true,false:false,null:null,empty:(),"
+            + "single:(0),nested:((1)),nested2:((1,2))"
+            + ",many:(-1,2.0,3e1,4e-2,5e+0),'hello':'world')";
+
+        assertJsonUrlText1(text, parseFactoryObject(text));
+        assertJsonUrlText1(text, parseImpliedFactoryObject(text));
+        assertJsonUrlText1(text, parseImpliedFactoryObject(text, 0, text.length()));
+    }
+
+    private void assertJsonUrlText2(String text, A actual) {
+        assertEquals(
+            factory.getNumber(new NumberBuilder("1")),
+            getNumber(0, actual),
+            text);
+    }
+
+    @ParameterizedTest
+    @Tag(TAG_PARSE)
+    @Tag(TAG_ARRAY)
+    @ValueSource(strings = {"(1)"})
+    void testJsonUrlText2(String text) {
+        assertJsonUrlText2(text, parseFactoryArray(text));
+        assertJsonUrlText2(text, parseImpliedFactoryArray(text));
+        assertJsonUrlText2(text, parseImpliedFactoryArray(text, 0, text.length()));
     }
     
-    @Test
-    @Tag(TAG_PARSE)
-    void testJsonUrlText3() throws ParseException {
-        A parseResult = parseArray("(1,(2))");
-
+    private void assertJsonUrlText3(String text, A actual) {
         assertEquals(
                 factory.getNumber(new NumberBuilder("2")),
-                getNumber(0, getArray(1,parseResult)));
+                getNumber(0, getArray(1, actual)),
+                text);
+        
     }
 
-    @Test
+    @ParameterizedTest
     @Tag(TAG_PARSE)
-    void testJsonUrlText4() throws ParseException {
-        A parseResult = parseArray("(1,(a:2),3)");
-
-        assertEquals(
-                factory.getNumber(new NumberBuilder("2")),
-                getNumber("a", getObject(1, parseResult)));
-    }
-
-    @Test
-    @Tag(TAG_PARSE)
-    void testJsonUrlText5() throws ParseException {
-        J parseResult = parseObject("(age:64,name:(first:Fred))");
-
-        assertEquals(
-                "Fred",
-                getString("first", getObject("name", parseResult)));
+    @Tag(TAG_ARRAY)
+    @ValueSource(strings = {"(1,(2))"})
+    void testJsonUrlText3(String text) {
+        assertJsonUrlText3(text, parseFactoryArray(text));
+        assertJsonUrlText3(text, parseImpliedFactoryArray(text));
+        assertJsonUrlText3(text, parseImpliedFactoryArray(text, 0, text.length()));
     }
     
-    @Test
-    @Tag(TAG_PARSE)
-    @DisplayName("testJsonUrlText6: Deeply nested array: ((((1))))")
-    void testJsonUrlText6() throws ParseException {
-        A parseResult = parseArray("((((1))))");
+    private void assertJsonUrlText4(String text, A actual) {
+        assertEquals(
+            factory.getNumber(new NumberBuilder("2")),
+            getNumber("a", getObject(1, actual)),
+            text);
+    }
 
+    @ParameterizedTest
+    @Tag(TAG_PARSE)
+    @Tag(TAG_ARRAY)
+    @ValueSource(strings = {"(1,(a:2),3)"})
+    void testJsonUrlText4(String text) {
+        assertJsonUrlText4(text, parseFactoryArray(text));
+        assertJsonUrlText4(text, parseImpliedFactoryArray(text));
+        assertJsonUrlText4(text, parseImpliedFactoryArray(text, 0, text.length()));
+
+    }
+
+    private void assertJsonUrlText5(String text, J actual) {
+        assertEquals(
+            factory.getString("Fred"),
+            getString("first", getObject("name", actual)),
+            text);
+    }
+
+    @ParameterizedTest
+    @Tag(TAG_PARSE)
+    @Tag(TAG_OBJECT)
+    @ValueSource(strings = {"(age:64,name:(first:Fred))"})
+    void testJsonUrlText5(String text) {
+        assertJsonUrlText5(text, parseFactoryObject(text));
+        assertJsonUrlText5(text, parseImpliedFactoryObject(text));
+        assertJsonUrlText5(text, parseImpliedFactoryObject(text, 0, text.length()));
+    }
+    
+    private void assertJsonUrlText6(String text, A actual) {
         assertEquals(
                 factory.getNumber(new NumberBuilder("1")),
-                getNumber(0,
-                    getArray(0, getArray(0, getArray(0,parseResult)))));
+                getNumber(0, getArray(0, getArray(0, getArray(0, actual)))),
+                text);
+        
+    }
+    
+    @ParameterizedTest
+    @Tag(TAG_PARSE)
+    @Tag(TAG_OBJECT)
+    @ValueSource(strings = {"((((1))))"})
+    @DisplayName("testJsonUrlText6: Deeply nested array")
+    void testJsonUrlText6(String text) {
+        assertJsonUrlText6(text, parseFactoryArray(text));
+        assertJsonUrlText6(text, parseImpliedFactoryArray(text));
+        assertJsonUrlText6(text, parseImpliedFactoryArray(text, 0, text.length()));
+    }
+
+    private void assertJsonUrlText7(String text, A actual) {
+        assertEquals(
+            factory.getNumber(new NumberBuilder("1")),
+            getNumber(0, actual),
+            text);
+        
+        assertTrue(getEmptyComposite(1, actual), text);
+    }
+
+    @ParameterizedTest
+    @Tag(TAG_PARSE)
+    @Tag(TAG_ARRAY)
+    @ValueSource(strings = {"(1,())"})
+    void testJsonUrlText7(String text) {
+        assertJsonUrlText7(text, parseFactoryArray(text));
+        assertJsonUrlText7(text, parseImpliedFactoryArray(text));
+        assertJsonUrlText7(text, parseImpliedFactoryArray(text, 0, text.length()));
+    }
+
+    private void assertJsonUrlText8(String text, J actual) {
+        assertTrue(getEmptyComposite("a", actual), text);
+    }
+
+    @ParameterizedTest
+    @Tag(TAG_PARSE)
+    @Tag(TAG_OBJECT)
+    @ValueSource(strings = {"(a:())"})
+    void testJsonUrlText8(String text) {
+        assertJsonUrlText8(text, parseFactoryObject(text));
+        assertJsonUrlText8(text, parseImpliedFactoryObject(text));
+        assertJsonUrlText8(text, parseImpliedFactoryObject(text, 0, text.length()));
     }
 }

@@ -149,6 +149,8 @@ final class CharUtil {
         CHARBITS[')'] = IS_STRUCTCHAR | IS_QSCHAR | IS_ENC_QSTRSAFE;
         CHARBITS[','] = IS_STRUCTCHAR | IS_QSCHAR | IS_ENC_QSTRSAFE;
         CHARBITS[':'] = IS_STRUCTCHAR | IS_QSCHAR | IS_ENC_QSTRSAFE;
+        CHARBITS['&'] = IS_STRUCTCHAR;
+        CHARBITS['='] = IS_STRUCTCHAR;
         CHARBITS[' '] = IS_SPACE;
         
         for (int i = 'A'; i <= 'F'; i++) {
