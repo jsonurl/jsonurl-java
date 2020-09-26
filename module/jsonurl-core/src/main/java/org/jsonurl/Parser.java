@@ -642,7 +642,7 @@ public class Parser {
             pos++;
         }
         
-        final boolean isImplied = impliedArray || impliedObject;
+        // final boolean isImplied = impliedArray || impliedObject;
         final boolean allowEmptyUnquotedKey = this.allowEmptyUnquotedKey;
         final boolean wwwFormUrlEncoded = this.wwwFormUrlEncoded;
 
@@ -656,7 +656,7 @@ public class Parser {
 
             char c = s.charAt(pos);
 
-            switch (stateStack.peek()) { // NOPMD - no default
+            switch (stateStack.peek()) {
             case PAREN:
                 switch (c) {
                 case '(':
@@ -736,15 +736,15 @@ public class Parser {
                     stateStack.pop();
                     result.setLocation(pos).addEmptyComposite();
 
-                    if (pos == stop && parseDepth == 1 && isImplied) {
+                    if (pos == stop && parseDepth == 1) {
                         if (impliedArray) {
-                            result.addArrayElement().endArray();
-
-                        } else {
-                            result.addObjectElement().endObject();
+                            return result.addArrayElement().endArray().getResult();
+                        }
+                        if (impliedObject) {
+                            return result.addObjectElement().endObject().getResult();
                         }
 
-                        return result.getResult();
+                        throw new SyntaxException(MSG_STILL_OPEN, pos);
                     }
 
                     continue;
