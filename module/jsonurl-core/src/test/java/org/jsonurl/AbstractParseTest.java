@@ -533,7 +533,6 @@ public abstract class AbstractParseTest<
         "((",
         "((a",
         "((a)",
-        // "((),)",
         "(((1))",
         "()1",
         "(1)1",
@@ -548,6 +547,7 @@ public abstract class AbstractParseTest<
         "(a:b,'c'd)",
         "(a:()a)",
         "(a:(b:(1))",
+        "1,2)",
     })
     void testExceptionSyntax(String text) {
         assertThrows(
@@ -986,6 +986,9 @@ public abstract class AbstractParseTest<
     @Tag(TAG_EXCEPTION)
     @ValueSource(strings = {
             "(1)",
+            "(a(",
+            "(a:",
+            "(a:b(",
     })
     void testExceptionObject(String text) {
         assertThrows(
@@ -999,6 +1002,7 @@ public abstract class AbstractParseTest<
     @Tag(TAG_EXCEPTION)
     @ValueSource(strings = {
             "(a:b)",
+            "(a(",
     })
     void testExceptionArray(String text) {
         assertThrows(
