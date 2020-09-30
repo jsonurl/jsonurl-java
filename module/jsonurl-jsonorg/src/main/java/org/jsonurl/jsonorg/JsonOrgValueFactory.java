@@ -212,6 +212,10 @@ public interface JsonOrgValueFactory extends ValueFactory.TransparentBuilder<
         if (value instanceof Boolean) {
             return types.contains(ValueType.BOOLEAN);
         }
+        if (isEmptyComposite(value)) {
+            return types.contains(ValueType.OBJECT)
+                || types.contains(ValueType.ARRAY);
+        }
         if (value instanceof JSONArray) {
             return types.contains(ValueType.ARRAY);
         }
@@ -220,10 +224,6 @@ public interface JsonOrgValueFactory extends ValueFactory.TransparentBuilder<
         }
         if (isNull(value)) {
             return types.contains(ValueType.NULL);
-        }
-        if (isEmptyComposite(value)) {
-            return types.contains(ValueType.OBJECT)
-                || types.contains(ValueType.ARRAY);
         }
         return false;
     }
