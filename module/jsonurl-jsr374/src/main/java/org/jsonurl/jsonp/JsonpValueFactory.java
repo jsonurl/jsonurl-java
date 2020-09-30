@@ -356,6 +356,10 @@ public interface JsonpValueFactory extends ValueFactory<
         if (value == JsonValue.FALSE || value == JsonValue.TRUE) {
             return types.contains(ValueType.BOOLEAN);
         }
+        if (isEmptyComposite(value)) {
+            return types.contains(ValueType.OBJECT)
+                || types.contains(ValueType.ARRAY);
+        }
         if (value instanceof JsonArray) {
             return types.contains(ValueType.ARRAY);
         }
@@ -364,10 +368,6 @@ public interface JsonpValueFactory extends ValueFactory<
         }
         if (JsonValue.NULL == value) {
             return types.contains(ValueType.NULL);
-        }
-        if (isEmptyComposite(value)) {
-            return types.contains(ValueType.OBJECT)
-                || types.contains(ValueType.ARRAY);
         }
         return false;
     }
