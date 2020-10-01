@@ -568,18 +568,42 @@ public class Parser {
             final Set<ValueType> canReturn,
             ParseResultFacade<R> result) {
 
-        result.setLocation(1);
+        final boolean impliedArray = result.isImpliedArray();
+        final boolean impliedObject = result.isImpliedObject();
 
         if (length == 0) {
+            //
+            // if the text is empty and this is an implied array or object then
+            // simply return the caller provided value.
+            //
+            if (impliedArray) {
+                return result.endArray().getResult();
+            }
+
+            if (impliedObject) {
+                return result.endObject().getResult();
+            }
+
+            //
+            // if the text is empty and the caller allows unquoted empty string
+            // literals then return one.
+            //
+            if (allowEmptyUnquotedValue) {
+                return result.getResult(s, off, off, true);
+            }
+            
+            //
+            // otherwise, it's an error
+            //
             throw new SyntaxException(MSG_NO_TEXT, 0);
         }
         if (length >= this.maxParseChars) {
             throw new LimitException(MSG_LIMIT_MAX_PARSE_CHARS);
         }
 
+        result.setLocation(1);
+
         final int stop = off + length;
-        final boolean impliedArray = result.isImpliedArray();
-        final boolean impliedObject = result.isImpliedObject();
 
         //
         // the current parse position
@@ -642,7 +666,6 @@ public class Parser {
             pos++;
         }
         
-        // final boolean isImplied = impliedArray || impliedObject;
         final boolean allowEmptyUnquotedKey = this.allowEmptyUnquotedKey;
         final boolean wwwFormUrlEncoded = this.wwwFormUrlEncoded;
 
@@ -656,7 +679,7 @@ public class Parser {
 
             char c = s.charAt(pos);
 
-            switch (stateStack.peek()) {
+            switch (stateStack.peek()) { // NOPMD -- no switch default
             case PAREN:
                 switch (c) {
                 case '(':
@@ -775,6 +798,11 @@ public class Parser {
                 c = s.charAt(pos);
 
                 switch (c) {
+                case '&':
+                    if (!wwwFormUrlEncoded || parseDepth != 1) {
+                        throw new SyntaxException(MSG_BAD_CHAR, pos);
+                    }
+                    // fall through
                 case ',':
                     //
                     // multi-element array
@@ -938,6 +966,11 @@ public class Parser {
                 result.setLocation(pos).addArrayElement();
 
                 switch (c) {
+                case '&':
+                    if (!wwwFormUrlEncoded || parseDepth != 1) {
+                        throw new SyntaxException(MSG_BAD_CHAR, pos);
+                    }
+                    // fall through
                 case ',':
                     stateStack.set(0, State.IN_ARRAY);
                     pos++;
