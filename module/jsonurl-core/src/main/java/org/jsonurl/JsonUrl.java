@@ -311,6 +311,7 @@ public final class JsonUrl {
          * @param start the start index
          * @param stop the stop index
          * @param factory a valid value factory
+         * @param isEmptyUnquotedStringOK if true allow a zero length value
          */
         static final <V> V literal(
                 StringBuilder buf,
@@ -320,6 +321,16 @@ public final class JsonUrl {
                 int stop,
                 ValueFactory<V,?,?,?,?,?,?,?,?,?> factory,
                 boolean isEmptyUnquotedStringOK) {
+
+            if (stop <= start) {
+                if (isEmptyUnquotedStringOK) {
+                    return factory.getString("");
+                }
+
+                throw new SyntaxException(
+                    SyntaxException.Message.MSG_EXPECT_LITERAL,
+                    start);
+            }
 
             if (s.charAt(start) == '\'') {
                 return factory.getString(string(

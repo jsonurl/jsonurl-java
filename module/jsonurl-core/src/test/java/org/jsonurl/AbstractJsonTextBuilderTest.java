@@ -66,60 +66,142 @@ public abstract class AbstractJsonTextBuilderTest<
     @ValueSource(strings = {
         "()",
         "(value)",
-        "(value,value)",
-        "(value,value2,value3)",
+        "(value&value)",
+        "(value&value2&value3)",
         "((value))",
         "((name:value))",
-        "((name:value),(name:value))",
+        "((name:value)&(name:value))",
         "(true)",
         "(false)",
-        "(true,false,null)",
-        "((),false,null,true,1.0,(false,hello,world,(),2.0))",
+        "(true&false&null)",
+        "(()&false&null&true&1.0&(false,hello,world,(),2.0))",
     })
-    void testArray(String expected) throws IOException {
-        A value = new ValueFactoryParser<>(getFactory()).parseArray(expected);
-        assertTest(expected, value);
+    void testArray(String text) throws IOException {
+        Parser p = new Parser();
+
+        p.setAllowFormUrlEncoded(true);
+        assertEquals(true, p.getAllowFormUrlEncoded(), text);
+
+        //
+        // !implied && wwwFormUrlEncoded
+        //
+        A value = p.parseArray(text, factory);
+        assertTest(text, value, false, true);
+
+        //
+        // implied && wwwFormUrlEncoded
+        //
+        value = p.parseArray(
+            makeImplied(text),
+            factory,
+            factory.newArrayBuilder());
+
+        assertTest(makeImplied(text), value, true, true);
+
+        text = replaceWfuChars(text);
+        p.setAllowFormUrlEncoded(false);
+        assertEquals(false, p.getAllowFormUrlEncoded(), text);
+
+        //
+        // !implied && !wwwFormUrlEncoded
+        //
+        value = p.parseArray(text, factory);
+        assertTest(text, value, false, false);
+
+        //
+        // implied && !wwwFormUrlEncoded
+        //
+        value = p.parseArray(
+            makeImplied(text),
+            factory,
+            factory.newArrayBuilder());
+
+        assertTest(makeImplied(text), value, true, false);
     }
     
     @ParameterizedTest
     @ValueSource(strings = {
         "()",
-        "(name:value)",
-        "(name:value,name2:value)",
-        "(name:())",
-        "(name:(name:value))",
-        "(name:(value,value))",
-        "(name:true,name2:value)",
-        "(1.234:false)",
+        "(name=value)",
+        "(name=value&name2=value)",
+        "(name=())",
+        "(name=(name:value))",
+        "(name=(value,value))",
+        "(name=true&name2=false)",
+        "(1.234=false)",
     })
-    void testObject(String expected) throws IOException {
-        J value = new ValueFactoryParser<>(factory).parseObject(expected);
-        assertTest(expected, value);
+    void testObject(String text) throws IOException {
+        Parser p = new Parser();
 
-        String impledText = makeImplied(expected);
-        
-        if (impledText.length() > 0) {
-            value = new ValueFactoryParser<>(factory).parseObject(
-                impledText, factory.newObjectBuilder());
+        p.setAllowFormUrlEncoded(true);
+        assertEquals(true, p.getAllowFormUrlEncoded(), text);
 
-            assertTest(expected, value);    
-        }
+        //
+        // !implied && wwwFormUrlEncoded
+        //
+        J value = p.parseObject(text, factory);
+        assertTest(text, value, false, true);
+
+        //
+        // implied && wwwFormUrlEncoded
+        //
+        value = p.parseObject(
+            makeImplied(text),
+            factory,
+            factory.newObjectBuilder());
+
+        assertTest(makeImplied(text), value, true, true);
+
+        text = replaceWfuChars(text);
+        p.setAllowFormUrlEncoded(false);
+        assertEquals(false, p.getAllowFormUrlEncoded(), text);
+
+        //
+        // !implied && !wwwFormUrlEncoded
+        //
+        value = p.parseObject(text, factory);
+        assertTest(text, value, false, false);
+
+        //
+        // implied && !wwwFormUrlEncoded
+        //
+        value = p.parseObject(
+            makeImplied(text),
+            factory,
+            factory.newObjectBuilder());
+
+        assertTest(makeImplied(text), value, true, false);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {
         "1.234",
+        "false",
+        "null",
+        "true",
     })
     void testLiteral(String expected) throws IOException {
         V value = new ValueFactoryParser<>(getFactory()).parse(expected);
-        assertTest(expected, value);
+        assertTest(expected, value, false, false);
     }
     
-    void assertTest(String expected, V value) throws IOException {
+    void assertTest(
+            String expected,
+            V value,
+            boolean implied,
+            boolean wwwFormUrlEncoded) throws IOException {
+
         JsonUrlStringBuilder sb = new JsonUrlStringBuilder();
+        sb.setImplied(implied);
+        sb.setFormUrlEncoded(wwwFormUrlEncoded);
+
         write(sb, value);
 
         String actual = sb.build();
         assertEquals(expected, actual, expected);
+    }
+    
+    private static final String replaceWfuChars(String s) {
+        return s.replace('&', ',').replace('=', ':');
     }
 }

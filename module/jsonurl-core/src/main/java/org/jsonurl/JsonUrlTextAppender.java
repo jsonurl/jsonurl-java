@@ -39,6 +39,21 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R>
     protected final A out;
 
     /**
+     * Use application/x-www-form-urlencoded style separators at depth 0.
+     */
+    private boolean wwwFormUrlEncoded;
+
+    /**
+     * Do not output the top level parens.
+     */
+    private boolean implied;
+
+    /**
+     * Current print depth.
+     */
+    private int depth;
+
+    /**
      * Create a new JsonUrlTextAppender.
      *
      * @param out JSON&#x2192;URL text destination
@@ -49,37 +64,33 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R>
 
     @Override
     public JsonUrlTextAppender<A,R> beginObject() throws IOException {
-        out.append('(');
-        return this;
+        return beginComposite();
     }
 
     @Override
     public JsonUrlTextAppender<A,R> endObject() throws IOException {
-        out.append(')');
-        return this;
+        return endComposite();
     }
 
     @Override
     public JsonUrlTextAppender<A,R> beginArray() throws IOException {
-        out.append('(');
-        return this;
+        return beginComposite();
     }
 
     @Override
     public JsonUrlTextAppender<A,R> endArray() throws IOException {
-        out.append(')');
-        return this;
+        return endComposite();
     }
 
     @Override
     public JsonUrlTextAppender<A,R> valueSeparator() throws IOException {
-        out.append(',');
+        out.append(useWfuStructChars() ? '&' : ',');
         return this;
     }
 
     @Override
     public JsonUrlTextAppender<A,R> nameSeparator() throws IOException {
-        out.append(':');
+        out.append(useWfuStructChars() ? '=' : ':');
         return this;
     }
 
@@ -147,6 +158,69 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R>
     @Override
     public JsonUrlTextAppender<A,R> append(char c) throws IOException {
         out.append(c);
+        return this;
+    }
+
+    /**
+     * Returns true if application/x-www-form-urlencoded style separators are
+     * allowed for an implied top-level object or array.
+     * @see #setFormUrlEncoded(boolean) 
+     */
+    public boolean isFormUrlEncoded() {
+        return wwwFormUrlEncoded;
+    }
+
+    /**
+     * Set this to true if you want to allow {@code &amp} to be used as a
+     * top-level value separator and {@code =} to be used as top-level name
+     * separator. 
+     * 
+     * @param wwwFormUrlEncoded true or false
+     */
+    public JsonUrlTextAppender<A,R> setFormUrlEncoded(boolean wwwFormUrlEncoded) {
+        this.wwwFormUrlEncoded = wwwFormUrlEncoded;
+        return this;
+    }
+
+    /**
+     * Returns true if this appender is writing an implied array or object.
+     * @see #setImplied(boolean) 
+     */
+    public boolean isImplied() {
+        return implied;
+    }
+
+    /**
+     * Set this to true to output an implied array or object.
+     * @param implied true or false
+     */
+    public JsonUrlTextAppender<A,R> setImplied(boolean implied) {
+        this.implied = implied;
+        return this;
+    }
+
+    /**
+     * Test if wwwFormUrlEncoded structural characters should be used.
+     */
+    private boolean useWfuStructChars() {
+        return wwwFormUrlEncoded && depth == 1;
+    }
+
+    private JsonUrlTextAppender<A,R> beginComposite() throws IOException {
+        if (!implied || depth > 0) {
+            out.append('(');
+        }
+
+        depth++;
+        return this;
+    }
+
+    private JsonUrlTextAppender<A,R> endComposite() throws IOException {
+        depth--;
+
+        if (!implied || depth > 0) {
+            out.append(')');
+        }
         return this;
     }
 }
