@@ -18,7 +18,6 @@ package org.jsonurl.j2se;
  */
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Map;
 import org.jsonurl.JsonTextBuilder;
 
@@ -29,6 +28,7 @@ import org.jsonurl.JsonTextBuilder;
  * @author David MacCormack
  * @since 2020-09-01
  */
+@SuppressWarnings("PMD.GodClass")
 public final class JsonUrlWriter {
     
     private JsonUrlWriter() {
@@ -90,8 +90,28 @@ public final class JsonUrlWriter {
             return;
         }
 
-        if (in.getClass().isArray()) {
-            write(out, Arrays.asList(in));
+        final Class<?> clazz = in.getClass();
+        if (clazz.isArray()) {
+            Class<?> type = clazz.getComponentType();
+            if (type == Boolean.TYPE) {
+                write(out, (boolean[])in);
+            } else if (type == Byte.TYPE) {
+                write(out, (byte[])in);
+            } else if (type == Character.TYPE) {
+                write(out, (char[])in);
+            } else if (type == Double.TYPE) {
+                write(out, (double[])in);
+            } else if (type == Float.TYPE) {
+                write(out, (float[])in);
+            } else if (type == Integer.TYPE) {
+                write(out, (int[])in);
+            } else if (type == Long.TYPE) {
+                write(out, (long[])in);
+            } else if (type == Short.TYPE) {
+                write(out, (short[])in);
+            } else {
+                write(out, (Object[])in);
+            }
             return;
         }
 
@@ -173,4 +193,267 @@ public final class JsonUrlWriter {
 
         out.endArray();
     }
+
+    /**
+     * Write the given array as JSON&#x2192;URL text.
+     * 
+     * @param <A> Accumulator type
+     * @param <R> Result type
+     * @param out non-null JsonTextBuilder
+     * @param array null or a valid array
+     */
+    public static final <A,R> void write(
+            JsonTextBuilder<A,R> out,
+            boolean... array) throws IOException {
+
+        if (isNull(array)) {
+            out.addNull();
+            return;
+        }
+
+        out.beginArray();
+
+        for (int i = 0; i < array.length; i++) {
+            if (i > 0) {
+                out.valueSeparator();
+            }
+            out.add(array[i]);
+        }
+
+        out.endArray();
+    }
+
+    /**
+     * Write the given array as JSON&#x2192;URL text.
+     * 
+     * @param <A> Accumulator type
+     * @param <R> Result type
+     * @param out non-null JsonTextBuilder
+     * @param array null or a valid array
+     */
+    public static final <A,R> void write(
+            JsonTextBuilder<A,R> out,
+            byte... array) throws IOException {
+
+        if (isNull(array)) {
+            out.addNull();
+            return;
+        }
+
+        out.beginArray();
+
+        for (int i = 0; i < array.length; i++) {
+            if (i > 0) {
+                out.valueSeparator();
+            }
+            out.add(array[i]);
+        }
+
+        out.endArray();
+    }
+
+    /**
+     * Write the given array as JSON&#x2192;URL text.
+     * 
+     * @param <A> Accumulator type
+     * @param <R> Result type
+     * @param out non-null JsonTextBuilder
+     * @param array null or a valid array
+     */
+    public static final <A,R> void write(
+            JsonTextBuilder<A,R> out,
+            char... array) throws IOException {
+
+        if (isNull(array)) {
+            out.addNull();
+            return;
+        }
+
+        out.beginArray();
+
+        for (int i = 0; i < array.length; i++) {
+            if (i > 0) {
+                out.valueSeparator();
+            }
+            out.add(array[i]);
+        }
+
+        out.endArray();
+    }
+
+    /**
+     * Write the given array as JSON&#x2192;URL text.
+     * 
+     * @param <A> Accumulator type
+     * @param <R> Result type
+     * @param out non-null JsonTextBuilder
+     * @param array null or a valid array
+     */
+    public static final <A,R> void write(
+            JsonTextBuilder<A,R> out,
+            double... array) throws IOException {
+
+        if (isNull(array)) {
+            out.addNull();
+            return;
+        }
+
+        out.beginArray();
+
+        for (int i = 0; i < array.length; i++) {
+            if (i > 0) {
+                out.valueSeparator();
+            }
+            out.add(array[i]);
+        }
+
+        out.endArray();
+    }
+
+    /**
+     * Write the given array as JSON&#x2192;URL text.
+     * 
+     * @param <A> Accumulator type
+     * @param <R> Result type
+     * @param out non-null JsonTextBuilder
+     * @param array null or a valid array
+     */
+    public static final <A,R> void write(
+            JsonTextBuilder<A,R> out,
+            float... array) throws IOException {
+
+        if (isNull(array)) {
+            out.addNull();
+            return;
+        }
+
+        out.beginArray();
+
+        for (int i = 0; i < array.length; i++) {
+            if (i > 0) {
+                out.valueSeparator();
+            }
+            out.add(array[i]);
+        }
+
+        out.endArray();
+    }
+
+    /**
+     * Write the given array as JSON&#x2192;URL text.
+     * 
+     * @param <A> Accumulator type
+     * @param <R> Result type
+     * @param out non-null JsonTextBuilder
+     * @param array null or a valid array
+     */
+    public static final <A,R> void write(
+            JsonTextBuilder<A,R> out,
+            int... array) throws IOException {
+
+        if (isNull(array)) {
+            out.addNull();
+            return;
+        }
+
+        out.beginArray();
+
+        for (int i = 0; i < array.length; i++) {
+            if (i > 0) {
+                out.valueSeparator();
+            }
+            out.add(array[i]);
+        }
+
+        out.endArray();
+    }
+
+    /**
+     * Write the given array as JSON&#x2192;URL text.
+     * 
+     * @param <A> Accumulator type
+     * @param <R> Result type
+     * @param out non-null JsonTextBuilder
+     * @param array null or a valid array
+     */
+    public static final <A,R> void write(
+            JsonTextBuilder<A,R> out,
+            long... array) throws IOException {
+
+        if (isNull(array)) {
+            out.addNull();
+            return;
+        }
+
+        out.beginArray();
+
+        for (int i = 0; i < array.length; i++) {
+            if (i > 0) {
+                out.valueSeparator();
+            }
+            out.add(array[i]);
+        }
+
+        out.endArray();
+    }
+
+    /**
+     * Write the given array as JSON&#x2192;URL text.
+     * 
+     * @param <A> Accumulator type
+     * @param <R> Result type
+     * @param out non-null JsonTextBuilder
+     * @param array null or a valid array
+     */
+    @SuppressWarnings("PMD.AvoidUsingShortType")
+    public static final <A,R> void write(
+            JsonTextBuilder<A,R> out,
+            short... array) throws IOException {
+
+        if (isNull(array)) {
+            out.addNull();
+            return;
+        }
+
+        out.beginArray();
+
+        for (int i = 0; i < array.length; i++) {
+            if (i > 0) {
+                out.valueSeparator();
+            }
+            out.add(array[i]);
+        }
+
+        out.endArray();
+    }
+
+    /**
+     * Write the given array as JSON&#x2192;URL text.
+     * 
+     * @param <A> Accumulator type
+     * @param <R> Result type
+     * @param out non-null JsonTextBuilder
+     * @param array null or a valid array
+     */
+    public static final <A,R> void write(
+            JsonTextBuilder<A,R> out,
+            Object... array) throws IOException {
+
+        if (isNull(array)) {
+            out.addNull();
+            return;
+        }
+
+        out.beginArray();
+
+        for (int i = 0; i < array.length; i++) {
+            if (i > 0) {
+                out.valueSeparator();
+            }
+            write(out, array[i]);
+        }
+
+        out.endArray();
+    }
+
 }

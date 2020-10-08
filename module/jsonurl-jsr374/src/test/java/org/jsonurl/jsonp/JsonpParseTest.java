@@ -137,6 +137,11 @@ abstract class JsonpParseTest extends AbstractParseTest<
     }
 
     @Override
+    protected String getStringValue(JsonValue value) {
+        return value instanceof JsonString ? ((JsonString)value).getString() : null;
+    }
+
+    @Override
     protected ValueFactory<
             JsonValue,
             JsonStructure,

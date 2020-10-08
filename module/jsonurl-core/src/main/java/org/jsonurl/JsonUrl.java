@@ -28,7 +28,6 @@ import static org.jsonurl.SyntaxException.Message.MSG_BAD_PCT_ENC;
 import static org.jsonurl.SyntaxException.Message.MSG_BAD_QSTR;
 import static org.jsonurl.SyntaxException.Message.MSG_BAD_UTF8;
 import static org.jsonurl.SyntaxException.Message.MSG_EXPECT_LITERAL;
-import static org.jsonurl.SyntaxException.Message.MSG_NO_TEXT;
 
 import java.io.IOException;
 import java.nio.charset.MalformedInputException;
@@ -193,6 +192,18 @@ public final class JsonUrl {
                     i += 2;
                     break;
                 default:
+                    //
+                    // Note: I am not checking CharUtil.CHARBITS[c]
+                    // against IS_LITCHAR and IS_QSCHAR here. This method is not
+                    // public, so it may not be called directly. The way the code
+                    // is currently structured there is no path to here that
+                    // doesn't first call parseLiteralLength, and
+                    // parseLiteralLength *does* check against those bits.
+                    //
+                    // If that changes then proper checking will need to be added.
+                    // I have not added it now because it would be impossible to
+                    // test.
+                    //
                     b = c;
                     break;
                 }
@@ -226,10 +237,17 @@ public final class JsonUrl {
                     // I want to throw something that extends RuntimeException
                     // and it does not.
                     //
-                    throw new IllegalArgumentException("utf-8 decode error");
+                    // Also, by throwing SyntaxException I can also include the
+                    // position.
+                    //
+                    throw new SyntaxException(MSG_BAD_UTF8, stop);
                 }
             }
             if (needEndQuote) {
+                //
+                // this isn't actually possible because parseLiteralLength()
+                // will throw an exception first. But, just in case...
+                //
                 throw new SyntaxException(MSG_BAD_QSTR, stop);
             }
             if (more > 0) {
@@ -266,8 +284,6 @@ public final class JsonUrl {
                 int stop,
                 boolean isEmptyUnquotedStringOK) {
 
-            
-            
             if (s.charAt(start) == '\'') {
                 return string(buf, s, start + 1, stop, true, isEmptyUnquotedStringOK);
             }
@@ -277,18 +293,12 @@ public final class JsonUrl {
             if (ret != null) {
                 return ret;
             }
-            
-            if (num == null) {
-                //
-                // This will never build a Number (e.g. instance of BigInteger
-                // or BigDecimal), it's only used to parse the text, so it is
-                // safe to pass in null for the factory.
-                //
-                num = newNumberBuilder(null);
 
-            } else {
-                num.reset();
-            }
+            //
+            // It is not possible (with the current codebase) for num to be
+            // null, so that check has been removed and I simply reset it.
+            //
+            num.reset();
 
             if (num.parse(s, start, stop)) {
                 return s.subSequence(start, stop).toString();
@@ -363,7 +373,7 @@ public final class JsonUrl {
      * a namespace to hide private, encode-specific static fields and methods.
      */
     static final class Encode {
-        
+
         /**
          * Enumeration of strings "types" based on what characters are in them.
          */
@@ -415,6 +425,13 @@ public final class JsonUrl {
                 if (c > 127) {
                     return StringEncoding.FULL_ENCODING;
                 }
+
+                //
+                // track space and non-space values with separate masks.
+                // CharUtil.CHARBITS[' '] is specifically setup to allow this.
+                // If you change this code be sure to update that value as
+                // necessary.
+                //
                 strbits &= CharUtil.CHARBITS[c] & strmask;
                 spacebits |= CharUtil.CHARBITS[c] & spacemask;
             }
@@ -447,8 +464,21 @@ public final class JsonUrl {
                 Appendable dest,
                 CharSequence s,
                 int start,
-                int end) throws IOException {
+                int end,
+                boolean quoted) throws IOException {
+
+            if (start < end && s.charAt(start) == '\'') {
+                //
+                // edge case: if the first character is a quote then
+                // it must always be encoded
+                //
+                dest.append("%27");
+                start++;
+            }
             
+            final String[] hexEncode = quoted
+                ? CharUtil.HEXENCODE_QUOTED : CharUtil.HEXENCODE_UNQUOTED;
+
             for (int i = start; i < end; i++) {
                 char c = s.charAt(i);
                 int cp;
@@ -474,37 +504,22 @@ public final class JsonUrl {
                 }
                 
                 if (cp < 0x80) {
-                    dest.append(CharUtil.HEXENCODE[cp]);
+                    dest.append(hexEncode[cp]);
 
                 } else if (cp < 0x800) {
-                    dest.append(CharUtil.HEXENCODE[(0xC0 | (cp >> 6))]);
-                    dest.append(CharUtil.HEXENCODE[(0x80 | (cp & 0x3F))]);
+                    dest.append(hexEncode[(0xC0 | (cp >> 6))]);
+                    dest.append(hexEncode[(0x80 | (cp & 0x3F))]);
 
                 } else if (cp < 0x10000) {
-                    dest.append(CharUtil.HEXENCODE[(0xE0 | (cp >> 12))]);
-                    dest.append(CharUtil.HEXENCODE[(0x80 | ((cp >> 6) & 0x3F))]);
-                    dest.append(CharUtil.HEXENCODE[(0x80 | (cp & 0x3F))]);
+                    dest.append(hexEncode[(0xE0 | (cp >> 12))]);
+                    dest.append(hexEncode[(0x80 | ((cp >> 6) & 0x3F))]);
+                    dest.append(hexEncode[(0x80 | (cp & 0x3F))]);
 
                 } else if (cp < 0x200000) {
-                    dest.append(CharUtil.HEXENCODE[(0xF0 | (cp >> 18))]);
-                    dest.append(CharUtil.HEXENCODE[(0x80 | ((cp >> 12) & 0x3F))]);
-                    dest.append(CharUtil.HEXENCODE[(0x80 | ((cp >> 6) & 0x3F))]);
-                    dest.append(CharUtil.HEXENCODE[(0x80 | (cp & 0x3F))]);
-
-                } else if (cp < 0x4000000) {
-                    dest.append(CharUtil.HEXENCODE[(0xF8 | (cp >> 24))]);
-                    dest.append(CharUtil.HEXENCODE[(0x80 | ((cp >> 18) & 0x3F))]);
-                    dest.append(CharUtil.HEXENCODE[(0x80 | ((cp >> 12) & 0x3F))]);
-                    dest.append(CharUtil.HEXENCODE[(0x80 | ((cp >> 6) & 0x3F))]);
-                    dest.append(CharUtil.HEXENCODE[(0x80 | (cp & 0x3F))]);
-
-                } else if (cp < 0x8000000) {
-                    dest.append(CharUtil.HEXENCODE[(0xFC | (cp >> 30))]);
-                    dest.append(CharUtil.HEXENCODE[(0x80 | ((cp >> 24) & 0x3F))]);
-                    dest.append(CharUtil.HEXENCODE[(0x80 | ((cp >> 18) & 0x3F))]);
-                    dest.append(CharUtil.HEXENCODE[(0x80 | ((cp >> 12) & 0x3F))]);
-                    dest.append(CharUtil.HEXENCODE[(0x80 | ((cp >> 6) & 0x3F))]);
-                    dest.append(CharUtil.HEXENCODE[(0x80 | (cp & 0x3F))]);
+                    dest.append(hexEncode[(0xF0 | (cp >> 18))]);
+                    dest.append(hexEncode[(0x80 | ((cp >> 12) & 0x3F))]);
+                    dest.append(hexEncode[(0x80 | ((cp >> 6) & 0x3F))]);
+                    dest.append(hexEncode[(0x80 | (cp & 0x3F))]);
 
                 } else {
                     throw new MalformedInputException(i);
@@ -606,10 +621,7 @@ public final class JsonUrl {
             }
             throw new SyntaxException(MSG_BAD_CHAR, start);
         }
-        
-        if (start != stop && errmsg != null) {
-            throw new SyntaxException(errmsg, stop);
-        }
+
         return ret;
     }
 
@@ -650,10 +662,11 @@ public final class JsonUrl {
             ValueFactory<V,?,?,?,?,?,?,?,?,?> factory,
             boolean isEmptyUnquotedStringOK) {
 
-        if (length == 0) {
-            throw new SyntaxException(MSG_NO_TEXT);
-        }
-
+        //
+        // Note: not checking length == 0 here. That case is handled properly
+        // by both parseLiteralLength() and Parse.literal().
+        //
+        
         int stop = start + length;
         parseLiteralLength(s, start, stop, MSG_EXPECT_LITERAL);
 
@@ -754,7 +767,7 @@ public final class JsonUrl {
                 dest.append('\'').append(s, start, end).append('\'');
 
             } else {
-                Encode.encode(dest, s, start, end);
+                Encode.encode(dest, s, start, end, false);
             }
             return dest;
         }
@@ -767,14 +780,14 @@ public final class JsonUrl {
         switch (enc) {
         case FULL_ENCODING:
         case NO_QUOTE_WITH_SPACE:
-            Encode.encode(dest, s, start, end);
+            Encode.encode(dest, s, start, end, false);
             break;
         case QUOTE_NO_SPACE:
             dest.append('\'').append(s, start, end).append('\'');
             break;
         case QUOTE_WITH_SPACE:
             dest.append('\'');
-            Encode.encode(dest, s, start, end);
+            Encode.encode(dest, s, start, end, true);
             dest.append('\'');
             break;
         case SAFE_ASIS:

@@ -131,7 +131,12 @@ abstract class JavaValueFactoryParseTest extends AbstractParseTest<
     protected Number getNumberValue(Object value) {
         return value instanceof Number ? (Number)value : null;
     }
-    
+
+    @Override
+    protected String getStringValue(Object value) {
+        return value instanceof String ? (String)value : null;
+    }
+
     @Test
     @DisplayName("JavaValueFactory.toJavaString")
     void testToJavaString() {
