@@ -127,6 +127,11 @@ abstract class JsonOrgParseTest extends AbstractParseTest<
     }
 
     @Override
+    protected String getStringValue(Object value) {
+        return value instanceof String ? (String)value : null;
+    }
+
+    @Override
     protected ValueFactory<
             Object,
             Object,

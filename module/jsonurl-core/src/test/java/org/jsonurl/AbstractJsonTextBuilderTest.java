@@ -58,7 +58,7 @@ public abstract class AbstractJsonTextBuilderTest<
 
     /**
      * Get an implementation-defined JSON&#x2192;URL ValueFactory.
-     * @return a valid Parser instance
+     * @return a valid ValueFactory instance
      */
     protected abstract ValueFactory<V,C,ABT,A,JBT,J,?,?,?,?> getFactory();
     
