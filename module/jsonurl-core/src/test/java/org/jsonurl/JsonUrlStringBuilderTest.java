@@ -20,13 +20,16 @@ package org.jsonurl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.MalformedInputException;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /**
@@ -97,33 +100,88 @@ class JsonUrlStringBuilderTest {
     @ParameterizedTest
     @Tag("parse")
     @Tag("string")
-    @Tag("autostring")
+    @Tag("exception")
     @ValueSource(strings = {
-            "hello",
-            "t", "tr", "tru", "True", "tRue", "trUe", "truE",
-            "f", "fa", "fal", "fals", "False", "fAlse", "faLse", "falSe", "falsE",
-            "n", "nu", "nul", "Null", "nUll", "nuLl", "nulL",
+            Character.MIN_LOW_SURROGATE + "" + Character.MIN_HIGH_SURROGATE,
+            Character.MIN_HIGH_SURROGATE + "",
+            Character.MIN_HIGH_SURROGATE + "" + Character.MIN_HIGH_SURROGATE,
+            Character.MAX_HIGH_SURROGATE + "" + (Character.MAX_LOW_SURROGATE + 1),
     })
-    void testNonLiteral(String text) throws IOException {
-        testValue(text, false);
+    void testException(String text) throws IOException {
+        assertThrows(
+            MalformedInputException.class,
+            () -> new JsonUrlStringBuilder().addKey(text).build());
+
+        assertThrows(
+            MalformedInputException.class,
+            () -> new JsonUrlStringBuilder().add(text).build());
     }
 
     @ParameterizedTest
     @Tag("parse")
     @Tag("string")
-    @Tag("autostring")
     @ValueSource(strings = {
-            "true", "false", "null", "1", "1.0", "1e3",
+        "hello",
+        "t", "tr", "tru", "True", "tRue", "trUe", "truE",
+        "f", "fa", "fal", "fals", "False", "fAlse", "faLse", "falSe", "falsE",
+        "n", "nu", "nul", "Null", "nUll", "nuLl", "nulL",
     })
-    void testLiteral(String text) throws IOException {
-        testValue(text, true);
+    void testNonQuotedString(String text) throws IOException {
+        testValue(text, text, text);
+    }
+
+    @ParameterizedTest
+    @Tag("parse")
+    @Tag("string")
+    @ValueSource(strings = {
+        "true", "false", "null", "1", "1.0", "1e3", "1e-3",
+    })
+    void testQuotedString(String text) throws IOException {
+        testValue(text, text, '\'' + text + '\'');
+    }
+
+    @ParameterizedTest
+    @Tag("parse")
+    @Tag("string")
+    @CsvSource({
+        "1e+3,1e%2B3",
+    })
+    void testEncodedString(String in, String out) throws IOException {
+        testValue(in, in, out);
+    }
+
+    @Test
+    @Tag("parse")
+    @Tag("string")
+    void testEncodedString() throws IOException {
+        testValue("'hello", "%27hello", "%27hello");
+        testValue("hello,", "'hello,'", "'hello,'");
+        testValue("hello, ", "'hello,+'", "'hello,+'");
+    }
+
+    @ParameterizedTest
+    @Tag("parse")
+    @Tag("string")
+    @CsvSource({
+        // CHECKSTYLE:OFF
+        "'hello\u00A2world',hello%C2%A2world",
+        "'hello\u20ACworld',hello%E2%82%ACworld",
+        "'hello\uD83C\uDF55world',hello%F0%9F%8D%95world",
+        "'hello\uD852\uDF62world',hello%F0%A4%AD%A2world",
+        // CHECKSTYLE:ON
+    })
+    void testUtf8(String text, String expected) throws IOException {
+        String actual = new JsonUrlStringBuilder().addKey(text).build();
+        assertEquals(expected, actual, text);
     }
     
-    private void testValue(String text, boolean isLiteral) throws IOException {
-        String expected = isLiteral ? '\'' + text + '\'' : text;
-        assertEquals(text, new JsonUrlStringBuilder().addKey(text).build());
-        assertEquals(expected, new JsonUrlStringBuilder().add(text).build());
-        assertEquals(expected,
+    private void testValue(
+            String text,
+            String keyOutput,
+            String nonKeyOutput) throws IOException {
+        assertEquals(keyOutput, new JsonUrlStringBuilder().addKey(text).build());
+        assertEquals(nonKeyOutput, new JsonUrlStringBuilder().add(text).build());
+        assertEquals(nonKeyOutput,
             new JsonUrlStringBuilder().add(text, 0, text.length()).build());
     }
 }

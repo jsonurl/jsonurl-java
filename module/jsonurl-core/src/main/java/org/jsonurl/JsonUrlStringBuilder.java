@@ -61,6 +61,11 @@ public class JsonUrlStringBuilder extends
 
     @Override
     public String build() {
+        return toString();
+    }
+
+    @Override
+    public String toString() {
         return out.toString();
     }
 }

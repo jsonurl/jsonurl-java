@@ -131,6 +131,12 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R>
     }
 
     @Override
+    public JsonUrlTextAppender<A,R> add(char value) throws IOException {
+        out.append(value);
+        return this;
+    }
+
+    @Override
     public JsonUrlTextAppender<A,R> add(
             CharSequence s,
             int start,
