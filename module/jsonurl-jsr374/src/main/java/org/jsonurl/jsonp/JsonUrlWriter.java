@@ -113,10 +113,8 @@ public final class JsonUrlWriter {
         }
         
         boolean comma = false; // NOPMD - I need to track this
-        
+
         out.beginObject();
-        
-        in.entrySet();
         
         for (Entry<String, JsonValue> e : in.entrySet()) {
             String key = e.getKey();
