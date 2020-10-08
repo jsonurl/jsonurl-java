@@ -89,11 +89,16 @@ public interface JsonTextBuilder<A,R> {
      * Add a BigInteger value.
      */
     public JsonTextBuilder<A,R> add(BigInteger value) throws IOException;
-    
+
     /**
      * Add a boolean value.
      */
     public JsonTextBuilder<A,R> add(boolean value) throws IOException;
+
+    /**
+     * Add a boolean value.
+     */
+    public JsonTextBuilder<A,R> add(char value) throws IOException;
 
     /**
      * Add a string value.
@@ -135,6 +140,35 @@ public interface JsonTextBuilder<A,R> {
     }
 
     /**
+     * Add an enum value.
+     *
+     * <p>This is simply a convenience for
+     * {@link #add(CharSequence, boolean)
+     * add(value.name(), isKey)}.
+     * @param value an enumerated value or null
+     * @param isKey true if this is an object key 
+     */
+    default JsonTextBuilder<A,R> add(Enum<?> value, boolean isKey) throws IOException {
+        if (value == null) {
+            return addNull();
+        }
+
+        return add(value.name(), isKey);
+    }
+
+    /**
+     * Add an enum value.
+     *
+     * <p>This is simply a convenience for
+     * {@link #add(Enum, boolean)
+     * add(value, false)}.
+     * @param value an enumerated value or null 
+     */
+    default JsonTextBuilder<A,R> add(Enum<?> value) throws IOException {
+        return add(value, false);    
+    }
+
+    /**
      * Add a string value.
      *
      * <p>This is simply a convenience for
@@ -145,6 +179,20 @@ public interface JsonTextBuilder<A,R> {
      */
     default JsonTextBuilder<A,R> add(CharSequence s) throws IOException {
         return add(s, 0, s.length(), false);
+    }
+
+    /**
+     * Add a string value.
+     *
+     * <p>This is simply a convenience for
+     * {@link #add(CharSequence, int, int, boolean)
+     * add(s,0,s.length(),false)}.
+     * @param s the character sequence to add 
+     * @param isKey true if this is an object key
+     * @see #add(CharSequence, int, int, boolean)
+     */
+    default JsonTextBuilder<A,R> add(CharSequence s, boolean isKey) throws IOException {
+        return add(s, 0, s.length(), isKey);
     }
 
     /**
