@@ -27,6 +27,7 @@ import java.math.BigInteger;
 import java.math.MathContext;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -137,7 +138,7 @@ class NumberBuilderTest {
         nb.setBigMathProvider(mcp);
         assertEquals(mcp, nb.getBigMathProvider(), sin);
         BigDecimal bd = nb.toBigDecimal();
-        assertEquals(expect, bd.doubleValue());
+        assertEquals(expect, bd.doubleValue(), String.valueOf(in));
     }
 
     @ParameterizedTest
@@ -292,7 +293,7 @@ class NumberBuilderTest {
         assertToString(in);
         assertToString(out);
     }
-    
+
     @ParameterizedTest
     @ValueSource(strings = {
         "true", "false", "null",
@@ -300,9 +301,92 @@ class NumberBuilderTest {
         "1.", "-1.",
         "1e+", "1e-",
     })
-    void testNonNumberLiterals(String s) {
-        assertFalse(JsonUrl.parseLiteral(s) instanceof Number, s);
-        assertEquals_isNumber(false, s);
-        assertEquals_isInteger(false, s);
+    void testNonNumberLiterals(String text) {
+        assertFalse(JsonUrl.parseLiteral(text) instanceof Number, text);
+        assertEquals_isNumber(false, text);
+        assertEquals_isInteger(false, text);
+    }
+    
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "1",
+        Long.MIN_VALUE + "", // NOPMD - must be a literal
+        Long.MAX_VALUE + "", // NOPMD - must be a literal
+    })
+    void testIsLong(String text) {
+        assertTrue(NumberBuilder.isLong(new NumberBuilder(text)), text);
+        assertEquals(
+            Long.parseLong(text),
+            NumberBuilder.toLong(new NumberBuilder(text)),
+            text);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        Long.MIN_VALUE + "0",
+        Long.MAX_VALUE + "0",
+        "1.0",
+    })
+    void testIsNotLong(String text) {
+        assertFalse(NumberBuilder.isLong(new NumberBuilder(text)), text);
+    }
+
+    @Test
+    void testEmptyString() {
+        NumberText text = new NumberText() { // NOPMD
+
+            @Override
+            public CharSequence getText() {
+                return null;
+            }
+
+            @Override
+            public int getIntegerStartIndex() {
+                return 0;
+            }
+
+            @Override
+            public int getIntegerStopIndex() {
+                return 0;
+            }
+
+            @Override
+            public int getFractionalStartIndex() {
+                return 0;
+            }
+
+            @Override
+            public int getFractionalStopIndex() {
+                return 0;
+            }
+
+            @Override
+            public int getExponentStartIndex() {
+                return 0;
+            }
+
+            @Override
+            public int getExponentStopIndex() {
+                return 0;
+            }
+
+            @Override
+            public int getStartIndex() {
+                return 0;
+            }
+
+            @Override
+            public int getStopIndex() {
+                return 0;
+            }
+
+            @Override
+            public Exponent getExponentType() {
+                return Exponent.NONE;
+            }
+            
+        };
+
+        assertEquals(0L, NumberBuilder.toLong(text), "empty string");
     }
 }
