@@ -1,5 +1,3 @@
-package org.jsonurl;
-
 /*
  * Copyright 2019 David MacCormack
  * 
@@ -17,6 +15,8 @@ package org.jsonurl;
  * under the License.
  */
 
+package org.jsonurl;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.params.ParameterizedTest;
@@ -29,25 +29,25 @@ class ValueTypeTest {
 
     @ParameterizedTest
     @EnumSource(ValueType.class)
-    void test(ValueType t) {
+    void test(ValueType type) {
         assertEquals(
-            t == ValueType.ARRAY || t == ValueType.OBJECT,
-            t.isComposite(),
-            t.name());
+            type == ValueType.ARRAY || type == ValueType.OBJECT,
+            type.isComposite(),
+            type.name());
         
         assertEquals(
-            t == ValueType.ARRAY || t == ValueType.OBJECT || t == ValueType.NULL,
-            t.isCompositeOrNull(),
-            t.name());
+            type == ValueType.ARRAY || type == ValueType.OBJECT || type == ValueType.NULL,
+            type.isCompositeOrNull(),
+            type.name());
         
         assertEquals(
-            t != ValueType.ARRAY && t != ValueType.OBJECT && t != ValueType.NULL,
-            t.isPrimitive(),
-            t.name());
+            type != ValueType.ARRAY && type != ValueType.OBJECT && type != ValueType.NULL,
+            type.isPrimitive(),
+            type.name());
         
         assertEquals(
-            t != ValueType.ARRAY && t != ValueType.OBJECT,
-            t.isPrimitiveOrNull(),
-            t.name());
+            type != ValueType.ARRAY && type != ValueType.OBJECT,
+            type.isPrimitiveOrNull(),
+            type.name());
     }
 }

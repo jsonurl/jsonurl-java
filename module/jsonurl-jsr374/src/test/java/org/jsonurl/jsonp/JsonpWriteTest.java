@@ -17,6 +17,7 @@
 
 package org.jsonurl.jsonp;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import javax.json.Json;
@@ -45,16 +46,16 @@ public class JsonpWriteTest extends AbstractJsonApiWriteTest<
 
 
     @Override
-    public JsonArray newArray(String s) {
-        try (JsonReader r = Json.createReader(new StringReader(s))) {
-            return r.readArray();
+    public JsonArray newArray(String text) {
+        try (JsonReader json = Json.createReader(new StringReader(text))) {
+            return json.readArray();
         }
     }
 
     @Override
-    public JsonObject newObject(String s) {
-        try (JsonReader r = Json.createReader(new StringReader(s))) {
-            return r.readObject();
+    public JsonObject newObject(String text) {
+        try (JsonReader json = Json.createReader(new StringReader(text))) {
+            return json.readObject();
         }
     }
 
@@ -81,8 +82,8 @@ public class JsonpWriteTest extends AbstractJsonApiWriteTest<
     }
 
     @Override
-    public void write(JsonTextBuilder<?, ?> out, JsonValue value)
-            throws Exception {
-        JsonUrlWriter.write(out, value);
+    public void write(JsonTextBuilder<?, ?> dest, JsonValue value)
+            throws IOException {
+        JsonUrlWriter.write(dest, value);
     }
 }

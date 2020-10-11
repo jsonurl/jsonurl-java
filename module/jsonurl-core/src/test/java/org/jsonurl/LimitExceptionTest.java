@@ -32,7 +32,6 @@ import org.junit.jupiter.params.provider.EnumSource;
  */
 public class LimitExceptionTest {
 
-
     @ParameterizedTest
     @Tag("exception")
     @EnumSource(LimitException.Message.class)

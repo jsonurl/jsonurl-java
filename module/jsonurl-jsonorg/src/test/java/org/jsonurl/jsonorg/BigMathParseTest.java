@@ -1,5 +1,3 @@
-package org.jsonurl.jsonorg;
-
 /*
  * Copyright 2019 David MacCormack
  * 
@@ -17,6 +15,8 @@ package org.jsonurl.jsonorg;
  * under the License.
  */
 
+package org.jsonurl.jsonorg;
+
 /**
  * Unit test using JsonOrgValueFactory.BigMathFactory.
  *
@@ -24,12 +24,12 @@ package org.jsonurl.jsonorg;
  * @author David MacCormack
  * @since 2019-09-01
  */
-class BigMathParseTest extends JsonOrgParseTest {
+class BigMathParseTest extends AbstractJsonOrgParseTest {
     
     /**
      * Unit test using JsonOrgValueFactory.BIGMATH32.
      */
-    static final class Test32 extends JsonOrgParseTest {
+    static final class Test32 extends AbstractJsonOrgParseTest {
         /**
          * Create a new Test32.
          */
@@ -41,7 +41,7 @@ class BigMathParseTest extends JsonOrgParseTest {
     /**
      * Unit test using JsonOrgValueFactory.BIGMATH64.
      */
-    static final class Test64 extends JsonOrgParseTest {
+    static final class Test64 extends AbstractJsonOrgParseTest {
         /**
          * Create a new Test64.
          */
@@ -53,7 +53,7 @@ class BigMathParseTest extends JsonOrgParseTest {
     /**
      * Unit test using JsonOrgValueFactory.BIGMATH128.
      */
-    static final class Test128 extends JsonOrgParseTest {
+    static final class Test128 extends AbstractJsonOrgParseTest {
         /**
          * Create a new Test128.
          */

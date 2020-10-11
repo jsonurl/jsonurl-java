@@ -80,6 +80,7 @@
 
     <checkstyle.config.file>config/checkstyle.xml</checkstyle.config.file>
     <checkstyle.config.module.location>../../${checkstyle.config.file}</checkstyle.config.module.location>
+    <pmd.version>6.28.0</pmd.version>
     <pmd.config.file>config/pmd-ruleset.xml</pmd.config.file>
     <pmd.config.module.location>../../${pmd.config.file}</pmd.config.module.location>
     <jacoco.minimum.coverage>0.40</jacoco.minimum.coverage>
@@ -203,6 +204,28 @@
         <plugin>
           <artifactId>maven-pmd-plugin</artifactId>
           <version>${maven.pmd.plugin}</version>
+          <dependencies>
+            <dependency>
+              <groupId>net.sourceforge.pmd</groupId>
+              <artifactId>pmd-core</artifactId>
+              <version>${pmd.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>net.sourceforge.pmd</groupId>
+              <artifactId>pmd-java</artifactId>
+              <version>${pmd.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>net.sourceforge.pmd</groupId>
+              <artifactId>pmd-java8</artifactId>
+              <version>${pmd.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>net.sourceforge.pmd</groupId>
+              <artifactId>pmd-jsp</artifactId>
+              <version>${pmd.version}</version>
+            </dependency>
+          </dependencies>
           <configuration>
             <sourceEncoding>${char.encoding}</sourceEncoding>
             <targetJdk>${jdk.version}</targetJdk>

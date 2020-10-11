@@ -46,15 +46,19 @@ import java.util.EnumSet;
 public class ValueFactoryParser<
         V,
         C extends V,
-        ABT,
+        ABT, // NOPMD - GenericsNaming
         A extends C,
-        JBT,
+        JBT, // NOPMD - GenericsNaming
         J extends C,
         B extends V,
         M extends V,
         N extends V,
         S extends V> extends Parser {
-    
+
+    /**
+     * This parser's ValueFactory.
+     */
+    private final ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory;
      
     /**
      * A {@link ValueFactoryParser} with {@link ValueFactory.TransparentBuilder
@@ -89,11 +93,6 @@ public class ValueFactoryParser<
             super(factory);
         }
     }
-    
-    /**
-     * This parser's ValueFactory.
-     */
-    private final ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory;
 
     /**
      * Instantiate a new ValueFactoryParser.
@@ -108,8 +107,8 @@ public class ValueFactoryParser<
      * {@link org.jsonurl.Parser#parseObject(CharSequence, int, int, ValueFactory)
      * parse(s, 0, s.length(), getFactory())}.
      */
-    public J parseObject(CharSequence s) {
-        return parseObject(s, 0, s.length(), factory);
+    public J parseObject(CharSequence text) {
+        return parseObject(text, 0, text.length(), factory);
     }
 
     /**
@@ -117,8 +116,8 @@ public class ValueFactoryParser<
      * {@link org.jsonurl.Parser#parseObject(CharSequence, int, int, ValueFactory)
      * parse(s, off, length, getFactory())}.
      */
-    public J parseObject(CharSequence s, int off, int length) {
-        return super.parseObject(s, off, length, factory);
+    public J parseObject(CharSequence text, int off, int length) {
+        return super.parseObject(text, off, length, factory);
     }
 
     /**
@@ -126,8 +125,8 @@ public class ValueFactoryParser<
      * {@link org.jsonurl.Parser#parseObject(CharSequence, int, int, ValueFactory, Object)
      * parse(s, 0, s.length(), getFactory(), impliedObject)}.
      */
-    public J parseObject(CharSequence s, JBT impliedObject) {
-        return super.parseObject(s, factory, impliedObject);
+    public J parseObject(CharSequence text, JBT impliedObject) {
+        return super.parseObject(text, factory, impliedObject);
     }
 
     /**
@@ -136,11 +135,11 @@ public class ValueFactoryParser<
      * parse(s, off, length, getFactory(), impliedObject)}.
      */
     public J parseObject(
-                CharSequence s,
+                CharSequence text,
                 int off,
                 int length,
                 JBT impliedObject) {
-        return super.parseObject(s, off, length, factory, impliedObject);
+        return super.parseObject(text, off, length, factory, impliedObject);
     }
 
     /**
@@ -148,8 +147,8 @@ public class ValueFactoryParser<
      * {@link org.jsonurl.Parser#parseArray(CharSequence, int, int, ValueFactory)
      * parse(s, 0, s.length(), getFactory())}.
      */
-    public A parseArray(CharSequence s) {
-        return super.parseArray(s, 0, s.length(), factory);
+    public A parseArray(CharSequence text) {
+        return super.parseArray(text, 0, text.length(), factory);
     }
 
     /**
@@ -157,8 +156,8 @@ public class ValueFactoryParser<
      * {@link org.jsonurl.Parser#parseArray(CharSequence, int, int, ValueFactory)
      * parse(s, off, length, getFactory())}.
      */
-    public A parseArray(CharSequence s, int off, int length) {
-        return super.parseArray(s, off, length, factory);
+    public A parseArray(CharSequence text, int off, int length) {
+        return super.parseArray(text, off, length, factory);
     }
 
     /**
@@ -166,8 +165,8 @@ public class ValueFactoryParser<
      * {@link org.jsonurl.Parser#parseArray(CharSequence, int, int, ValueFactory, Object)
      * parse(s, 0, s.length(), getFactory())}.
      */
-    public A parseArray(CharSequence s, ABT impliedArray) {
-        return super.parseArray(s, 0, s.length(), factory, impliedArray);
+    public A parseArray(CharSequence text, ABT impliedArray) {
+        return super.parseArray(text, 0, text.length(), factory, impliedArray);
     }
 
     /**
@@ -176,11 +175,11 @@ public class ValueFactoryParser<
      * parse(s, off, length, getFactory())}.
      */
     public A parseArray(
-                CharSequence s,
+                CharSequence text,
                 int off,
                 int length,
                 ABT impliedArray) {
-        return super.parseArray(s, off, length, factory, impliedArray);
+        return super.parseArray(text, off, length, factory, impliedArray);
     }
 
     /**
@@ -188,8 +187,8 @@ public class ValueFactoryParser<
      * {@link #parse(CharSequence, int, int, ValueType, ValueFactory)
      * parse(s, 0, s.length(), null, factory)}.
      */
-    public V parse(CharSequence s) {
-        return parse(s, 0, s.length(), (EnumSet<ValueType>)null, factory);
+    public V parse(CharSequence text) {
+        return parse(text, 0, text.length(), (EnumSet<ValueType>)null, factory);
     }
 
     /**
@@ -197,8 +196,8 @@ public class ValueFactoryParser<
      * {@link #parse(CharSequence, int, int, ValueType, ValueFactory)
      * parse(s, off, length, null, factory)}.  
      */
-    public V parse(CharSequence s, int off, int length) {
-        return parse(s, off, length, (EnumSet<ValueType>)null, factory);
+    public V parse(CharSequence text, int off, int length) {
+        return parse(text, off, length, (EnumSet<ValueType>)null, factory);
     }
     
     /**
@@ -207,11 +206,11 @@ public class ValueFactoryParser<
      * parse(s, off, length, EnumSet.of(canReturn), factory)}.
      */
     public V parse(
-                CharSequence s,
+                CharSequence text,
                 int off,
                 int length,
                 ValueType canReturn) {
-        return parse(s, off, length, EnumSet.of(canReturn), factory);
+        return parse(text, off, length, EnumSet.of(canReturn), factory);
     }
 
     /**
@@ -219,8 +218,8 @@ public class ValueFactoryParser<
      * {@link #parse(CharSequence, int, int, ValueType, ValueFactory)
      * parse(s, 0, s.length(), EnumSet.of(canReturn), factory)}.
      */
-    public V parse(CharSequence s, ValueType canReturn) {
-        return parse(s, 0, s.length(), EnumSet.of(canReturn), factory);
+    public V parse(CharSequence text, ValueType canReturn) {
+        return parse(text, 0, text.length(), EnumSet.of(canReturn), factory);
     }
 
     /**

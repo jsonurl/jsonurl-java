@@ -31,9 +31,9 @@ import java.util.Set;
  */
 class ValueFactoryParseResultFacade<V,
         C extends V,
-        ABT,
+        ABT, // NOPMD - GenericsNaming
         A extends C,
-        JBT,
+        JBT, // NOPMD - GenericsNaming
         J extends C,
         B extends V,
         M extends V,
@@ -115,8 +115,8 @@ class ValueFactoryParseResultFacade<V,
     @Override
     public ParseResultFacade<V> endArray() {
         @SuppressWarnings("unchecked") //NOPMD
-        ABT ab = (ABT)builderStack.pop();
-        factoryValueStack.push(factory.newArray(ab));
+        ABT builder = (ABT)builderStack.pop();
+        factoryValueStack.push(factory.newArray(builder));
         return this;
     }
 
@@ -129,8 +129,8 @@ class ValueFactoryParseResultFacade<V,
     @Override
     public ParseResultFacade<V> endObject() {
         @SuppressWarnings("unchecked")
-        JBT jb = (JBT)builderStack.pop();
-        factoryValueStack.push(factory.newObject(jb));
+        JBT builder = (JBT)builderStack.pop();
+        factoryValueStack.push(factory.newObject(builder));
         return this;
     }
 
@@ -146,37 +146,37 @@ class ValueFactoryParseResultFacade<V,
 
     @Override
     public void addLiteral(
-            CharSequence s,
+            CharSequence text,
             int start,
             int stop,
             boolean isEmptyUnquotedStringOK) {
 
         factoryValueStack.push(
-            literal(buf, numb, s, start, stop, factory, isEmptyUnquotedStringOK));
+            literal(buf, numb, text, start, stop, factory, isEmptyUnquotedStringOK));
     }
 
     @Override
     public void addSingleElementArray(
-            CharSequence s,
+            CharSequence text,
             int start,
             int stop,
             boolean isEmptyUnquotedStringOK) {
         ABT sea = factory.newArrayBuilder();
 
         factory.add(sea, literal(
-            buf, numb, s, start, stop, factory, isEmptyUnquotedStringOK));
+            buf, numb, text, start, stop, factory, isEmptyUnquotedStringOK));
 
         factoryValueStack.push(factory.newArray(sea));                
     }
 
     @Override
     public void addObjectKey(
-            CharSequence s,
+            CharSequence text,
             int start,
             int stop,
             boolean isEmptyUnquotedStringOK) {
         keyStack.push(literalToJavaString(
-            buf, numb, s, start, stop, isEmptyUnquotedStringOK));                
+            buf, numb, text, start, stop, isEmptyUnquotedStringOK));                
     }
 
     @Override
@@ -196,9 +196,9 @@ class ValueFactoryParseResultFacade<V,
         String key = keyStack.pop();
 
         @SuppressWarnings("unchecked")
-        JBT jb = (JBT)builderStack.peek();
+        JBT builder = (JBT)builderStack.peek();
 
-        factory.put(jb, key, topval);
+        factory.put(builder, key, topval);
         return this;
     }
 
@@ -214,11 +214,11 @@ class ValueFactoryParseResultFacade<V,
 
     @Override
     public V getResult(
-            CharSequence s,
+            CharSequence text,
             int start,
             int stop,
             boolean isEmptyUnquotedStringOK) {
-        return literal(buf, numb, s, start, stop, factory, isEmptyUnquotedStringOK);
+        return literal(buf, numb, text, start, stop, factory, isEmptyUnquotedStringOK);
     }
 
     @Override

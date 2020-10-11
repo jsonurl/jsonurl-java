@@ -55,20 +55,12 @@ import org.junit.jupiter.params.provider.ValueSource;
  * @author David MacCormack
  * @since 2019-09-01
  */
-@SuppressWarnings({
-    "PMD.DataflowAnomalyAnalysis",
-    "PMD.CyclomaticComplexity",
-    "PMD.AvoidDuplicateLiterals",
-    "PMD.CommentRequired",
-    "PMD.ExcessiveClassLength",
-    "PMD.GodClass"
-    })
 public abstract class AbstractParseTest<
         V,
         C extends V,
-        ABT,
+        ABT, // NOPMD - GenericsNaming
         A extends C,
-        JBT,
+        JBT, // NOPMD - GenericsNaming
         J extends C,
         B extends V,
         M extends V,
@@ -85,28 +77,28 @@ public abstract class AbstractParseTest<
     private static final String NULL = "null";
 
     /** tag annotation. */
-    private static final String TAG_ARRAY = "array";
+    public static final String TAG_ARRAY = "array";
 
     /** tag annotation. */
-    private static final String TAG_BOOLEAN = "boolean";
+    public static final String TAG_BOOLEAN = "boolean";
 
     /** tag annotation. */
-    private static final String TAG_EMPTY = "empty";
+    public static final String TAG_EMPTY = "empty";
 
     /** tag annotation. */
-    private static final String TAG_EXCEPTION = "exception";
+    public static final String TAG_EXCEPTION = "exception";
 
     /** tag annotation. */
-    private static final String TAG_NULL = NULL;
+    public static final String TAG_NULL = NULL;
 
     /** tag annotation. */
-    private static final String TAG_OBJECT = "object";
+    public static final String TAG_OBJECT = "object";
 
     /** tag annotation. */
-    private static final String TAG_PARSE = "parse";
+    public static final String TAG_PARSE = "parse";
 
     /** tag annotation. */
-    private static final String TAG_STRING = "string";
+    public static final String TAG_STRING = "string";
 
     /** Nonsense prefix to test parse start/end support. */
     private static final String PREFIX1 = "prefix 1";
@@ -141,110 +133,109 @@ public abstract class AbstractParseTest<
 
     private void parseLiteral(
             ValueType allow,
-            String in,
-            Object out) {
-        parse(EnumSet.of(allow), in, out, true);
+            String text,
+            Object expected) {
+        parse(EnumSet.of(allow), text, expected, true);
     }
     
     private void parse(
             EnumSet<ValueType> allow,
-            String in,
+            String text,
             Object expect,
             boolean isLiteral) {
-        parse(allow, in, expect, isLiteral, false);
+        parse(allow, text, expect, isLiteral, false);
     }
 
     private void parse(
             EnumSet<ValueType> allow,
-            String in,
+            String text,
             Object expect,
             boolean isLiteral,
             boolean allowEmptyString) {
 
-        StringBuilder sb = new StringBuilder(1 << 10);
+        StringBuilder buf = new StringBuilder(1 << 10);
 
         //
         // Parser.parse()
         //
-        sb.append(PREFIX1).append(in).append(SUFFIX1);
+        buf.append(PREFIX1).append(text).append(SUFFIX1);
 
         V parseResult = newFactoryParser().parse(
-            sb.toString(), PREFIX1.length(), in.length());
-        
-        if (expect == null) {
-            //
-            // just test that prefix and non/prefix are the same
-            //
-            expect = newFactoryParser().parse(in);
-        }
+            buf.toString(), PREFIX1.length(), text.length());
+
+        //
+        // just test that prefix and non/prefix are the same by default
+        //
+        final Object expectValue = expect == null
+                ? newFactoryParser().parse(text) : expect;
 
         //
         // I should just use assertEquals() here but the json.org
         // implementation doesn't override Object.equals().
         //
         // assertEquals(expect, parseResult, in)
-        assertTrue(isEqual(expect, parseResult), in);
+        assertTrue(isEqual(expectValue, parseResult), text);
 
         if (allow != null) {
-            assertTrue(factory.isValid(allow, parseResult), in);            
+            assertTrue(factory.isValid(allow, parseResult), text);            
         }
 
         //
         // JsonUrl.parseLiteral()
         //
         if (isLiteral) {
-            sb.setLength(0);
-            sb.append(PREFIX2).append(in).append(SUFFIX2);
+            buf.setLength(0);
+            buf.append(PREFIX2).append(text).append(SUFFIX2);
     
             V litResult = JsonUrl.parseLiteral(
-                sb.toString(), PREFIX2.length(), in.length(), factory, allowEmptyString);
+                buf.toString(), PREFIX2.length(), text.length(), factory, allowEmptyString);
     
-            Object litCompare = expect;
-            assertEquals(litCompare, litResult, in);
+            Object litCompare = expectValue;
+            assertEquals(litCompare, litResult, text);
     
             if (allow != null) {
-                assertTrue(factory.isValid(allow, litResult), in);
+                assertTrue(factory.isValid(allow, litResult), text);
             }
     
-            assertEquals(in.length(), JsonUrl.parseLiteralLength(in), in);
+            assertEquals(text.length(), JsonUrl.parseLiteralLength(text), text);
         }
     }
 
-    private V parse(String s) {
-        StringBuilder sb = new StringBuilder(4096)
+    private V parse(String text) {
+        StringBuilder buf = new StringBuilder(4096)
             .append(PREFIX1)
-            .append(s)
+            .append(text)
             .append(SUFFIX1);
 
-        return newFactoryParser().parse(sb.toString(), PREFIX1.length(), s.length());
+        return newFactoryParser().parse(buf.toString(), PREFIX1.length(), text.length());
     }
 
     /**
      * Remove leading and trailing chars to build an implied array or object.
      */
-    static final String makeImplied(String s) {
-        StringBuilder sb = new StringBuilder(s.length());
-        if (s == null || s.length() < 2) {
+    static final String makeImplied(String text) {
+        if (text == null || text.length() < 2) {
             return "";
         }
-        sb.append(s, 1, s.length() - 1);
 
-        return sb.toString();
+        StringBuilder buf = new StringBuilder(text.length())
+                .append(text, 1, text.length() - 1);
+
+        return buf.toString();
     }
 
     private A parseFactoryArray(String jsonUrlText) {
-        ValueFactoryParser<V, C, ABT, A, JBT, J, B, M, N, S> p = newFactoryParser();
-        return p.parseArray(jsonUrlText);
+        return newFactoryParser()
+                .parseArray(jsonUrlText);
     }
 
     private A parseImpliedFactoryArray(String jsonUrlText) {
-        ValueFactoryParser<V, C, ABT, A, JBT, J, B, M, N, S> p = newFactoryParser();
-        return p.parseArray(makeImplied(jsonUrlText), factory.newArrayBuilder());
+        return newFactoryParser().parseArray(
+                makeImplied(jsonUrlText), factory.newArrayBuilder());
     }
 
     private A parseImpliedFactoryArray(String jsonUrlText, int off, int len) {
-        ValueFactoryParser<V, C, ABT, A, JBT, J, B, M, N, S> p = newFactoryParser();
-        return p.parseArray(
+        return newFactoryParser().parseArray(
             makeImplied(jsonUrlText),
             off,
             Math.max(0, len - 2),
@@ -462,7 +453,7 @@ public abstract class AbstractParseTest<
             JsonUrl.parseLiteralLength(text, 0, text.length()));
 
         assertEquals(text.length(), JsonUrl.parseLiteralLength(
-            text, 0, text.length(), SyntaxException.Message.MSG_EXPECT_LITERAL));
+            text, 0, text.length(), null));
 
         V expected = factory.getString("");
         assertTrue(factory.isValid(ValueType.STRING, expected));
@@ -501,7 +492,7 @@ public abstract class AbstractParseTest<
         assertEquals(expected, JsonUrl.parseLiteral(text, 0, text.length(), factory, true));
 
         Parser p = new Parser();
-        p.setAllowEmptyUnquotedValue(true);
+        p.setEmptyUnquotedValueAllowed(true);
         assertEquals(expected, p.parse(text, factory));
     }
 
@@ -683,9 +674,9 @@ public abstract class AbstractParseTest<
             () -> p.parse(text, this.factory),
             text);
         
-        p.setAllowEmptyUnquotedKey(true);
+        p.setEmptyUnquotedKeyAllowed(true);
         
-        assertTrue(p.getAllowEmptyUnquotedKey(), text);
+        assertTrue(p.isEmptyUnquotedKeyAllowed(), text);
 
         assertAllowEmptyUnquotedKey(text, p.parseObject(text, factory));
 
@@ -727,9 +718,9 @@ public abstract class AbstractParseTest<
             () -> p.parse(text, this.factory),
             text);
         
-        p.setAllowEmptyUnquotedValue(true);
+        p.setEmptyUnquotedValueAllowed(true);
 
-        assertTrue(p.getAllowEmptyUnquotedValue(), text);
+        assertTrue(p.isEmptyUnquotedValueAllowed(), text);
 
         assertAllowEmptyUnquotedArrayValue(text, p.parseArray(text, factory));
 
@@ -763,9 +754,9 @@ public abstract class AbstractParseTest<
             () -> p.parse(text, this.factory),
             text);
         
-        p.setAllowEmptyUnquotedValue(true);
+        p.setEmptyUnquotedValueAllowed(true);
 
-        assertTrue(p.getAllowEmptyUnquotedValue(), text);
+        assertTrue(p.isEmptyUnquotedValueAllowed(), text);
 
         assertAllowEmptyUnquotedObjectValue(
             text,
@@ -813,9 +804,9 @@ public abstract class AbstractParseTest<
                 factory.newObjectBuilder()),
             text);
 
-        p.setAllowFormUrlEncoded(true);
+        p.setFormUrlEncodedAllowed(true);
 
-        assertTrue(p.getAllowFormUrlEncoded(), text);
+        assertTrue(p.isFormUrlEncodedAllowed(), text);
 
         assertObjectWfu(text, p.parseObject(text, factory));
 
@@ -858,9 +849,9 @@ public abstract class AbstractParseTest<
                 factory.newArrayBuilder()),
             text);
 
-        p.setAllowFormUrlEncoded(true);
+        p.setFormUrlEncodedAllowed(true);
 
-        assertTrue(p.getAllowFormUrlEncoded(), text);
+        assertTrue(p.isFormUrlEncodedAllowed(), text);
 
         assertArrayWfu(text, p.parseArray(text, factory));
 
@@ -1166,7 +1157,7 @@ public abstract class AbstractParseTest<
             () -> p.parse(text, factory));
 
 
-        p.setAllowFormUrlEncoded(true);
+        p.setFormUrlEncodedAllowed(true);
 
         assertThrows(
             SyntaxException.class,

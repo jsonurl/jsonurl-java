@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 David MacCormack
+ * Copyright 2019-2020 David MacCormack
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -25,9 +25,9 @@ import java.math.MathContext;
 public class BigMath implements BigMathProvider {
 
     /**
-     * MathContext for new BigDecimal instances. 
+     * MathContext for new BigDecimal instances.
      */
-    private final MathContext mc;
+    private final MathContext mathContext;
 
     /**
      * Positive BigInteger boundary.
@@ -46,18 +46,18 @@ public class BigMath implements BigMathProvider {
 
     /**
      * Create a new BigMath.
-     * @param mc a valid MathContext or null
+     * @param mctxt a valid MathContext or null
      * @param bigIntegerBoundaryNeg negative value boundary
      * @param bigIntegerBoundaryPos positive value boundary
      * @param bigIntegerOverflow action on boundary overflow
      */
     public BigMath(
-        MathContext mc,
+        MathContext mctxt,
         String bigIntegerBoundaryNeg,
         String bigIntegerBoundaryPos,
         BigIntegerOverflow bigIntegerOverflow) {
 
-        this.mc = mc;
+        this.mathContext = mctxt;
         this.bigIntegerBoundaryNeg = bigIntegerBoundaryNeg;
         this.bigIntegerBoundaryPos = bigIntegerBoundaryPos;
         this.bigIntegerOverflow = bigIntegerOverflow;
@@ -65,7 +65,7 @@ public class BigMath implements BigMathProvider {
 
     @Override
     public MathContext getMathContext() {
-        return mc;
+        return mathContext;
     }
 
     @Override

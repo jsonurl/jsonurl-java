@@ -1,5 +1,3 @@
-package org.jsonurl.jsonorg;
-
 /*
  * Copyright 2019 David MacCormack
  * 
@@ -16,6 +14,8 @@ package org.jsonurl.jsonorg;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+package org.jsonurl.jsonorg;
 
 import java.math.MathContext;
 import java.util.Set;
@@ -44,7 +44,40 @@ public interface JsonOrgValueFactory extends ValueFactory.TransparentBuilder<
         Number,
         Object,
         String> {
+
+
+    /**
+     * This represents the empty composite value.
+     */
+    Object EMPTY = new JSONObject();
+
+    /**
+     * A singleton instance of {@link BigMathFactory} with 32-bit boundaries.
+     */
+    BigMathFactory BIGMATH32 = new BigMathFactory(
+        MathContext.DECIMAL32,
+        BigMath.BIG_INTEGER32_BOUNDARY_NEG,
+        BigMath.BIG_INTEGER32_BOUNDARY_POS,
+        null);
     
+    /**
+     * A singleton instance of {@link BigMathFactory} with 64-bit boundaries.
+     */
+    BigMathFactory BIGMATH64 = new BigMathFactory(
+        MathContext.DECIMAL64,
+        BigMath.BIG_INTEGER64_BOUNDARY_NEG,
+        BigMath.BIG_INTEGER64_BOUNDARY_POS,
+        null);
+    
+    /**
+     * A singleton instance of {@link BigMathFactory} with 128-bit boundaries.
+     */
+    BigMathFactory BIGMATH128 = new BigMathFactory(
+        MathContext.DECIMAL128,
+        BigMath.BIG_INTEGER128_BOUNDARY_NEG,
+        BigMath.BIG_INTEGER128_BOUNDARY_POS,
+        null);
+
     /**
      * A {@link JsonOrgValueFactory} that uses
      * {@link java.math.BigInteger BigInteger} and
@@ -56,7 +89,7 @@ public interface JsonOrgValueFactory extends ValueFactory.TransparentBuilder<
      * parts that are too big to stored in a {@link java.lang.Double Double}
      * will be stored in a {@link java.math.BigDecimal BigDecimal}.
      */
-    public static class BigMathFactory extends BigMath
+    class BigMathFactory extends BigMath
             implements JsonOrgValueFactory, ValueFactory.BigMathFactory<
                 Object,
                 Object,
@@ -70,18 +103,18 @@ public interface JsonOrgValueFactory extends ValueFactory.TransparentBuilder<
                 String> {
         /**
          * Create a new BigMathFactory JsonOrgValueFactory using the given MathContext.
-         * @param mc a valid MathContext or null
+         * @param mctxt a valid MathContext or null
          * @param bigIntegerBoundaryNeg negative value boundary
          * @param bigIntegerBoundaryPos positive value boundary
          * @param bigIntegerOverflow action on boundary overflow
          */
         public BigMathFactory(
-            MathContext mc,
+            MathContext mctxt,
             String bigIntegerBoundaryNeg,
             String bigIntegerBoundaryPos,
             BigIntegerOverflow bigIntegerOverflow) {
 
-            super(mc,
+            super(mctxt,
                 bigIntegerBoundaryNeg,
                 bigIntegerBoundaryPos,
                 bigIntegerOverflow);
@@ -92,11 +125,6 @@ public interface JsonOrgValueFactory extends ValueFactory.TransparentBuilder<
             return NumberBuilder.build(text, false, this);
         }
     }
-
-    /**
-     * This represents the empty composite value.
-     */
-    public static final Object EMPTY = new JSONObject();
     
     /**
      * A singleton instance of {@link JsonOrgValueFactory}.
@@ -106,7 +134,7 @@ public interface JsonOrgValueFactory extends ValueFactory.TransparentBuilder<
      * NumberBuilder.build(text,true)}
      * to parse JSON&#x2192;URL numbers.  
      */
-    public static final JsonOrgValueFactory PRIMITIVE = new JsonOrgValueFactory() {
+    JsonOrgValueFactory PRIMITIVE = new JsonOrgValueFactory() {
 
         @Override
         public Number getNumber(NumberText text) {
@@ -121,40 +149,13 @@ public interface JsonOrgValueFactory extends ValueFactory.TransparentBuilder<
      * {@link java.lang.Double#valueOf(String) Double.valueOf(text)}
      * to parse JSON&#x2192;URL numbers.
      */
-    public static final JsonOrgValueFactory DOUBLE = new JsonOrgValueFactory() {
+    JsonOrgValueFactory DOUBLE = new JsonOrgValueFactory() {
 
         @Override
         public Number getNumber(NumberText text) {
             return Double.valueOf(text.toString());
         }
     };
-    
-    /**
-     * A singleton instance of {@link BigMathFactory} with 32-bit boundaries.
-     */
-    public static final BigMathFactory BIGMATH32 = new BigMathFactory(
-        MathContext.DECIMAL32,
-        BigMath.BIG_INTEGER32_BOUNDARY_NEG,
-        BigMath.BIG_INTEGER32_BOUNDARY_POS,
-        null);
-    
-    /**
-     * A singleton instance of {@link BigMathFactory} with 64-bit boundaries.
-     */
-    public static final BigMathFactory BIGMATH64 = new BigMathFactory(
-        MathContext.DECIMAL64,
-        BigMath.BIG_INTEGER64_BOUNDARY_NEG,
-        BigMath.BIG_INTEGER64_BOUNDARY_POS,
-        null);
-    
-    /**
-     * A singleton instance of {@link BigMathFactory} with 128-bit boundaries.
-     */
-    public static final BigMathFactory BIGMATH128 = new BigMathFactory(
-        MathContext.DECIMAL128,
-        BigMath.BIG_INTEGER128_BOUNDARY_NEG,
-        BigMath.BIG_INTEGER128_BOUNDARY_POS,
-        null);
 
     @Override
     default JSONArray newArrayBuilder() {
@@ -197,8 +198,8 @@ public interface JsonOrgValueFactory extends ValueFactory.TransparentBuilder<
     }
 
     @Override
-    default String getString(CharSequence s, int start, int stop) {
-        return JavaValueFactory.toJavaString(s, start, stop);
+    default String getString(CharSequence text, int start, int stop) {
+        return JavaValueFactory.toJavaString(text, start, stop);
     }
     
     @Override

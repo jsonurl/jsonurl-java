@@ -1,5 +1,3 @@
-package org.jsonurl;
-
 /*
  * Copyright 2019 David MacCormack
  * 
@@ -16,6 +14,8 @@ package org.jsonurl;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+package org.jsonurl;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -55,14 +55,14 @@ import java.util.concurrent.atomic.LongAdder;
  *      <td>{@link java.lang.Double Double}</td></tr>
  * </table>
  */
-final class NumberCoercionMap {
+final class NumberCoercionMap { //NOPMD - ClassNamingConventions
 
     /**
      * Static map of input type to coerced type.
      */
-    @SuppressWarnings("PMD") // this is read-only
-    private static final Map<Class<? extends Number>, Class<? extends Number>> MAP =
-            new HashMap<>();
+    private static final Map<
+            Class<? extends Number>,
+            Class<? extends Number>> MAP = new HashMap<>();
 
     static {
         MAP.put(Byte.class, Long.class);
@@ -85,11 +85,11 @@ final class NumberCoercionMap {
 
     /**
      * Get the coerced type for the given input type.
-     * @param c a valid class
+     * @param clazz a valid class
      * @return a valid class
      */
-    public static final Class<? extends Number> getType(Class<? extends Number> c) {
-        Class<? extends Number> ret = MAP.get(c);
+    public static Class<? extends Number> getType(Class<? extends Number> clazz) {
+        Class<? extends Number> ret = MAP.get(clazz);
         return ret == null ? BigDecimal.class : ret;
     }
 }

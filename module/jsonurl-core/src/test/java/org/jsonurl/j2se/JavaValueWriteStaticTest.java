@@ -241,7 +241,6 @@ class JavaValueWriteStaticTest {
             () -> JsonUrlWriter.write(new JsonUrlStringBuilder(), newNonStringMap()));
     }
     
-    @SuppressWarnings("PMD.UseConcurrentHashMap")
     private Map<?,?> newNonStringMap() {
         Map<Object, Object> ret = new HashMap<>(); 
         ret.put(new Object(), new Object());

@@ -24,7 +24,7 @@ package org.jsonurl.j2se;
  * @author David MacCormack
  * @since 2019-09-01
  */
-public class PrimitiveParseTest extends JavaValueFactoryParseTest {
+public class PrimitiveParseTest extends AbstractJavaValueFactoryParseTest {
 
     /**
      * Create a new PrimitiveParseTest.

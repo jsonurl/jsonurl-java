@@ -41,7 +41,7 @@ import org.jsonurl.ValueFactory;
  * @author David MacCormack
  * @since 2019-09-01
  */
-abstract class JsonpParseTest extends AbstractParseTest<
+abstract class AbstractJsonpParseTest extends AbstractParseTest<
         JsonValue,
         JsonStructure,
         JsonArrayBuilder,
@@ -56,7 +56,7 @@ abstract class JsonpParseTest extends AbstractParseTest<
     /**
      * Create a new JsonpParseTest.
      */
-    public JsonpParseTest(JsonpValueFactory factory) {
+    public AbstractJsonpParseTest(JsonpValueFactory factory) {
         super(factory);
     }
     
@@ -153,12 +153,12 @@ abstract class JsonpParseTest extends AbstractParseTest<
             JsonNumber,
             JsonValue,
             JsonString> newBigMathFactory(
-                MathContext mc,
+                MathContext mctxt,
                 String boundNeg,
                 String boundPos,
                 BigIntegerOverflow over) {
         return new JsonpValueFactory.BigMathFactory(
-            mc, boundNeg, boundPos, over);
+            mctxt, boundNeg, boundPos, over);
     }
 
     @Override

@@ -19,6 +19,7 @@ package org.jsonurl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.IOException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -35,30 +36,34 @@ import org.junit.jupiter.params.provider.ValueSource;
  * @author David MacCormack
  * @since 2019-09-01
  */
-public abstract class AbstractJsonApiWriteTest<V,C extends V,A extends C,J extends C> {
+public abstract class AbstractJsonApiWriteTest<
+    V,
+    C extends V,
+    A extends C,
+    J extends C> {
 
     /**
      * Write the given value.
-     * @param out destination
+     * @param dest destination
      * @param value value to write
      */
     public abstract void write(
-            JsonTextBuilder<?,?> out,
-            V value) throws Exception; //NOPMD - Exception is correct here
+            JsonTextBuilder<?,?> dest,
+            V value) throws IOException;
 
     /**
      * Create a new implementation-defined Array instance.
-     * @param s JSON&#x2192;URL text
+     * @param text JSON&#x2192;URL text
      * @return a valid Array instance
      */
-    public abstract A newArray(String s);
+    public abstract A newArray(String text);
 
     /**
      * Create a new implementation-defined Object instance.
-     * @param s JSON&#x2192;URL text
+     * @param text JSON&#x2192;URL text
      * @return a valid Object instance
      */
-    public abstract J newObject(String s);
+    public abstract J newObject(String text);
 
     /**
      * Create a new implementation-defined JSON&#x2192;URL parser.
@@ -81,8 +86,8 @@ public abstract class AbstractJsonApiWriteTest<V,C extends V,A extends C,J exten
         "{\"name\":[\"value\",\"value\"]}",
         "{\"name\":true,\"name2\":\"value\"}",
     })
-    void testInlineObject(String s) throws Exception {
-        testInline(s, newObject(s));
+    void testInlineObject(String text) throws Exception {
+        testInline(text, newObject(text));
     }
     
     @ParameterizedTest
@@ -97,18 +102,24 @@ public abstract class AbstractJsonApiWriteTest<V,C extends V,A extends C,J exten
         "[false]",
         "[true,false,null]",
     })
-    void testInlineArray(String s) throws Exception {
-        testInline(s, newArray(s));
+    void testInlineArray(String text) throws Exception {
+        testInline(text, newArray(text));
     }
     
-    void testInline(String s, V obj) throws Exception {
-        JsonUrlStringBuilder sb = new JsonUrlStringBuilder();
-        write(sb, obj);
-        String jsonUriText = sb.build();
+    void testInline(String text, V obj) throws Exception {
+        JsonUrlStringBuilder buf = new JsonUrlStringBuilder();
+        write(buf, obj);
+        String jsonUriText = buf.build();
         
-        ValueFactoryParser<V,C,?,A,?,J,?,?,?,?> p = newParser();
-        V obj2 = p.parse(jsonUriText);
+        ValueFactoryParser<V,C,?,A,?,J,?,?,?,?> vfp = newParser();
+
+        //
+        // newParser() is a factory method. The whole point is that I'm
+        // asking the implementation to return one to me.
+        //
+        V obj2 = vfp.parse(jsonUriText);
+
         String jsonText = valueToString(obj2);
-        assertEquals(s, jsonText);
+        assertEquals(text, jsonText);
     }
 }

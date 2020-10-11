@@ -43,9 +43,9 @@ import java.util.Set;
 public interface ValueFactory<
         V,
         C extends V,
-        ABT,
+        ABT, // NOPMD - GenericsNaming
         A extends C,
-        JBT,
+        JBT, // NOPMD - GenericsNaming
         J extends C,
         B extends V,
         M extends V,
@@ -76,7 +76,7 @@ public interface ValueFactory<
      * @author David MacCormack
      * @since 2019-09-01
      */
-    public interface TransparentBuilder<
+    interface TransparentBuilder<
         V,
         C extends V,
         A extends C,
@@ -111,7 +111,7 @@ public interface ValueFactory<
      * @param <N> null type
      * @param <S> string type
      */
-    public interface BigMathFactory<
+    interface BigMathFactory<
         V,
         C extends V,
         ABT,
@@ -133,7 +133,7 @@ public interface ValueFactory<
      * JSON&#x2192;URL spec.
      * @return a valid composite instance
      */
-    public C getEmptyComposite();
+    C getEmptyComposite();
 
     /**
      * construct a new JSON array from the given builder.
@@ -145,7 +145,7 @@ public interface ValueFactory<
      * @param builder an array builder
      * @return a valid JSON array
      */
-    public A newArray(ABT builder);
+    A newArray(ABT builder);
     
     /**
      * construct a new JSON object from the given builder.
@@ -157,7 +157,7 @@ public interface ValueFactory<
      * @param builder an object builder
      * @return a valid JSON object
      */
-    public J newObject(JBT builder);
+    J newObject(JBT builder);
     
     /**
      * get a new JSON array builder.
@@ -167,7 +167,7 @@ public interface ValueFactory<
      * a new JSON array builder.
      * @return a valid JSON array builder
      */
-    public ABT newArrayBuilder();
+    ABT newArrayBuilder();
 
     /**
      * get a new JSON object builder.
@@ -177,17 +177,17 @@ public interface ValueFactory<
      * a new JSON object builder.
      * @return a valid JSON object builder
      */
-    public JBT newObjectBuilder();
+    JBT newObjectBuilder();
 
     /**
      * add a value to an array.
      */
-    public void add(ABT dest, V obj);
+    void add(ABT dest, V obj);
 
     /**
      * add a key/value pair to an object.
      */
-    public void put(JBT dest, String key, V value);
+    void put(JBT dest, String key, V value);
 
     /**
      * get the null value.
@@ -196,7 +196,7 @@ public interface ValueFactory<
      * the JSON value null.
      * @return a valid null instance
      */
-    public N getNull();
+    N getNull();
 
     /**
      * get the true value.
@@ -205,7 +205,7 @@ public interface ValueFactory<
      * the JSON boolean value true.
      * @return the JSON value true
      */
-    public B getTrue();
+    B getTrue();
 
     /**
      * get the true value.
@@ -214,22 +214,22 @@ public interface ValueFactory<
      * the JSON boolean value false.
      * @return the JSON value false
      */
-    public B getFalse();
+    B getFalse();
     
     /**
      * get a JSON string value.
      *
      * @return a valid string whose text is the given character sequence
      */
-    public S getString(CharSequence s, int start, int stop);
+    S getString(CharSequence text, int start, int stop);
 
     /**
      * get a JSON string value.
      *
      * @return a valid string whose text is the given Java String
      */
-    default S getString(String s) {
-        return getString(s, 0, s.length());
+    default S getString(String text) {
+        return getString(text, 0, text.length());
     }
 
     /**
@@ -238,16 +238,16 @@ public interface ValueFactory<
      * @param text the parsed text of a JSON&#x2192;URL number literal 
      * @return a number object for the given text
      */
-    public M getNumber(NumberText text);
+    M getNumber(NumberText text);
 
     /**
      * Get a boolean value.
      *
-     * @param b a boolean value
+     * @param value a boolean value
      * @return if <i>b</i> is true then return true; otherwise, return false.
      */
-    default B getBoolean(boolean b) {
-        return b ? getTrue() : getFalse();
+    default B getBoolean(boolean value) {
+        return value ? getTrue() : getFalse();
     }
 
     /**
@@ -267,7 +267,7 @@ public interface ValueFactory<
      * @param value value to test
      * @return true if the type of value is in the given types set.
      */
-    public boolean isValid(Set<ValueType> types, V value);
+    boolean isValid(Set<ValueType> types, V value);
 
     /**
      * Test if the given object is the empty composite value.
@@ -292,32 +292,31 @@ public interface ValueFactory<
     /**
      * get a true, false, or null value for the given text.
      *
-     * @param s the text
+     * @param text the text
      * @param start the start index
      * @param stop the stop index
      * @return a valid value or null
      */
-    @SuppressWarnings("PMD")
-    default V getTrueFalseNull(
-            CharSequence s,
+    default V getTrueFalseNull(// NOPMD - CyclomaticComplexity
+            CharSequence text,
             int start,
             int stop) {
 
         switch (stop - start) {
         case 4:
-            switch (s.charAt(start)) {
+            switch (text.charAt(start)) {
             case 't':
-                if (s.charAt(start + 1) != 'r'
-                        || s.charAt(start + 2) != 'u'
-                        || s.charAt(start + 3) != 'e') {
+                if (text.charAt(start + 1) != 'r'
+                        || text.charAt(start + 2) != 'u'
+                        || text.charAt(start + 3) != 'e') {
                     return null;
                 }
                 return getTrue();
 
             case 'n':
-                if (s.charAt(start + 1) != 'u'
-                        || s.charAt(start + 2) != 'l'
-                        || s.charAt(start + 3) != 'l') {
+                if (text.charAt(start + 1) != 'u'
+                        || text.charAt(start + 2) != 'l'
+                        || text.charAt(start + 3) != 'l') {
                     return null;
                 }
                 return getNull();
@@ -329,11 +328,11 @@ public interface ValueFactory<
             // fall through
 
         case 5:
-            if (s.charAt(start) != 'f'
-                    || s.charAt(start + 1) != 'a'
-                    || s.charAt(start + 2) != 'l'
-                    || s.charAt(start + 3) != 's'
-                    || s.charAt(start + 4) != 'e') {
+            if (text.charAt(start) != 'f'
+                    || text.charAt(start + 1) != 'a'
+                    || text.charAt(start + 2) != 'l'
+                    || text.charAt(start + 3) != 's'
+                    || text.charAt(start + 4) != 'e') {
                 return null;
             }
             return getFalse();

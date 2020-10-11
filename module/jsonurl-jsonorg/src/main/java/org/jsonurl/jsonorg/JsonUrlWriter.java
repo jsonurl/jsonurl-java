@@ -1,5 +1,3 @@
-package org.jsonurl.jsonorg;
-
 /*
  * Copyright 2019 David MacCormack
  * 
@@ -17,10 +15,10 @@ package org.jsonurl.jsonorg;
  * under the License.
  */
 
+package org.jsonurl.jsonorg;
+
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,14 +32,14 @@ import org.jsonurl.JsonTextBuilder;
  * @author David MacCormack
  * @since 2019-09-01
  */
-public final class JsonUrlWriter {
+public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
     
     private JsonUrlWriter() {
         // EMPTY
     }
     
-    private static final boolean isNull(Object in) {
-        return in == null || in == JSONObject.NULL;
+    private static  boolean isNull(Object obj) {
+        return obj == null || obj == JSONObject.NULL;
     }
 
     /**
@@ -49,75 +47,39 @@ public final class JsonUrlWriter {
      * 
      * @param <A> Accumulator type
      * @param <R> Result type
-     * @param out non-null JsonTextBuilder
-     * @param in null or Java Object
+     * @param dest non-null JsonTextBuilder
+     * @param value null or Java Object
      */
-    @SuppressWarnings("PMD")
-    public static final <A,R> void write(
-            JsonTextBuilder<A,R> out,
-            Object in) throws IOException {
+    public static <A,R> void write(
+            JsonTextBuilder<A,R> dest,
+            Object value) throws IOException {
 
-        if (isNull(in)) {
-            out.addNull();
+        if (isNull(value)) {
+            dest.addNull();
             return;
         }
 
-        if (in instanceof JSONString) {
+        if (value instanceof JSONString) {
             try {
-                String s = ((JSONString)in).toJSONString();
-                out.add(s);
-            } catch (Exception e) { //NOPMD - I want to re-throw as JSONException
+                String str = ((JSONString)value).toJSONString();
+                dest.add(str);
+            } catch (IOException e) {
                 throw new JSONException(e);
             }
             return;
         }
         
-        if (in instanceof Number) {
-            out.add((Number)in);
+        if (value instanceof JSONObject) {
+            write(dest, (JSONObject)value);
             return;
         }
         
-        if (in instanceof Boolean) {
-            out.add(((Boolean)in).booleanValue());
-            return;
-        }
-        
-        if (in instanceof Enum<?>) {
-            out.add(((Enum<?>)in).name());
-            return;
-        }
-        
-        if (in instanceof JSONObject) {
-            write(out, (JSONObject)in);
-            return;
-        }
-        
-        if (in instanceof JSONArray) {
-            write(out, (JSONArray)in);
+        if (value instanceof JSONArray) {
+            write(dest, (JSONArray)value);
             return;
         }
 
-        if (in instanceof CharSequence) {
-            out.add((CharSequence)in);
-            return;
-        }
-
-        if (in instanceof Map<?,?>) {
-            write(out, new JSONObject((Map<?,?>)in));
-            return;
-        }
-        
-        if (in instanceof Collection<?>) {
-            write(out, new JSONArray((Collection<?>)in));
-            return;
-        }
-        
-        if (in.getClass().isArray()) {
-            write(out, new JSONArray((Collection<?>)in));
-            return;
-        }
-
-        throw new JSONException("unsupported class: " + in.getClass());
+        org.jsonurl.j2se.JsonUrlWriter.write(dest, value);
     }
 
     /**
@@ -125,40 +87,40 @@ public final class JsonUrlWriter {
      * 
      * @param <A> Accumulator type
      * @param <R> Result type
-     * @param out non-null JsonTextBuilder
-     * @param in null or Java Object
+     * @param dest non-null JsonTextBuilder
+     * @param obj null or JSONObject
      */
-    public static final <A,R> void write(
-            JsonTextBuilder<A,R> out,
-            JSONObject in) throws IOException {
+    public static <A,R> void write(
+            JsonTextBuilder<A,R> dest,
+            JSONObject obj) throws IOException {
         
-        if (isNull(in)) {
-            out.addNull();
+        if (isNull(obj)) {
+            dest.addNull();
             return;
         }
 
-        out.beginObject();
+        dest.beginObject();
 
         //
         // this is the best we can do with the given interface
         //
-        boolean comma = false; // NOPMD - I need to track this
+        boolean comma = false; // NOPMD - state across for loop
 
-        for (Iterator<String> it = in.keys(); it.hasNext();) { // NOPMD - not iterable
+        for (Iterator<String> it = obj.keys(); it.hasNext();) { // NOPMD - ForLoopCanBeForeach
             String key = it.next();
             
             if (comma) {
-                out.valueSeparator();
+                dest.valueSeparator();
             }
 
-            comma = true; // NOPMD - I need to track this
+            comma = true; // NOPMD - state across for loop
             
-            out.addKey(key).nameSeparator();
+            dest.addKey(key).nameSeparator();
             
-            write(out, in.get(key));
+            write(dest, obj.get(key));
         }
         
-        out.endObject();
+        dest.endObject();
     }
 
     /**
@@ -166,32 +128,32 @@ public final class JsonUrlWriter {
      * 
      * @param <A> Accumulator type
      * @param <R> Result type
-     * @param out non-null JsonTextBuilder
-     * @param in null or Java Object
+     * @param dest non-null JsonTextBuilder
+     * @param value null or JSONArray
      */
-    public static final <A,R> void write(
-            JsonTextBuilder<A,R> out,
-            JSONArray in) throws IOException {
+    public static <A,R> void write(
+            JsonTextBuilder<A,R> dest,
+            JSONArray value) throws IOException {
         
-        if (isNull(in)) {
-            out.addNull();
+        if (isNull(value)) {
+            dest.addNull();
             return;
         }
 
-        out.beginArray();
+        dest.beginArray();
 
         boolean comma = false; // NOPMD - I need to track this
 
-        for (int i = 0, length = in.length(); i < length; i++) { // NOPMD
+        for (int i = 0, length = value.length(); i < length; i++) { // NOPMD
             if (comma) {
-                out.valueSeparator();
+                dest.valueSeparator();
             }
 
             comma = true; // NOPMD - I need to track this
 
-            write(out, in.get(i));
+            write(dest, value.get(i));
         }
 
-        out.endArray();
+        dest.endArray();
     }
 }

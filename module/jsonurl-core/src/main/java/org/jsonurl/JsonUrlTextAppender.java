@@ -1,7 +1,5 @@
-package org.jsonurl;
-
 /*
- * Copyright 2019 David MacCormack
+ * Copyright 2019-2020 David MacCormack
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -17,6 +15,8 @@ package org.jsonurl;
  * under the License.
  */
 
+package org.jsonurl;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -30,8 +30,8 @@ import java.math.BigInteger;
  * @author David MacCormack
  * @since 2019-09-01
  */
-public abstract class JsonUrlTextAppender<A extends Appendable, R>
-        implements JsonTextBuilder<A, R>, Appendable { 
+public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
+        implements JsonTextBuilder<A, R>, Appendable {
 
     /**
      * Destination, provided in constructor.
@@ -138,11 +138,11 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R>
 
     @Override
     public JsonUrlTextAppender<A,R> add(
-            CharSequence s,
+            CharSequence text,
             int start,
             int end,
             boolean isKey) throws IOException {
-        JsonUrl.appendLiteral(out, s, start, end, isKey);
+        JsonUrl.appendLiteral(out, text, start, end, isKey);
         return this;
     }
     
@@ -162,8 +162,8 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R>
     }
 
     @Override
-    public JsonUrlTextAppender<A,R> append(char c) throws IOException {
-        out.append(c);
+    public JsonUrlTextAppender<A,R> append(char value) throws IOException {
+        out.append(value);
         return this;
     }
 
@@ -183,7 +183,9 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R>
      * 
      * @param wwwFormUrlEncoded true or false
      */
-    public JsonUrlTextAppender<A,R> setFormUrlEncoded(boolean wwwFormUrlEncoded) {
+    public JsonUrlTextAppender<A,R> setFormUrlEncoded(// NOPMD - LinguisticNaming
+            boolean wwwFormUrlEncoded) {
+
         this.wwwFormUrlEncoded = wwwFormUrlEncoded;
         return this;
     }
@@ -200,7 +202,8 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R>
      * Set this to true to output an implied array or object.
      * @param implied true or false
      */
-    public JsonUrlTextAppender<A,R> setImplied(boolean implied) {
+    public JsonUrlTextAppender<A,R> setImplied(// NOPMD - LinguisticNaming
+            boolean implied) {
         this.implied = implied;
         return this;
     }

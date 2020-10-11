@@ -1,5 +1,3 @@
-package org.jsonurl;
-
 /*
  * Copyright 2019 David MacCormack
  * 
@@ -16,6 +14,8 @@ package org.jsonurl;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+package org.jsonurl;
 
 /**
  * An exception that occurs while parsing JSON&#x2192;URL text.
@@ -63,18 +63,18 @@ public class ParseException extends RuntimeException {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(64);
+        StringBuilder buf = new StringBuilder(64);
 
-        sb.append("jsonurl ")
+        buf.append("jsonurl ")
             .append(typeDescription())
             .append(": ")
             .append(getMessage());
 
-        int p = getPosition();
-        if (p > -1) {
-            sb.append(" at ").append(p);
+        int pos = getPosition();
+        if (pos > -1) {
+            buf.append(" at ").append(pos);
         }
 
-        return sb.toString();
+        return buf.toString();
     }
 }
