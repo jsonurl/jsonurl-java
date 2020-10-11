@@ -1,7 +1,5 @@
-package org.jsonurl;
-
 /*
- * Copyright 2019 David MacCormack
+ * Copyright 2019-2020 David MacCormack
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -17,10 +15,12 @@ package org.jsonurl;
  * under the License.
  */
 
+package org.jsonurl;
+
 /**
  * A exception that occurs when a limit is exceeded.
  */
-public class LimitException extends ParseException {
+public class LimitException extends ParseException { // NOPMD - not a bean
     
     /**
      * Enumeration of messages.
@@ -40,7 +40,7 @@ public class LimitException extends ParseException {
         
         private final String text;
 
-        private Message(String text) {
+        Message(String text) {
             this.text = text;
         }
 

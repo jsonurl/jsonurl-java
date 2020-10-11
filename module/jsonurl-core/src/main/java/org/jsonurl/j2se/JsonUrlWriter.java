@@ -1,5 +1,3 @@
-package org.jsonurl.j2se;
-
 /*
  * Copyright 2019 David MacCormack
  * 
@@ -17,6 +15,8 @@ package org.jsonurl.j2se;
  * under the License.
  */
 
+package org.jsonurl.j2se;
+
 import java.io.IOException;
 import java.util.Map;
 import org.jsonurl.JsonTextBuilder;
@@ -28,15 +28,14 @@ import org.jsonurl.JsonTextBuilder;
  * @author David MacCormack
  * @since 2020-09-01
  */
-@SuppressWarnings("PMD.GodClass")
-public final class JsonUrlWriter {
+public final class JsonUrlWriter { // NOPMD
     
     private JsonUrlWriter() {
         // EMPTY
     }
     
-    private static final boolean isNull(Object in) {
-        return in == null || in == JavaValueFactory.NULL;
+    private static boolean isNull(Object obj) {
+        return obj == null || obj == JavaValueFactory.NULL;
     }
 
     /**
@@ -44,78 +43,74 @@ public final class JsonUrlWriter {
      * 
      * @param <A> Accumulator type
      * @param <R> Result type
-     * @param out non-null JsonTextBuilder
-     * @param in null or Java Object
+     * @param dest non-null JsonTextBuilder
+     * @param value null or Java Object
      */
-    @SuppressWarnings({
-        "PMD.NPathComplexity",
-        "PMD.CyclomaticComplexity"
-    })
-    public static final <A,R> void write(
-            JsonTextBuilder<A,R> out,
-            Object in) throws IOException {
+    public static <A,R> void write(// NOPMD
+            JsonTextBuilder<A,R> dest,
+            Object value) throws IOException {
 
-        if (isNull(in)) {
-            out.addNull();
+        if (isNull(value)) {
+            dest.addNull();
             return;
         }
 
-        if (in instanceof Number) {
-            out.add((Number)in);
+        if (value instanceof Number) {
+            dest.add((Number)value);
             return;
         }
 
-        if (in instanceof Boolean) {
-            out.add(((Boolean)in).booleanValue());
+        if (value instanceof Boolean) {
+            dest.add(((Boolean)value).booleanValue());
             return;
         }
 
-        if (in instanceof Enum) {
-            out.add(((Enum<?>)in).name());
+        if (value instanceof Enum) {
+            dest.add(((Enum<?>)value).name());
             return;
         }
 
-        if (in instanceof Map) {
-            write(out, (Map<?,?>)in);
+        if (value instanceof Map) {
+            write(dest, (Map<?,?>)value);
             return;
         }
 
-        if (in instanceof Iterable) {
-            write(out, (Iterable<?>)in);
+        if (value instanceof Iterable) {
+            write(dest, (Iterable<?>)value);
             return;
         }
 
-        if (in instanceof CharSequence) {
-            out.add((CharSequence)in);
+        if (value instanceof CharSequence) {
+            dest.add((CharSequence)value);
             return;
         }
 
-        final Class<?> clazz = in.getClass();
+        final Class<?> clazz = value.getClass();
         if (clazz.isArray()) {
             Class<?> type = clazz.getComponentType();
             if (type == Boolean.TYPE) {
-                write(out, (boolean[])in);
+                write(dest, (boolean[])value);
             } else if (type == Byte.TYPE) {
-                write(out, (byte[])in);
+                write(dest, (byte[])value);
             } else if (type == Character.TYPE) {
-                write(out, (char[])in);
+                write(dest, (char[])value);
             } else if (type == Double.TYPE) {
-                write(out, (double[])in);
+                write(dest, (double[])value);
             } else if (type == Float.TYPE) {
-                write(out, (float[])in);
+                write(dest, (float[])value);
             } else if (type == Integer.TYPE) {
-                write(out, (int[])in);
+                write(dest, (int[])value);
             } else if (type == Long.TYPE) {
-                write(out, (long[])in);
+                write(dest, (long[])value);
             } else if (type == Short.TYPE) {
-                write(out, (short[])in);
+                write(dest, (short[])value);
             } else {
-                write(out, (Object[])in);
+                write(dest, (Object[])value);
             }
             return;
         }
 
-        throw new IOException("unsupported class: " + in.getClass());
+        throw new IOException("unsupported class: " + value.getClass());
     }
 
     /**
@@ -123,23 +118,23 @@ public final class JsonUrlWriter {
      * 
      * @param <A> Accumulator type
      * @param <R> Result type
-     * @param out non-null JsonTextBuilder
-     * @param in null or Java Object
+     * @param dest non-null JsonTextBuilder
+     * @param value null or Java Object
      */
-    public static final <A,R> void write(
-            JsonTextBuilder<A,R> out,
-            Map<?,?> in) throws IOException {
+    public static <A,R> void write(
+            JsonTextBuilder<A,R> dest,
+            Map<?,?> value) throws IOException {
         
-        if (isNull(in)) {
-            out.addNull();
+        if (isNull(value)) {
+            dest.addNull();
             return;
         }
 
-        out.beginObject();
+        dest.beginObject();
 
-        boolean comma = false; // NOPMD - I need to track this
+        boolean comma = false; // NOPMD - state across for loop
 
-        for (Map.Entry<?,?> e : in.entrySet())  {
+        for (Map.Entry<?,?> e : value.entrySet())  {
             Object key = e.getKey();
             
             if (!(key instanceof CharSequence)) {
@@ -147,17 +142,17 @@ public final class JsonUrlWriter {
             }
 
             if (comma) {
-                out.valueSeparator();
+                dest.valueSeparator();
             }
 
-            comma = true; // NOPMD - I need to track this
+            comma = true; // NOPMD - state across for loop
 
-            out.addKey(key.toString()).nameSeparator();
+            dest.addKey(key.toString()).nameSeparator();
 
-            write(out, e.getValue());
+            write(dest, e.getValue());
         }
 
-        out.endObject();
+        dest.endObject();
     }
 
     /**
@@ -165,33 +160,33 @@ public final class JsonUrlWriter {
      * 
      * @param <A> Accumulator type
      * @param <R> Result type
-     * @param out non-null JsonTextBuilder
-     * @param it null or an iterable object
+     * @param dest non-null JsonTextBuilder
+     * @param value null or an iterable object
      */
-    public static final <A,R> void write(
-            JsonTextBuilder<A,R> out,
-            Iterable<?> it) throws IOException {
+    public static <A,R> void write(
+            JsonTextBuilder<A,R> dest,
+            Iterable<?> value) throws IOException {
 
-        if (isNull(it)) {
-            out.addNull();
+        if (isNull(value)) {
+            dest.addNull();
             return;
         }
 
-        out.beginArray();
+        dest.beginArray();
 
-        boolean comma = false; // NOPMD - I need to track this
+        boolean comma = false; // NOPMD - state across for loop
 
-        for (Object obj : it) {
+        for (Object obj : value) {
             if (comma) {
-                out.valueSeparator();
+                dest.valueSeparator();
             }
 
-            comma = true; // NOPMD - I need to track this
+            comma = true; // NOPMD - state across for loop
 
-            write(out, obj);
+            write(dest, obj);
         }
 
-        out.endArray();
+        dest.endArray();
     }
 
     /**
@@ -199,28 +194,28 @@ public final class JsonUrlWriter {
      * 
      * @param <A> Accumulator type
      * @param <R> Result type
-     * @param out non-null JsonTextBuilder
+     * @param dest non-null JsonTextBuilder
      * @param array null or a valid array
      */
-    public static final <A,R> void write(
-            JsonTextBuilder<A,R> out,
+    public static <A,R> void write(
+            JsonTextBuilder<A,R> dest,
             boolean... array) throws IOException {
 
         if (isNull(array)) {
-            out.addNull();
+            dest.addNull();
             return;
         }
 
-        out.beginArray();
+        dest.beginArray();
 
         for (int i = 0; i < array.length; i++) {
             if (i > 0) {
-                out.valueSeparator();
+                dest.valueSeparator();
             }
-            out.add(array[i]);
+            dest.add(array[i]);
         }
 
-        out.endArray();
+        dest.endArray();
     }
 
     /**
@@ -228,28 +223,28 @@ public final class JsonUrlWriter {
      * 
      * @param <A> Accumulator type
      * @param <R> Result type
-     * @param out non-null JsonTextBuilder
+     * @param dest non-null JsonTextBuilder
      * @param array null or a valid array
      */
-    public static final <A,R> void write(
-            JsonTextBuilder<A,R> out,
+    public static <A,R> void write(
+            JsonTextBuilder<A,R> dest,
             byte... array) throws IOException {
 
         if (isNull(array)) {
-            out.addNull();
+            dest.addNull();
             return;
         }
 
-        out.beginArray();
+        dest.beginArray();
 
         for (int i = 0; i < array.length; i++) {
             if (i > 0) {
-                out.valueSeparator();
+                dest.valueSeparator();
             }
-            out.add(array[i]);
+            dest.add(array[i]);
         }
 
-        out.endArray();
+        dest.endArray();
     }
 
     /**
@@ -257,28 +252,28 @@ public final class JsonUrlWriter {
      * 
      * @param <A> Accumulator type
      * @param <R> Result type
-     * @param out non-null JsonTextBuilder
+     * @param dest non-null JsonTextBuilder
      * @param array null or a valid array
      */
-    public static final <A,R> void write(
-            JsonTextBuilder<A,R> out,
+    public static <A,R> void write(
+            JsonTextBuilder<A,R> dest,
             char... array) throws IOException {
 
         if (isNull(array)) {
-            out.addNull();
+            dest.addNull();
             return;
         }
 
-        out.beginArray();
+        dest.beginArray();
 
         for (int i = 0; i < array.length; i++) {
             if (i > 0) {
-                out.valueSeparator();
+                dest.valueSeparator();
             }
-            out.add(array[i]);
+            dest.add(array[i]);
         }
 
-        out.endArray();
+        dest.endArray();
     }
 
     /**
@@ -286,28 +281,28 @@ public final class JsonUrlWriter {
      * 
      * @param <A> Accumulator type
      * @param <R> Result type
-     * @param out non-null JsonTextBuilder
+     * @param dest non-null JsonTextBuilder
      * @param array null or a valid array
      */
-    public static final <A,R> void write(
-            JsonTextBuilder<A,R> out,
+    public static <A,R> void write(
+            JsonTextBuilder<A,R> dest,
             double... array) throws IOException {
 
         if (isNull(array)) {
-            out.addNull();
+            dest.addNull();
             return;
         }
 
-        out.beginArray();
+        dest.beginArray();
 
         for (int i = 0; i < array.length; i++) {
             if (i > 0) {
-                out.valueSeparator();
+                dest.valueSeparator();
             }
-            out.add(array[i]);
+            dest.add(array[i]);
         }
 
-        out.endArray();
+        dest.endArray();
     }
 
     /**
@@ -315,28 +310,28 @@ public final class JsonUrlWriter {
      * 
      * @param <A> Accumulator type
      * @param <R> Result type
-     * @param out non-null JsonTextBuilder
+     * @param dest non-null JsonTextBuilder
      * @param array null or a valid array
      */
-    public static final <A,R> void write(
-            JsonTextBuilder<A,R> out,
+    public static <A,R> void write(
+            JsonTextBuilder<A,R> dest,
             float... array) throws IOException {
 
         if (isNull(array)) {
-            out.addNull();
+            dest.addNull();
             return;
         }
 
-        out.beginArray();
+        dest.beginArray();
 
         for (int i = 0; i < array.length; i++) {
             if (i > 0) {
-                out.valueSeparator();
+                dest.valueSeparator();
             }
-            out.add(array[i]);
+            dest.add(array[i]);
         }
 
-        out.endArray();
+        dest.endArray();
     }
 
     /**
@@ -344,28 +339,28 @@ public final class JsonUrlWriter {
      * 
      * @param <A> Accumulator type
      * @param <R> Result type
-     * @param out non-null JsonTextBuilder
+     * @param dest non-null JsonTextBuilder
      * @param array null or a valid array
      */
-    public static final <A,R> void write(
-            JsonTextBuilder<A,R> out,
+    public static <A,R> void write(
+            JsonTextBuilder<A,R> dest,
             int... array) throws IOException {
 
         if (isNull(array)) {
-            out.addNull();
+            dest.addNull();
             return;
         }
 
-        out.beginArray();
+        dest.beginArray();
 
         for (int i = 0; i < array.length; i++) {
             if (i > 0) {
-                out.valueSeparator();
+                dest.valueSeparator();
             }
-            out.add(array[i]);
+            dest.add(array[i]);
         }
 
-        out.endArray();
+        dest.endArray();
     }
 
     /**
@@ -373,28 +368,28 @@ public final class JsonUrlWriter {
      * 
      * @param <A> Accumulator type
      * @param <R> Result type
-     * @param out non-null JsonTextBuilder
+     * @param dest non-null JsonTextBuilder
      * @param array null or a valid array
      */
-    public static final <A,R> void write(
-            JsonTextBuilder<A,R> out,
+    public static <A,R> void write(
+            JsonTextBuilder<A,R> dest,
             long... array) throws IOException {
 
         if (isNull(array)) {
-            out.addNull();
+            dest.addNull();
             return;
         }
 
-        out.beginArray();
+        dest.beginArray();
 
         for (int i = 0; i < array.length; i++) {
             if (i > 0) {
-                out.valueSeparator();
+                dest.valueSeparator();
             }
-            out.add(array[i]);
+            dest.add(array[i]);
         }
 
-        out.endArray();
+        dest.endArray();
     }
 
     /**
@@ -402,29 +397,29 @@ public final class JsonUrlWriter {
      * 
      * @param <A> Accumulator type
      * @param <R> Result type
-     * @param out non-null JsonTextBuilder
+     * @param dest non-null JsonTextBuilder
      * @param array null or a valid array
      */
-    @SuppressWarnings("PMD.AvoidUsingShortType")
-    public static final <A,R> void write(
-            JsonTextBuilder<A,R> out,
-            short... array) throws IOException {
+    public static <A,R> void write(
+            JsonTextBuilder<A,R> dest,
+            short... array) // NOPMD - AvoidUsingShortType
+                throws IOException {
 
         if (isNull(array)) {
-            out.addNull();
+            dest.addNull();
             return;
         }
 
-        out.beginArray();
+        dest.beginArray();
 
         for (int i = 0; i < array.length; i++) {
             if (i > 0) {
-                out.valueSeparator();
+                dest.valueSeparator();
             }
-            out.add(array[i]);
+            dest.add(array[i]);
         }
 
-        out.endArray();
+        dest.endArray();
     }
 
     /**
@@ -432,28 +427,28 @@ public final class JsonUrlWriter {
      * 
      * @param <A> Accumulator type
      * @param <R> Result type
-     * @param out non-null JsonTextBuilder
+     * @param dest non-null JsonTextBuilder
      * @param array null or a valid array
      */
-    public static final <A,R> void write(
-            JsonTextBuilder<A,R> out,
+    public static <A,R> void write(
+            JsonTextBuilder<A,R> dest,
             Object... array) throws IOException {
 
         if (isNull(array)) {
-            out.addNull();
+            dest.addNull();
             return;
         }
 
-        out.beginArray();
+        dest.beginArray();
 
         for (int i = 0; i < array.length; i++) {
             if (i > 0) {
-                out.valueSeparator();
+                dest.valueSeparator();
             }
-            write(out, array[i]);
+            write(dest, array[i]);
         }
 
-        out.endArray();
+        dest.endArray();
     }
 
 }

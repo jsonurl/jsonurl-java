@@ -1,5 +1,3 @@
-package org.jsonurl;
-
 /*
  * Copyright 2019-2020 David MacCormack
  * 
@@ -17,7 +15,10 @@ package org.jsonurl;
  * under the License.
  */
 
+package org.jsonurl;
+
 import static org.jsonurl.CharUtil.CHARBITS;
+import static org.jsonurl.CharUtil.CHARBITS_LENGTH;
 import static org.jsonurl.CharUtil.IS_LITCHAR;
 import static org.jsonurl.CharUtil.IS_QSCHAR;
 import static org.jsonurl.CharUtil.IS_QUOTE;
@@ -41,7 +42,12 @@ import org.jsonurl.j2se.JavaValueFactory;
  * @author David MacCormack
  * @since 2019-09-01
  */
-public final class JsonUrl {
+public final class JsonUrl { // NOPMD - ClassNamingConventions
+
+    /**
+     * single quote/apostrophe.
+     */
+    private static final char APOS = '\'';
 
     /**
      * a namespace to hide private, parse-specific static fields and methods.
@@ -51,7 +57,7 @@ public final class JsonUrl {
         private Parse() {
         }
         
-        static final NumberBuilder newNumberBuilder(
+        static NumberBuilder newNumberBuilder(
             ValueFactory<?,?,?,?,?,?,?,?,?,?> factory) {
             
             final NumberBuilder ret = new NumberBuilder();
@@ -66,8 +72,8 @@ public final class JsonUrl {
             return ret;
         }
 
-        private static final int percentDecode(
-                CharSequence s,
+        private static int percentDecode(
+                CharSequence text,
                 int off,
                 int len) {
 
@@ -75,14 +81,14 @@ public final class JsonUrl {
                 throw new SyntaxException(MSG_BAD_PCT_ENC, off);
             }
 
-            int c1 = hexDecode(s.charAt(off));
-            int c2 = hexDecode(s.charAt(off + 1));
+            int ch1 = hexDecode(text.charAt(off));
+            int ch2 = hexDecode(text.charAt(off + 1));
 
-            if (c1 < 0 || c2 < 0) {
+            if (ch1 < 0 || ch2 < 0) {
                 throw new SyntaxException(MSG_BAD_PCT_ENC, off);
             }
 
-            return ((c1 << 4) | c2);
+            return (ch1 << 4) | ch2;
         }
         
         /**
@@ -91,27 +97,26 @@ public final class JsonUrl {
          * @return true if the string matches one of the following JSON&#x2192;URL
          *      literal values: true, false, null.
          */
-        @SuppressWarnings("PMD")
-        private static final String getTrueFalseNull(
-                CharSequence s,
+        private static String getTrueFalseNull(// NOPMD - CyclomaticComplexity
+                CharSequence text,
                 int start,
                 int stop) {
 
             switch (stop - start) {
             case 4:
-                switch (s.charAt(start)) {
+                switch (text.charAt(start)) {
                 case 't':
-                    if (s.charAt(start + 1) != 'r'
-                            || s.charAt(start + 2) != 'u'
-                            || s.charAt(start + 3) != 'e') {
+                    if (text.charAt(start + 1) != 'r'
+                            || text.charAt(start + 2) != 'u'
+                            || text.charAt(start + 3) != 'e') {
                         return null;
                     }
                     return "true";
 
                 case 'n':
-                    if (s.charAt(start + 1) != 'u'
-                            || s.charAt(start + 2) != 'l'
-                            || s.charAt(start + 3) != 'l') {
+                    if (text.charAt(start + 1) != 'u'
+                            || text.charAt(start + 2) != 'l'
+                            || text.charAt(start + 3) != 'l') {
                         return null;
                     }
                     return "null";
@@ -121,11 +126,11 @@ public final class JsonUrl {
                 }
 
             case 5:
-                if (s.charAt(start) != 'f'
-                        || s.charAt(start + 1) != 'a'
-                        || s.charAt(start + 2) != 'l'
-                        || s.charAt(start + 3) != 's'
-                        || s.charAt(start + 4) != 'e') {
+                if (text.charAt(start) != 'f'
+                        || text.charAt(start + 1) != 'a'
+                        || text.charAt(start + 2) != 'l'
+                        || text.charAt(start + 3) != 's'
+                        || text.charAt(start + 4) != 'e') {
                     return null;
                 }
                 return "false";
@@ -143,10 +148,19 @@ public final class JsonUrl {
          * @see <a href="https://www.w3.org/International/unescape.java">
          * https://www.w3.org/International/unescape.java</a>
          */
-        @SuppressWarnings("PMD")
-        private static final String string(
-                StringBuilder buf,
-                CharSequence s,
+        @SuppressWarnings({
+            "PMD.AvoidLiteralsInIfCondition",
+            "PMD.AvoidReassigningLoopVariables", // needed to properly consume pct-encoding
+            "PMD.DataflowAnomalyAnalysis", // NOPMD - state needs to span the for loop
+            "PMD.CyclomaticComplexity", // NOPMD - yup, decoding UTF-8 branches a lot
+            "PMD.ExcessiveMethodLength", // side-effect of shared state across many branches
+            "PMD.ModifiedCyclomaticComplexity",
+            "PMD.NPathComplexity",
+            "PMD.ShortVariable", // NOPMD
+            "PMD.StdCyclomaticComplexity"})
+        private static String string(
+                StringBuilder dest,
+                CharSequence text,
                 int start,
                 int stop,
                 boolean quoted,
@@ -154,12 +168,14 @@ public final class JsonUrl {
 
             boolean needEndQuote = quoted;
 
-            if (buf == null) {
-                buf = new StringBuilder(Math.min((stop - start) * 2, 1 << 3));
-            } else {
-                buf.setLength(0);
-            }
-            
+            //
+            // buffer to accumulate the result as it's parsed
+            //
+            final StringBuilder buf = dest == null
+                    ? new StringBuilder(Math.min((stop - start) * 2, 1 << 3)) : dest;
+
+            buf.setLength(0);
+
             int sumb = 0;
             int more = -1;
 
@@ -174,7 +190,7 @@ public final class JsonUrl {
                 char c;
                 int b;
 
-                c = s.charAt(i);
+                c = text.charAt(i);
 
                 switch (c) {
                 case '\'':
@@ -188,7 +204,7 @@ public final class JsonUrl {
                     b = ' ';
                     break;
                 case '%':
-                    b = percentDecode(s, i + 1, stop);
+                    b = percentDecode(text, i + 1, stop);
                     i += 2;
                     break;
                 default:
@@ -216,7 +232,7 @@ public final class JsonUrl {
                 // Decode byte b as UTF-8, sumb collects incomplete chars
                 if ((b & 0xc0) == 0x80) {               // 10xxxxxx (continuation byte)
                     sumb = (sumb << 6) | (b & 0x3f);    // Add 6 bits to sumb
-                    if (--more == 0) {
+                    if (--more == 0) {                  // NOPMD
                         buf.appendCodePoint(sumb);      // Add char to sbuf
                     }
                 } else if ((b & 0x80) == 0x00) {        // 0xxxxxxx (yields 7 bits)
@@ -255,9 +271,7 @@ public final class JsonUrl {
             }
             
             if (!quoted && !isEmptyUnquotedStringOK && buf.length() == 0) {
-                throw new SyntaxException(
-                    SyntaxException.Message.MSG_EXPECT_LITERAL,
-                    start);
+                throw new SyntaxException(MSG_EXPECT_LITERAL, start);
             }
 
             return buf.toString();
@@ -272,24 +286,23 @@ public final class JsonUrl {
          *
          * @param buf a temporary buffer used to parse the value
          * @param num a valid NumberBuilder instance or null
-         * @param s the text to be parsed
+         * @param text the text to be parsed
          * @param start the start index
          * @param stop the stop index
          */
-        static final String literalToJavaString(
+        static String literalToJavaString(
                 StringBuilder buf,
                 NumberBuilder num,
-                CharSequence s,
+                CharSequence text,
                 int start,
                 int stop,
                 boolean isEmptyUnquotedStringOK) {
 
-            if (s.charAt(start) == '\'') {
-                return string(buf, s, start + 1, stop, true, isEmptyUnquotedStringOK);
+            if (text.charAt(start) == APOS) {
+                return string(buf, text, start + 1, stop, true, isEmptyUnquotedStringOK);
             }
 
-            String ret = getTrueFalseNull(s, start, stop);
-
+            String ret = getTrueFalseNull(text, start, stop);
             if (ret != null) {
                 return ret;
             }
@@ -300,11 +313,11 @@ public final class JsonUrl {
             //
             num.reset();
 
-            if (num.parse(s, start, stop)) {
-                return s.subSequence(start, stop).toString();
+            if (num.parse(text, start, stop)) {
+                return text.subSequence(start, stop).toString();
             }
 
-            return string(buf, s, start, stop, false, isEmptyUnquotedStringOK);
+            return string(buf, text, start, stop, false, isEmptyUnquotedStringOK);
         }
 
         /**
@@ -316,17 +329,17 @@ public final class JsonUrl {
          *
          * @param <V> value type
          * @param buf a temporary buffer used to parse the value
-         * @param num a valid NumberBuilder instance or null
-         * @param s the text to be parsed
+         * @param nbuilder a valid NumberBuilder instance or null
+         * @param text the text to be parsed
          * @param start the start index
          * @param stop the stop index
          * @param factory a valid value factory
          * @param isEmptyUnquotedStringOK if true allow a zero length value
          */
-        static final <V> V literal(
+        static <V> V literal(
                 StringBuilder buf,
-                NumberBuilder num,
-                CharSequence s,
+                NumberBuilder nbuilder,
+                CharSequence text,
                 int start,
                 int stop,
                 ValueFactory<V,?,?,?,?,?,?,?,?,?> factory,
@@ -337,35 +350,28 @@ public final class JsonUrl {
                     return factory.getString("");
                 }
 
-                throw new SyntaxException(
-                    SyntaxException.Message.MSG_EXPECT_LITERAL,
-                    start);
+                throw new SyntaxException(MSG_EXPECT_LITERAL, start);
             }
 
-            if (s.charAt(start) == '\'') {
+            if (text.charAt(start) == APOS) {
                 return factory.getString(string(
-                    buf, s, start + 1, stop, true, isEmptyUnquotedStringOK));
+                    buf, text, start + 1, stop, true, isEmptyUnquotedStringOK));
             }
 
-            V ret = factory.getTrueFalseNull(s, start, stop);
-
+            V ret = factory.getTrueFalseNull(text, start, stop);
             if (ret != null) {
                 return ret;
             }
+            
+            final NumberBuilder num = nbuilder == null
+                    ? newNumberBuilder(factory) : nbuilder.reset(); 
 
-            if (num == null) {
-                num = newNumberBuilder(factory);
-
-            } else {
-                num.reset();
-            }
-
-            if (num.parse(s, start, stop)) {
+            if (num.parse(text, start, stop)) {
                 return factory.getNumber(num);
             }
 
             return factory.getString(string(
-                buf, s, start, stop, false, isEmptyUnquotedStringOK));
+                buf, text, start, stop, false, isEmptyUnquotedStringOK));
         }
     }
 
@@ -385,14 +391,14 @@ public final class JsonUrl {
             FULL_ENCODING
         }
 
-        private static final boolean contains(
-                CharSequence s,
+        private static boolean contains(
+                CharSequence haystack,
                 int start,
                 int end,
-                char c) {
+                char needle) {
             
             for (int i = start; i < end; i++) {
-                if (c == s.charAt(i)) {
+                if (needle == haystack.charAt(i)) {
                     return true;
                 }
             }
@@ -400,29 +406,32 @@ public final class JsonUrl {
             return false;
         }
 
-        @SuppressWarnings("PMD")
-        private static final StringEncoding getStringEncoding(
-                CharSequence s,
+        @SuppressWarnings({
+            "PMD.CyclomaticComplexity",
+            "PMD.DataflowAnomalyAnalysis", // maintain state across for loop
+            "PMD.ShortVariable"})
+        private static StringEncoding getStringEncoding(
+                CharSequence text,
                 int start,
                 int end) {
+
+            if (text.charAt(start) == APOS) {
+                //
+                // edge case: if the string starts with a literal quote then it
+                // must be percent encoded because a parser could not otherwise
+                // tell the difference between that and a quoted string.
+                //
+                return StringEncoding.FULL_ENCODING;
+            }
 
             final int strmask = CharUtil.BIS_ENC_STRSAFE;
             final int spacemask = CharUtil.IS_SPACE;
             int strbits = strmask;
             int spacebits = 0;
 
-            if (s.charAt(start) == '\'') {
-                //
-                // edge case: if the string starts with a quote then it must
-                // be percent encoded because a parser could not otherwise tell
-                // the difference between that and a quoted string.
-                //
-                return StringEncoding.FULL_ENCODING;
-            }
-
             for (int i = start; i < end; i++) {
-                char c = s.charAt(i);
-                if (c > 127) {
+                char c = text.charAt(i);
+                if (c > CHARBITS_LENGTH) {
                     return StringEncoding.FULL_ENCODING;
                 }
 
@@ -432,8 +441,8 @@ public final class JsonUrl {
                 // If you change this code be sure to update that value as
                 // necessary.
                 //
-                strbits &= CharUtil.CHARBITS[c] & strmask;
-                spacebits |= CharUtil.CHARBITS[c] & spacemask;
+                strbits &= CHARBITS[c] & strmask;
+                spacebits |= CHARBITS[c] & spacemask;
             }
 
             switch (strbits | spacebits) {
@@ -459,39 +468,49 @@ public final class JsonUrl {
         /**
          * Hex encode as UTF-8 .
          */
-        @SuppressWarnings("PMD")
-        private static final void encode(
+        @SuppressWarnings({
+            "PMD.AvoidLiteralsInIfCondition",
+            "PMD.AvoidReassigningParameters", // needed for edge case
+            "PMD.CyclomaticComplexity", // yup, encoding UTF-8 branches a lot
+            "PMD.ModifiedCyclomaticComplexity",
+            "PMD.NPathComplexity",
+            "PMD.ShortVariable",
+            "PMD.StdCyclomaticComplexity"})
+        private static void encode(
                 Appendable dest,
-                CharSequence s,
+                CharSequence text,
                 int start,
                 int end,
                 boolean quoted) throws IOException {
 
-            if (start < end && s.charAt(start) == '\'') {
+            if (start < end && text.charAt(start) == APOS) {
                 //
-                // edge case: if the first character is a quote then
+                // edge case: if the first character is a literal quote then
                 // it must always be encoded
                 //
                 dest.append("%27");
                 start++;
             }
             
-            final String[] hexEncode = quoted
+            final String[] hexEncode = quoted // NOPMD
                 ? CharUtil.HEXENCODE_QUOTED : CharUtil.HEXENCODE_UNQUOTED;
 
             for (int i = start; i < end; i++) {
-                char c = s.charAt(i);
-                int cp;
+                char c = text.charAt(i);
                 
                 if (Character.isLowSurrogate(c)) {
                     throw new MalformedInputException(i);
                 }
+
+                final int cp;
                 if (Character.isHighSurrogate(c)) {
-                    if (++i == end) {
+                    i++; // NOPMD - needed to encode properly
+
+                    if (i == end) {
                         throw new MalformedInputException(i);
                     }
 
-                    char c2 = s.charAt(i);
+                    char c2 = text.charAt(i);
 
                     if (!Character.isLowSurrogate(c2)) {
                         throw new MalformedInputException(i);
@@ -507,19 +526,19 @@ public final class JsonUrl {
                     dest.append(hexEncode[cp]);
 
                 } else if (cp < 0x800) {
-                    dest.append(hexEncode[(0xC0 | (cp >> 6))]);
-                    dest.append(hexEncode[(0x80 | (cp & 0x3F))]);
+                    dest.append(hexEncode[0xC0 | (cp >> 6)]);
+                    dest.append(hexEncode[0x80 | (cp & 0x3F)]);
 
                 } else if (cp < 0x10000) {
-                    dest.append(hexEncode[(0xE0 | (cp >> 12))]);
-                    dest.append(hexEncode[(0x80 | ((cp >> 6) & 0x3F))]);
-                    dest.append(hexEncode[(0x80 | (cp & 0x3F))]);
+                    dest.append(hexEncode[0xE0 | (cp >> 12)]);
+                    dest.append(hexEncode[0x80 | ((cp >> 6) & 0x3F)]);
+                    dest.append(hexEncode[0x80 | (cp & 0x3F)]);
 
                 } else if (cp < 0x200000) {
-                    dest.append(hexEncode[(0xF0 | (cp >> 18))]);
-                    dest.append(hexEncode[(0x80 | ((cp >> 12) & 0x3F))]);
-                    dest.append(hexEncode[(0x80 | ((cp >> 6) & 0x3F))]);
-                    dest.append(hexEncode[(0x80 | (cp & 0x3F))]);
+                    dest.append(hexEncode[0xF0 | (cp >> 18)]);
+                    dest.append(hexEncode[0x80 | ((cp >> 12) & 0x3F)]);
+                    dest.append(hexEncode[0x80 | ((cp >> 6) & 0x3F)]);
+                    dest.append(hexEncode[0x80 | (cp & 0x3F)]);
 
                 } else {
                     throw new MalformedInputException(i);
@@ -532,22 +551,81 @@ public final class JsonUrl {
     }
 
     /**
+     * Parse the length of a quoted string literal.
+     */
+    private static int parseQuotedStringLength(
+            CharSequence text,
+            int start,
+            int stop) {
+
+        int ret = 0; // NOPMD
+
+        for (int i = start; i < stop; i++) {
+            char cur = text.charAt(i);
+
+            if (cur < CHARBITS_LENGTH) {
+                switch (CHARBITS[cur] & (IS_QSCHAR | IS_QUOTE)) {
+                case IS_QSCHAR:
+                    ret++;
+                    continue;
+                case IS_QUOTE:
+                    return ret + 2;
+                default:
+                    break;
+                }
+            }
+            throw new SyntaxException(MSG_BAD_CHAR, start);
+        }
+        throw new SyntaxException(MSG_BAD_QSTR, start);
+    }
+    
+    /**
+     * Parse the length of an unquoted literal.
+     */
+    private static int parseUnquotedLiteralLength(
+            CharSequence text,
+            int start,
+            int stop) {
+
+        int ret = 0; // NOPMD
+
+        for (int i = start; i < stop; i++) {
+            char cur = text.charAt(i);
+
+            if (cur < CHARBITS_LENGTH) {
+                switch (CHARBITS[cur] & (IS_LITCHAR | IS_STRUCTCHAR)) {
+                case IS_LITCHAR:
+                    ret++;
+                    continue;
+                case IS_STRUCTCHAR:
+                    return ret;
+                default:
+                    break;
+                }
+            }
+            throw new SyntaxException(MSG_BAD_CHAR, i);
+        }
+
+        return ret;
+    }
+
+    /**
      * Determine the length of a literal value.
      *
      * <p>This simply calls
      * {@link #parseLiteralLength(CharSequence, int, int, org.jsonurl.SyntaxException.Message)
      * parseLiteralLength(s, start, stop, null)}.
      * 
-     * @param s text to be parsed
+     * @param text text to be parsed
      * @param start start position in text
      * @param stop stop position in text
      * @return the length of the literal value
      */
-    public static final int parseLiteralLength(
-            CharSequence s,
+    public static int parseLiteralLength(
+            CharSequence text,
             int start,
             int stop) {
-        return parseLiteralLength(s, start, stop, null);
+        return parseLiteralLength(text, start, stop, null);
     }
 
     /**
@@ -563,74 +641,38 @@ public final class JsonUrl {
      * {@link org.jsonurl.Parser#parse(CharSequence, ValueFactory)
      * parse}.
      * 
-     * @param s text to be parsed
+     * @param text text to be parsed
      * @param start start position in text
      * @param stop stop position in text
      * @param errmsg error message for thrown {@link SyntaxException}
      * @return the length of the literal value
      */
-    @SuppressWarnings("PMD")
-    public static final int parseLiteralLength(
-            CharSequence s,
+    public static int parseLiteralLength(
+            CharSequence text,
             int start,
             int stop,
             SyntaxException.Message errmsg) {
-        
-        int ret = 0;
 
-        if (start == stop) {
+        if (stop <= start) {
+            if (errmsg != null) {
+                throw new SyntaxException(errmsg, start);
+            }
             return 0;
         }
 
-        if (s.charAt(start) == '\'') {
-            //
-            // quoted string
-            //
-            for (start++; start < stop; start++) {
-                char c = s.charAt(start);
-
-                if (c < 128) {
-                    switch (CHARBITS[c] & (IS_QSCHAR | IS_QUOTE)) {
-                    case IS_QSCHAR:
-                        ret++;
-                        continue;
-                    case IS_QUOTE:
-                        return ret + 2;
-                    default:
-                        break;
-                    }
-                }
-                throw new SyntaxException(MSG_BAD_CHAR, start);
-            }
-            throw new SyntaxException(MSG_BAD_QSTR, start);
+        if (text.charAt(start) == APOS) {
+            return parseQuotedStringLength(text, start + 1, stop);
         }
 
-        for (; start < stop; start++) {
-            char c = s.charAt(start);
-
-            if (c < 128) {
-                switch (CHARBITS[c] & (IS_LITCHAR | IS_STRUCTCHAR)) {
-                case IS_LITCHAR:
-                    ret++;
-                    continue;
-                case IS_STRUCTCHAR:
-                    return ret;
-                default:
-                    break;
-                }
-            }
-            throw new SyntaxException(MSG_BAD_CHAR, start);
-        }
-
-        return ret;
+        return parseUnquotedLiteralLength(text, start, stop);
     }
 
     /**
      * Determine the length of a literal value.
      * @see #parseLiteralLength(CharSequence, int, int, org.jsonurl.SyntaxException.Message)
      */
-    public static final int parseLiteralLength(CharSequence s) {
-        return parseLiteralLength(s, 0, s.length(), null);
+    public static int parseLiteralLength(CharSequence text) {
+        return parseLiteralLength(text, 0, text.length(), null);
     }
 
     /**
@@ -650,13 +692,13 @@ public final class JsonUrl {
      * <p>Note, the third argument is a length not a position. It indicates
      * the number of characters to be parsed.
      *
-     * @param s text to be parsed
+     * @param text text to be parsed
      * @param start start position in text
      * @param length number of characters to parse
      * @return an object for the parsed literal
      */
-    public static final <V> V parseLiteral(
-            CharSequence s,
+    public static <V> V parseLiteral(
+            CharSequence text,
             int start,
             int length,
             ValueFactory<V,?,?,?,?,?,?,?,?,?> factory,
@@ -668,9 +710,13 @@ public final class JsonUrl {
         //
         
         int stop = start + length;
-        parseLiteralLength(s, start, stop, MSG_EXPECT_LITERAL);
+        
+        final SyntaxException.Message errmsg = isEmptyUnquotedStringOK
+            ? null : MSG_EXPECT_LITERAL;
 
-        return Parse.literal(null, null, s, start, stop, factory, isEmptyUnquotedStringOK);
+        parseLiteralLength(text, start, stop, errmsg);
+
+        return Parse.literal(null, null, text, start, stop, factory, isEmptyUnquotedStringOK);
     }
 
     /**
@@ -683,11 +729,11 @@ public final class JsonUrl {
      * @see JsonUrl#parseLiteral(CharSequence, int, int, ValueFactory, boolean)
      * @see JavaValueFactory#PRIMITIVE
      */
-    public static final Object parseLiteral(
-            CharSequence s,
+    public static Object parseLiteral(
+            CharSequence text,
             int start,
             int length) {
-        return parseLiteral(s, start, length, JavaValueFactory.PRIMITIVE, false);
+        return parseLiteral(text, start, length, JavaValueFactory.PRIMITIVE, false);
     }
 
     /**
@@ -700,8 +746,8 @@ public final class JsonUrl {
      * @see JsonUrl#parseLiteral(CharSequence, int, int, ValueFactory, boolean)
      * @see JavaValueFactory#PRIMITIVE
      */
-    public static final Object parseLiteral(CharSequence s) {
-        return parseLiteral(s, 0, s.length(), JavaValueFactory.PRIMITIVE, false);
+    public static Object parseLiteral(CharSequence text) {
+        return parseLiteral(text, 0, text.length(), JavaValueFactory.PRIMITIVE, false);
     }
 
     /**
@@ -712,10 +758,10 @@ public final class JsonUrl {
      * parseLiteral(s, 0, s.length(), factory, false)}.
      * @see JsonUrl#parseLiteral(CharSequence, int, int, ValueFactory, boolean)
      */
-    public static final <V> V parseLiteral(
-            CharSequence s,
+    public static <V> V parseLiteral(
+            CharSequence text,
             ValueFactory<V,?,?,?,?,?,?,?,?,?> factory) {
-        return parseLiteral(s, 0, s.length(), factory, false);
+        return parseLiteral(text, 0, text.length(), factory, false);
     }
 
     /**
@@ -725,15 +771,14 @@ public final class JsonUrl {
      *
      * @param <T>   destination type
      * @param dest  destination
-     * @param s     source
+     * @param text     source
      * @param start offset in source
      * @param end   length of source
      * @return dest
      */
-    @SuppressWarnings("PMD")
-    public static <T extends Appendable> T appendLiteral(
+    public static <T extends Appendable> T appendLiteral(// NOPMD - CyclomaticComplexity
             T dest,
-            CharSequence s,
+            CharSequence text,
             int start,
             int end,
             boolean isKey) throws IOException {
@@ -749,25 +794,24 @@ public final class JsonUrl {
         //
         // true, false, null, and number values must be quoted
         //
-        boolean isLiteral = Parse.getTrueFalseNull(s, start, end) != null
-                || NumberBuilder.isNumber(s, start, end);
+        boolean isLiteral = Parse.getTrueFalseNull(text, start, end) != null
+                || NumberBuilder.isNumber(text, start, end);
 
         if (isLiteral) {
             if (isKey) {
                 //
                 // keys are always assumed to be strings
                 //
-                dest.append(s, start, end);
+                dest.append(text, start, end);
 
-            } else if (!Encode.contains(s, start, end, '+')) {
+            } else if (Encode.contains(text, start, end, '+')) {
+                Encode.encode(dest, text, start, end, false);
+            } else {
                 //
                 // this is a literal without a plus; it's safe to represent
                 // it as a quoted string.
                 //
-                dest.append('\'').append(s, start, end).append('\'');
-
-            } else {
-                Encode.encode(dest, s, start, end, false);
+                dest.append('\'').append(text, start, end).append('\'');
             }
             return dest;
         }
@@ -775,23 +819,23 @@ public final class JsonUrl {
         //
         // figure out the most efficient way to safely encode the string
         //
-        Encode.StringEncoding enc = Encode.getStringEncoding(s, start, end);
+        Encode.StringEncoding enc = Encode.getStringEncoding(text, start, end);
         
-        switch (enc) {
+        switch (enc) { // NOPMD - SwitchStmtsShouldHaveDefault
         case FULL_ENCODING:
         case NO_QUOTE_WITH_SPACE:
-            Encode.encode(dest, s, start, end, false);
+            Encode.encode(dest, text, start, end, false);
             break;
         case QUOTE_NO_SPACE:
-            dest.append('\'').append(s, start, end).append('\'');
+            dest.append('\'').append(text, start, end).append('\'');
             break;
         case QUOTE_WITH_SPACE:
             dest.append('\'');
-            Encode.encode(dest, s, start, end, true);
+            Encode.encode(dest, text, start, end, true);
             dest.append('\'');
             break;
         case SAFE_ASIS:
-            dest.append(s, start, end);
+            dest.append(text, start, end);
             break;
         }
 

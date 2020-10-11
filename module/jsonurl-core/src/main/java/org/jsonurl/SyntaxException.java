@@ -1,5 +1,3 @@
-package org.jsonurl;
-
 /*
  * Copyright 2019 David MacCormack
  * 
@@ -16,6 +14,8 @@ package org.jsonurl;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+package org.jsonurl;
 
 /**
  * A syntax error in JSON&#x2192;URL text. 
@@ -74,7 +74,7 @@ public class SyntaxException extends ParseException {
 
         private final String text;
 
-        private Message(String text) {
+        Message(String text) {
             this.text = text;
         }
 
@@ -89,7 +89,7 @@ public class SyntaxException extends ParseException {
     /**
      * My message.
      */
-    private final Message message;
+    private final Message message; // NOPMD - not a bean
 
     /**
      * Create a new SyntaxException.

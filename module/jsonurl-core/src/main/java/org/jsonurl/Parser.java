@@ -54,11 +54,7 @@ import java.util.Set;
  * @author David MacCormack
  * @since 2019-09-01
  */
-@SuppressWarnings({
-    "PMD.CyclomaticComplexity",
-    "PMD.GodClass",
-    "PMD.ExcessiveClassLength"})
-public class Parser {
+public class Parser { //NOPMD
 
     /**
      * Parse state.
@@ -113,6 +109,36 @@ public class Parser {
      * Maximum number of parsed values.
      */
     private int maxParseValues = DEFAULT_MAX_PARSE_VALUES;
+
+    /**
+     * begin-composite (open paren).
+     */
+    private static final char BEGIN_COMPOSITE = '(';
+
+    /**
+     * end-composite (close paren).
+     */
+    private static final char END_COMPOSITE = ')';
+
+    /**
+     * name-separator (colon).
+     */
+    private static final char NAME_SEPARATOR = ':';
+
+    /**
+     * value-separator (comma).
+     */
+    private static final char VALUE_SEPARATOR = ',';
+
+    /**
+     * x-www-form-urlencoded name-separator (equals).
+     */
+    private static final char WFU_NAME_SEPARATOR = '=';
+
+    /**
+     * x-www-form-urlencoded value-separator (ampersand).
+     */
+    private static final char WFU_VALUE_SEPARATOR = '&';
 
     /**
      * Allow application/x-www-form-urlencoded style separators.
@@ -186,9 +212,9 @@ public class Parser {
     /**
      * Returns true if application/x-www-form-urlencoded style separators are
      * allowed for an implied top-level object or array.
-     * @see #setAllowFormUrlEncoded(boolean) 
+     * @see #setFormUrlEncodedAllowed(boolean) 
      */
-    public boolean getAllowFormUrlEncoded() {
+    public boolean isFormUrlEncodedAllowed() {
         return wwwFormUrlEncoded;
     }
 
@@ -199,15 +225,15 @@ public class Parser {
      * 
      * @param wwwFormUrlEncoded true or false
      */
-    public void setAllowFormUrlEncoded(boolean wwwFormUrlEncoded) {
+    public void setFormUrlEncodedAllowed(boolean wwwFormUrlEncoded) {
         this.wwwFormUrlEncoded = wwwFormUrlEncoded;
     }
 
     /**
      * Returns true if the parser accepts empty, unquoted keys.
-     * @see #setAllowEmptyUnquotedKey(boolean) 
+     * @see #setEmptyUnquotedKeyAllowed(boolean) 
      */
-    public boolean getAllowEmptyUnquotedKey() {
+    public boolean isEmptyUnquotedKeyAllowed() {
         return allowEmptyUnquotedKey;
     }
 
@@ -216,15 +242,15 @@ public class Parser {
      * For example, {@code (:value)}.
      * @param allow boolean
      */
-    public void setAllowEmptyUnquotedKey(boolean allow) {
+    public void setEmptyUnquotedKeyAllowed(boolean allow) {
         this.allowEmptyUnquotedKey = allow;
     }
 
     /**
      * Returns true if the parser accepts empty, unquoted values.
-     * @see #setAllowEmptyUnquotedValue(boolean) 
+     * @see #setEmptyUnquotedValueAllowed(boolean) 
      */
-    public boolean getAllowEmptyUnquotedValue() {
+    public boolean isEmptyUnquotedValueAllowed() {
         return allowEmptyUnquotedValue;
     }
 
@@ -233,7 +259,7 @@ public class Parser {
      * For example, {@code (1,,3)}.
      * @param allow boolean
      */
-    public void setAllowEmptyUnquotedValue(boolean allow) {
+    public void setEmptyUnquotedValueAllowed(boolean allow) {
         this.allowEmptyUnquotedValue = allow;
     }
 
@@ -253,9 +279,9 @@ public class Parser {
             M extends V,
             N extends V,
             S extends V> J parseObject(
-                CharSequence s,
+                CharSequence text,
                 ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
-        return (J)parse(s, 0, s.length(), TYPE_VALUE_OBJECT, factory);
+        return (J)parse(text, 0, text.length(), TYPE_VALUE_OBJECT, factory);
     }
 
     /**
@@ -274,11 +300,11 @@ public class Parser {
             M extends V,
             N extends V,
             S extends V> J parseObject(
-                CharSequence s,
+                CharSequence text,
                 int off,
                 int length,
                 ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
-        return (J)parse(s, off, length, TYPE_VALUE_OBJECT, factory);
+        return (J)parse(text, off, length, TYPE_VALUE_OBJECT, factory);
     }
 
     /**
@@ -297,11 +323,11 @@ public class Parser {
             M extends V,
             N extends V,
             S extends V> J parseObject(
-                CharSequence s,
+                CharSequence text,
                 ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory,
                 JBT impliedObject) {
 
-        return (J)parse(s, 0, s.length(), TYPE_VALUE_OBJECT,
+        return (J)parse(text, 0, text.length(), TYPE_VALUE_OBJECT,
             new ValueFactoryParseResultFacade<>(factory, null, impliedObject));
     }
 
@@ -321,13 +347,13 @@ public class Parser {
             M extends V,
             N extends V,
             S extends V> J parseObject(
-                CharSequence s,
+                CharSequence text,
                 int off,
                 int length,
                 ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory,
                 JBT impliedObject) {
 
-        return (J)parse(s, off, length, TYPE_VALUE_OBJECT,
+        return (J)parse(text, off, length, TYPE_VALUE_OBJECT,
             new ValueFactoryParseResultFacade<>(factory, null, impliedObject));
     }
 
@@ -347,10 +373,10 @@ public class Parser {
             M extends V,
             N extends V,
             S extends V> A parseArray(
-                CharSequence s,
+                CharSequence text,
                 ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
 
-        return (A)parse(s, 0, s.length(), TYPE_VALUE_ARRAY, factory);
+        return (A)parse(text, 0, text.length(), TYPE_VALUE_ARRAY, factory);
     }
 
     /**
@@ -369,11 +395,11 @@ public class Parser {
             M extends V,
             N extends V,
             S extends V> A parseArray(
-                CharSequence s,
+                CharSequence text,
                 int off,
                 int length,
                 ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
-        return (A)parse(s, off, length, TYPE_VALUE_ARRAY, factory);
+        return (A)parse(text, off, length, TYPE_VALUE_ARRAY, factory);
     }
 
     /**
@@ -392,11 +418,11 @@ public class Parser {
             M extends V,
             N extends V,
             S extends V> A parseArray(
-                CharSequence s,
+                CharSequence text,
                 ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory,
                 ABT impliedArray) {
 
-        return (A)parse(s, 0, s.length(), TYPE_VALUE_ARRAY,
+        return (A)parse(text, 0, text.length(), TYPE_VALUE_ARRAY,
             new ValueFactoryParseResultFacade<>(factory, impliedArray, null));
     }
 
@@ -416,13 +442,13 @@ public class Parser {
             M extends V,
             N extends V,
             S extends V> A parseArray(
-                CharSequence s,
+                CharSequence text,
                 int off,
                 int length,
                 ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory,
                 ABT impliedArray) {
 
-        return (A)parse(s, off, length, TYPE_VALUE_ARRAY,
+        return (A)parse(text, off, length, TYPE_VALUE_ARRAY,
             new ValueFactoryParseResultFacade<>(factory, impliedArray, null));
     }
 
@@ -441,9 +467,9 @@ public class Parser {
             M extends V,
             N extends V,
             S extends V> V parse(
-                CharSequence s,
+                CharSequence text,
                 ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
-        return parse(s, 0, s.length(), (EnumSet<ValueType>)null, factory);
+        return parse(text, 0, text.length(), (EnumSet<ValueType>)null, factory);
     }
 
     /**
@@ -461,11 +487,11 @@ public class Parser {
             M extends V,
             N extends V,
             S extends V> V parse(
-                CharSequence s,
+                CharSequence text,
                 int off,
                 int length,
                 ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
-        return parse(s, off, length, (EnumSet<ValueType>)null, factory);
+        return parse(text, off, length, (EnumSet<ValueType>)null, factory);
     }
 
     /**
@@ -483,12 +509,12 @@ public class Parser {
             M extends V,
             N extends V,
             S extends V> V parse(
-                CharSequence s,
+                CharSequence text,
                 int off,
                 int length,
                 ValueType canReturn,
                 ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
-        return parse(s, off, length, EnumSet.of(canReturn), factory);
+        return parse(text, off, length, EnumSet.of(canReturn), factory);
     }
 
     /**
@@ -506,10 +532,10 @@ public class Parser {
             M extends V,
             N extends V,
             S extends V> V parse(
-                CharSequence s,
+                CharSequence text,
                 ValueType canReturn,
                 ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
-        return parse(s, 0, s.length(), EnumSet.of(canReturn), factory);
+        return parse(text, 0, text.length(), EnumSet.of(canReturn), factory);
     }
 
     /**
@@ -522,7 +548,7 @@ public class Parser {
      * to limit what types are allowed in the response. If an invalid value
      * type is found then a {@link ParseException} will be thrown.
      *
-     * @param s the text to be parsed
+     * @param text the text to be parsed
      * @param off offset of the first character to be parsed
      * @param length a <em>length</em>, not an offset
      * @param canReturn set of allowed return types
@@ -539,13 +565,13 @@ public class Parser {
             M extends V,
             N extends V,
             S extends V> V parse(
-                CharSequence s,
+                CharSequence text,
                 int off,
                 int length,
                 Set<ValueType> canReturn,
                 ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
 
-        return parse(s, off, length, canReturn,
+        return parse(text, off, length, canReturn,
             new ValueFactoryParseResultFacade<>(factory, null, null));
     }
 
@@ -556,13 +582,17 @@ public class Parser {
      * call.
      */
     @SuppressWarnings({
-        "PMD.NPathComplexity",
-        "PMD.ExcessiveMethodLength",
-        "PMD.DataflowAnomalyAnalysis",
         "PMD.AvoidDuplicateLiterals",
+        "PMD.CyclomaticComplexity",
+        "PMD.DataflowAnomalyAnalysis",
+        "PMD.ModifiedCyclomaticComplexity",
+        "PMD.NcssCount",
+        "PMD.NcssMethodCount",
+        "PMD.NPathComplexity",
+        "PMD.StdCyclomaticComplexity",
         "PMD.SwitchDensity"})
     private <R> R parse(
-            CharSequence s,
+            CharSequence text,
             int off,
             int length,
             final Set<ValueType> canReturn,
@@ -589,7 +619,7 @@ public class Parser {
             // literals then return one.
             //
             if (allowEmptyUnquotedValue) {
-                return result.getResult(s, off, off, true);
+                return result.getResult(text, off, off, true);
             }
             
             //
@@ -629,7 +659,14 @@ public class Parser {
             stateStack.push(State.IN_ARRAY);
             isDoneTypeCheck = true;
 
-        } else if (s.charAt(off) != '(') {
+        } else if (text.charAt(off) == BEGIN_COMPOSITE) {
+            //
+            // composite and no implied object/array
+            //
+            stateStack.push(State.PAREN);
+            pos++;
+
+        } else {
             //
             // not composite; parse as a single literal value
             //
@@ -640,13 +677,12 @@ public class Parser {
             // structural characters) but not valid when inside a composite.
             // I don't think I want that.
             //
-            int litlen = parseLiteralLength(s, off, stop, null);
+            int litlen = parseLiteralLength(text, off, stop, null);
             if (litlen != length) {
-                throw new SyntaxException(
-                    MSG_EXPECT_LITERAL);
+                throw new SyntaxException(MSG_EXPECT_LITERAL);
             }
 
-            R ret = result.getResult(s, off, stop, allowEmptyUnquotedValue);
+            R ret = result.getResult(text, off, stop, allowEmptyUnquotedValue);
 
             if (canReturn != null && !result.isValid(canReturn, ret)) {
                 throw new SyntaxException(
@@ -658,12 +694,6 @@ public class Parser {
 
             return ret;
 
-        } else {
-            //
-            // composite and no implied object/array
-            //
-            stateStack.push(State.PAREN);
-            pos++;
         }
         
         final boolean allowEmptyUnquotedKey = this.allowEmptyUnquotedKey;
@@ -677,12 +707,12 @@ public class Parser {
                 throw new SyntaxException(MSG_STILL_OPEN, pos);
             }
 
-            char c = s.charAt(pos);
+            char c = text.charAt(pos); // NOPMD - ShortVariable
 
             switch (stateStack.peek()) { // NOPMD -- no switch default
             case PAREN:
                 switch (c) {
-                case '(':
+                case BEGIN_COMPOSITE:
                     //
                     // found two back-to-back open parens. We know the first,
                     // paren is starting an array.
@@ -780,7 +810,7 @@ public class Parser {
                 // paren followed by a literal.  I need to lookahead
                 // one token to see if this is an object or array.
                 //
-                int litlen = parseLiteralLength(s, pos, stop, MSG_STILL_OPEN);
+                int litlen = parseLiteralLength(text, pos, stop, MSG_STILL_OPEN);
 
                 parseValueCount = incrementLimit(
                         MSG_LIMIT_MAX_PARSE_VALUES,
@@ -788,22 +818,23 @@ public class Parser {
                         parseValueCount,
                         pos);
 
-                int litpos = pos;
+                int litpos = pos; // NOPMD - capture the literal's position
+
                 pos += litlen;
 
                 if (pos == stop) {
                     throw new SyntaxException(MSG_STILL_OPEN, pos);
                 }
 
-                c = s.charAt(pos);
+                c = text.charAt(pos);
 
                 switch (c) {
-                case '&':
+                case WFU_VALUE_SEPARATOR:
                     if (!wwwFormUrlEncoded || parseDepth != 1) {
                         throw new SyntaxException(MSG_BAD_CHAR, pos);
                     }
                     // fall through
-                case ',':
+                case VALUE_SEPARATOR:
                     //
                     // multi-element array
                     //
@@ -829,11 +860,11 @@ public class Parser {
                     result
                         .setLocation(litpos)
                         .beginArray()
-                        .addLiteral(s, litpos, pos, allowEmptyUnquotedValue);
+                        .addLiteral(text, litpos, pos, allowEmptyUnquotedValue);
 
                     continue;
 
-                case ')':
+                case END_COMPOSITE:
                     //
                     // single element array
                     //
@@ -851,7 +882,7 @@ public class Parser {
                     
                     result
                         .setLocation(litpos)
-                        .addSingleElementArray(s, litpos, pos, allowEmptyUnquotedValue);
+                        .addSingleElementArray(text, litpos, pos, allowEmptyUnquotedValue);
 
                     parseDepth--;
                     pos++;
@@ -888,12 +919,12 @@ public class Parser {
                     stateStack.pop();
                     continue;
 
-                case '=':
+                case WFU_NAME_SEPARATOR:
                     if (!wwwFormUrlEncoded || parseDepth != 1) {
                         throw new SyntaxException(MSG_BAD_CHAR, pos);
                     }
                     // fall through
-                case ':':
+                case NAME_SEPARATOR:
                     //
                     // key name for object
                     //
@@ -913,7 +944,7 @@ public class Parser {
                     result
                         .setLocation(litpos)
                         .beginObject()
-                        .addObjectKey(s, litpos, pos, allowEmptyUnquotedKey);
+                        .addObjectKey(text, litpos, pos, allowEmptyUnquotedKey);
 
                     pos++;
                     continue;
@@ -924,7 +955,7 @@ public class Parser {
                 throw new SyntaxException(MSG_EXPECT_LITERAL, pos);
 
             case IN_ARRAY:
-                if (c == '(') {
+                if (c == BEGIN_COMPOSITE) {
                     stateStack.set(0, State.ARRAY_AFTER_ELEMENT);
                     stateStack.push(State.PAREN);
 
@@ -938,7 +969,7 @@ public class Parser {
                 }
 
                 litpos = pos;
-                litlen = parseLiteralLength(s, pos, stop, MSG_STILL_OPEN);
+                litlen = parseLiteralLength(text, pos, stop, MSG_STILL_OPEN);
 
                 parseValueCount = incrementLimit(
                         MSG_LIMIT_MAX_PARSE_VALUES,
@@ -951,7 +982,7 @@ public class Parser {
                 stateStack.set(0, State.ARRAY_AFTER_ELEMENT);
                 result
                     .setLocation(litpos)
-                    .addLiteral(s, litpos, pos, allowEmptyUnquotedValue);
+                    .addLiteral(text, litpos, pos, allowEmptyUnquotedValue);
 
                 if (pos == stop) {
                     if (parseDepth == 1 && impliedArray) {
@@ -966,17 +997,17 @@ public class Parser {
                 result.setLocation(pos).addArrayElement();
 
                 switch (c) {
-                case '&':
+                case WFU_VALUE_SEPARATOR:
                     if (!wwwFormUrlEncoded || parseDepth != 1) {
                         throw new SyntaxException(MSG_BAD_CHAR, pos);
                     }
                     // fall through
-                case ',':
+                case VALUE_SEPARATOR:
                     stateStack.set(0, State.IN_ARRAY);
                     pos++;
                     continue;
 
-                case ')':
+                case END_COMPOSITE:
                     result.endArray();
 
                     parseDepth--;
@@ -1014,7 +1045,7 @@ public class Parser {
                 throw new SyntaxException(MSG_EXPECT_STRUCT_CHAR, pos);
 
             case OBJECT_HAVE_KEY:
-                if (c == '(') {
+                if (c == BEGIN_COMPOSITE) {
                     stateStack.set(0, State.OBJECT_AFTER_ELEMENT);
                     stateStack.push(State.PAREN);
 
@@ -1029,7 +1060,7 @@ public class Parser {
                 }
 
                 litpos = pos;
-                litlen = parseLiteralLength(s, pos, stop, MSG_STILL_OPEN);
+                litlen = parseLiteralLength(text, pos, stop, MSG_STILL_OPEN);
 
                 parseValueCount = incrementLimit(
                         MSG_LIMIT_MAX_PARSE_VALUES,
@@ -1042,7 +1073,7 @@ public class Parser {
                 stateStack.set(0, State.OBJECT_AFTER_ELEMENT);
                 result
                     .setLocation(litpos)
-                    .addLiteral(s, litpos, pos, allowEmptyUnquotedValue);
+                    .addLiteral(text, litpos, pos, allowEmptyUnquotedValue);
                 
                 if (pos == stop) {
                     if (parseDepth == 1 && impliedObject) {
@@ -1058,17 +1089,17 @@ public class Parser {
                 result.setLocation(pos).addObjectElement();
 
                 switch (c) {
-                case '&':
+                case WFU_VALUE_SEPARATOR:
                     if (!wwwFormUrlEncoded || parseDepth != 1) {
                         throw new SyntaxException(MSG_BAD_CHAR, pos);
                     }
                     // fall through
-                case ',':
+                case VALUE_SEPARATOR:
                     stateStack.set(0, State.IN_OBJECT);
                     pos++;
                     continue;
 
-                case ')':
+                case END_COMPOSITE:
                     result.endObject();
 
                     parseDepth--;
@@ -1106,22 +1137,22 @@ public class Parser {
 
             case IN_OBJECT:
                 litpos = pos;
-                litlen = parseLiteralLength(s, pos, stop, MSG_STILL_OPEN);
+                litlen = parseLiteralLength(text, pos, stop, MSG_STILL_OPEN);
                 pos += litlen;
 
                 if (pos == stop) {
                     throw new SyntaxException(MSG_STILL_OPEN, pos);
                 }
 
-                c = s.charAt(pos);
+                c = text.charAt(pos);
 
                 switch (c) {
-                case '=':
+                case WFU_NAME_SEPARATOR:
                     if (!wwwFormUrlEncoded || parseDepth != 1) {
                         throw new SyntaxException(MSG_BAD_CHAR, pos);
                     }
                     // fall through
-                case ':':
+                case NAME_SEPARATOR:
                     break;
 
                 default:
@@ -1132,7 +1163,7 @@ public class Parser {
 
                 result
                     .setLocation(litpos)
-                    .addObjectKey(s, litpos, pos, allowEmptyUnquotedKey);
+                    .addObjectKey(text, litpos, pos, allowEmptyUnquotedKey);
 
                 pos++;
                 continue;
@@ -1143,16 +1174,17 @@ public class Parser {
     /**
      * increment a limit value, throwing an exception if the limit is reached.
      */
-    private static final int incrementLimit(
+    private static int incrementLimit(
             LimitException.Message msg,
             int limit,
             int value,
             int pos) {
-        value++;
 
-        if (value > limit) {
+        final int newValue = value + 1;
+
+        if (newValue > limit) {
             throw new LimitException(msg, pos);
         }
-        return value;
+        return newValue;
     }
 }

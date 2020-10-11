@@ -1,5 +1,3 @@
-package org.jsonurl;
-
 /*
  * Copyright 2019 David MacCormack
  * 
@@ -17,10 +15,12 @@ package org.jsonurl;
  * under the License.
  */
 
+package org.jsonurl;
 
-// CHECKSTYLE:OFF
-import static org.junit.jupiter.api.Assertions.*;
-// CHECKSTYLE:ON
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -40,7 +40,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  * @author David MacCormack
  * @since 2019-09-01
  */
-class NumberBuilderTest {
+class NumberBuilderTest { // NOPMD
     /** Prefix used to test non-zero based start index. */
     private static final String PREFIX  = "prefix ";
     
@@ -67,57 +67,65 @@ class NumberBuilderTest {
     /** tag annotation. */
     public static final String TAG_BIG = "big";
 
-    private NumberBuilder newNumberBuilder(String s) {
+    private NumberBuilder newNumberBuilder(String text) {
         return new NumberBuilder(
-                PREFIX + s + SUFFIX,
+                PREFIX + text + SUFFIX,
                 PREFIX.length(),
-                PREFIX.length() + s.length());
+                PREFIX.length() + text.length());
     }
     
-    private void assertEquals_isNumber(boolean expect, String s) {
-        assertEquals(expect, NumberBuilder.isNumber(s), s);
-        assertEquals(expect, NumberBuilder.isNumber(s, false), s);
+    private void assertEqualsIsNumber(boolean expect, String text) {
+        assertEquals(expect, NumberBuilder.isNumber(text), text);
+        assertEquals(expect, NumberBuilder.isNumber(text, false), text);
 
         assertEquals(expect, NumberBuilder.isNumber(
-            PREFIX + s + SUFFIX,
+            PREFIX + text + SUFFIX,
             PREFIX.length(),
-            PREFIX.length() + s.length()),
-            s);
+            PREFIX.length() + text.length()),
+            text);
 
-        assertEquals(expect, new NumberBuilder(s).isNumber(), s);
+        assertEquals(expect, new NumberBuilder(text).isNumber(), text);
 
         assertEquals(expect, new NumberBuilder(
-            PREFIX + s + SUFFIX,
+            PREFIX + text + SUFFIX,
             PREFIX.length(),
-            PREFIX.length() + s.length()).isNumber(),
-            s);
+            PREFIX.length() + text.length()).isNumber(),
+            text);
 
-        assertEquals(expect, new NumberBuilder(s).hasIntegerPart(), s);
+        assertEquals(expect, new NumberBuilder(text).hasIntegerPart(), text);
     }
 
-    private void assertEquals_isInteger(boolean expect, String s) {
-        assertEquals(expect, NumberBuilder.isNonFractional(s), s);
-        assertEquals(expect, NumberBuilder.isNumber(s, true), s);
+    private void assertEqualsIsInteger(boolean expect, String text) {
+        assertEquals(expect, NumberBuilder.isNonFractional(text), text);
+        assertEquals(expect, NumberBuilder.isNumber(text, true), text);
 
         assertEquals(expect, NumberBuilder.isNonFractional(
-            PREFIX + s + SUFFIX,
+            PREFIX + text + SUFFIX,
             PREFIX.length(),
-            PREFIX.length() + s.length()),
-            s);
+            PREFIX.length() + text.length()),
+            text);
         
-        assertEquals(expect, new NumberBuilder(s).isNonFractional(), s);
+        assertEquals(expect, new NumberBuilder(text).isNonFractional(), text);
 
         assertEquals(expect, new NumberBuilder(
-            PREFIX + s + SUFFIX,
+            PREFIX + text + SUFFIX,
             PREFIX.length(),
-            PREFIX.length() + s.length()).isNonFractional(),
-            s);
+            PREFIX.length() + text.length()).isNonFractional(),
+            text);
     }
 
-    private void assertToString(String s) {
-        NumberBuilder nb = newNumberBuilder(s);
-        assertArrayEquals(nb.toChars(), NumberBuilder.toChars(nb), s);
-        assertEquals(nb.toString(), NumberBuilder.toString(nb), s);
+    private void assertToString(String text) {
+        NumberBuilder numb = newNumberBuilder(text);
+
+        assertArrayEquals(
+                numb.toChars(),
+                NumberBuilder.toChars(numb),
+                text);
+
+        assertEquals(
+                numb.toString(),
+                NumberBuilder.toString(numb),
+                text);
     }
     
     @ParameterizedTest
@@ -126,19 +134,19 @@ class NumberBuilderTest {
     @CsvSource({
         Math.PI + ", 3.141593"
     })
-    void testBigDecimal(double in, double expect) {
+    void testBigDecimal(double actual, double expect) {
         final BigMathProvider mcp = new BigMath(
             MathContext.DECIMAL32,
             null,
             null,
             null);
 
-        final String sin = String.valueOf(in);
-        NumberBuilder nb = newNumberBuilder(sin);
-        nb.setBigMathProvider(mcp);
-        assertEquals(mcp, nb.getBigMathProvider(), sin);
-        BigDecimal bd = nb.toBigDecimal();
-        assertEquals(expect, bd.doubleValue(), String.valueOf(in));
+        final String sin = String.valueOf(actual);
+        NumberBuilder numb = newNumberBuilder(sin);
+        numb.setBigMathProvider(mcp);
+        assertEquals(mcp, numb.getBigMathProvider(), sin);
+        BigDecimal dec = numb.toBigDecimal();
+        assertEquals(expect, dec.doubleValue(), String.valueOf(actual));
     }
 
     @ParameterizedTest
@@ -147,38 +155,45 @@ class NumberBuilderTest {
     @ValueSource(longs = {
         0, -0,
         1, -1,
-        123456, -123456,
-        12345678905432132L,
+        123_456, -123_456,
+        12_345_678_905_432_132L,
         Long.MAX_VALUE,
         Long.MAX_VALUE - 1,
         Long.MIN_VALUE,
         Long.MIN_VALUE - 1,
     })
-    void testLong(long g) {
+    void testLong(long expected) {
         assertEquals(
-                Long.valueOf(g),
-                newNumberBuilder(String.valueOf(g)).build(true),
-                String.valueOf(g));
+                Long.valueOf(expected),
+                newNumberBuilder(String.valueOf(expected)).build(true),
+                String.valueOf(expected));
 
-        assertEquals_isNumber(true, String.valueOf(g));
-        assertEquals_isInteger(true, String.valueOf(g));
-        assertToString(String.valueOf(g));
+        assertEqualsIsNumber(true, String.valueOf(expected));
+        assertEqualsIsInteger(true, String.valueOf(expected));
+        assertToString(String.valueOf(expected));
     }
 
     @ParameterizedTest
     @Tag(TAG_LONG)
     @Tag(TAG_NUMBER)
     @ValueSource(strings = {
-        "0", "-0",
-        "1", "-1",
-        "123456", "-123456",
+        "0",
+        "-0",
+        "1",
+        "-1",
+        "123456",
+        "-123456",
         "12345678905432132",
     })
-    void testLong(String s) {
-        assertEquals(Long.valueOf(s), newNumberBuilder(s).build(true), s);
-        assertEquals_isNumber(true, s);
-        assertEquals_isInteger(true, s);
-        assertToString(s);
+    void testLong(String text) {
+        assertEquals(
+                Long.valueOf(text),
+                newNumberBuilder(text).build(true),
+                text);
+
+        assertEqualsIsNumber(true, text);
+        assertEqualsIsInteger(true, text);
+        assertToString(text);
     }
     
     @ParameterizedTest
@@ -195,11 +210,15 @@ class NumberBuilderTest {
         "'-2e+1',-20",
         "'4e+15',4000000000000000",
     })
-    void testLong(String in, long out) {
-        assertEquals(Long.valueOf(out), newNumberBuilder(in).build(true), in);
-        assertEquals_isNumber(true, in);
-        assertEquals_isInteger(true, in);
-        assertToString(in);
+    void testLong(String text, long expected) {
+        assertEquals(
+                Long.valueOf(expected),
+                newNumberBuilder(text).build(true),
+                text);
+
+        assertEqualsIsNumber(true, text);
+        assertEqualsIsInteger(true, text);
+        assertToString(text);
     }
     
     @ParameterizedTest
@@ -220,48 +239,48 @@ class NumberBuilderTest {
         
         "123456789012345678901"
     })
-    void testDouble(String s) {
+    void testDouble(String text) {
         assertEquals(
-                Double.valueOf(s),
-                newNumberBuilder(s).build(true),
-                s);
+                Double.valueOf(text),
+                newNumberBuilder(text).build(true),
+                text);
 
         assertEquals(
-            Double.valueOf(s),
-            newNumberBuilder(s).toDouble(),
-            s);
+            Double.valueOf(text),
+            newNumberBuilder(text).toDouble(),
+            text);
         
         assertEquals(
-            new BigDecimal(s),
-            newNumberBuilder(s).toBigDecimal(),
-            s);
+            new BigDecimal(text),
+            newNumberBuilder(text).toBigDecimal(),
+            text);
 
-        assertEquals_isNumber(true, s);
+        assertEqualsIsNumber(true, text);
 
-        assertEquals_isInteger(
-            s.indexOf('.') == -1 && s.indexOf('e') == -1,
-            s);
+        assertEqualsIsInteger(
+            text.indexOf('.') == -1 && text.indexOf('e') == -1,
+            text);
         
-        assertEquals(s.indexOf('.') != -1,
-            new NumberBuilder(s).hasFractionalPart(),
-            s);
+        assertEquals(text.indexOf('.') != -1,
+            new NumberBuilder(text).hasFractionalPart(),
+            text);
 
-        assertToString(s);
+        assertToString(text);
     }
     
     @ParameterizedTest
     @Tag(TAG_DOUBLE)
     @Tag(TAG_NUMBER)
     @MethodSource("integerAsDoubleProvider")
-    void testDouble(double g) {
-        String asString = String.format("%.0f", g);
+    void testDouble(double value) {
+        String asString = String.format("%.0f", value);
         assertEquals(
-                Double.valueOf(g),
+                Double.valueOf(value),
                 newNumberBuilder(asString).build(true),
                 asString);
 
-        assertEquals_isNumber(true, asString);
-        assertEquals_isInteger(true, asString);
+        assertEqualsIsNumber(true, asString);
+        assertEqualsIsInteger(true, asString);
         assertToString(asString);
     }
     
@@ -278,20 +297,20 @@ class NumberBuilderTest {
         Long.MAX_VALUE + "e2," + Long.MAX_VALUE + "00",
         Long.MIN_VALUE + "e3," + Long.MIN_VALUE + "000",
     })
-    void testBigInteger(String in, String out) {
-        out = out == null ? in : out;
+    void testBigInteger(String text, String expected) {
+        String expectedText = expected == null ? text : expected;
 
         assertEquals(
-                new BigInteger(out),
-                newNumberBuilder(String.valueOf(in)).build(false),
-                in);
+                new BigInteger(expectedText),
+                newNumberBuilder(String.valueOf(text)).build(false),
+                text);
 
-        assertEquals_isNumber(true, in);
-        assertEquals_isInteger(true, in);
-        assertEquals_isNumber(true, out);
-        assertEquals_isInteger(true, out);
-        assertToString(in);
-        assertToString(out);
+        assertEqualsIsNumber(true, text);
+        assertEqualsIsInteger(true, text);
+        assertEqualsIsNumber(true, expectedText);
+        assertEqualsIsInteger(true, expectedText);
+        assertToString(text);
+        assertToString(expectedText);
     }
 
     @ParameterizedTest
@@ -303,8 +322,8 @@ class NumberBuilderTest {
     })
     void testNonNumberLiterals(String text) {
         assertFalse(JsonUrl.parseLiteral(text) instanceof Number, text);
-        assertEquals_isNumber(false, text);
-        assertEquals_isInteger(false, text);
+        assertEqualsIsNumber(false, text);
+        assertEqualsIsInteger(false, text);
     }
     
     @ParameterizedTest
@@ -332,8 +351,8 @@ class NumberBuilderTest {
     }
 
     @Test
-    void testEmptyString() {
-        NumberText text = new NumberText() { // NOPMD
+    void testEmptyString() { // NOPMD - CyclomaticComplexity
+        NumberText text = new NumberText() { // NOPMD - DataflowAnomalyAnalysis
 
             @Override
             public CharSequence getText() {

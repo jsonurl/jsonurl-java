@@ -32,19 +32,20 @@ import org.junit.jupiter.api.Nested;
  * @author David MacCormack
  * @since 2020-09-01
  */
-public abstract class JavaValueWriteTest extends AbstractJsonTextBuilderTest<
-    Object,
-    Object,
-    List<Object>,
-    List<Object>,
-    Map<String,Object>,
-    Map<String,Object>> {
+public abstract class AbstractJavaValueWriteTest
+        extends AbstractJsonTextBuilderTest<
+            Object,
+            Object,
+            List<Object>,
+            List<Object>,
+            Map<String,Object>,
+            Map<String,Object>> {
 
     /**
      * JavaValueFactory.PRIMITIVE JavaValueWriteTest.
      */
     @Nested
-    static class PrimitiveWriteTest extends JavaValueWriteTest {
+    static class PrimitiveWriteTest extends AbstractJavaValueWriteTest {
 
         @Override
         public ValueFactory<
@@ -64,7 +65,7 @@ public abstract class JavaValueWriteTest extends AbstractJsonTextBuilderTest<
      * JavaValueFactory.DOUBLE JavaValueWriteTest.
      */
     @Nested
-    static class DoubleWriteTest extends JavaValueWriteTest {
+    static class DoubleWriteTest extends AbstractJavaValueWriteTest {
 
         @Override
         public ValueFactory<
@@ -83,7 +84,7 @@ public abstract class JavaValueWriteTest extends AbstractJsonTextBuilderTest<
      * JavaValueFactory.BIGMATH32 JavaValueWriteTest.
      */
     @Nested
-    static class BigMathWriteTest extends JavaValueWriteTest {
+    static class BigMathWriteTest extends AbstractJavaValueWriteTest {
 
         @Override
         public ValueFactory<
@@ -102,7 +103,7 @@ public abstract class JavaValueWriteTest extends AbstractJsonTextBuilderTest<
      * JavaValueFactory.BIGMATH32 JavaValueWriteTest.
      */
     @Nested
-    static class BigMathWriteTest32 extends JavaValueWriteTest {
+    static class BigMathWriteTest32 extends AbstractJavaValueWriteTest {
 
         @Override
         public ValueFactory<
@@ -121,7 +122,7 @@ public abstract class JavaValueWriteTest extends AbstractJsonTextBuilderTest<
      * JavaValueFactory.BIGMATH64 JavaValueWriteTest.
      */
     @Nested
-    static class BigMathWriteTest64 extends JavaValueWriteTest {
+    static class BigMathWriteTest64 extends AbstractJavaValueWriteTest {
 
         @Override
         public ValueFactory<
@@ -140,7 +141,7 @@ public abstract class JavaValueWriteTest extends AbstractJsonTextBuilderTest<
      * JavaValueFactory.BIGMATH128 JavaValueWriteTest.
      */
     @Nested
-    static class BigMathWriteTest128 extends JavaValueWriteTest {
+    static class BigMathWriteTest128 extends AbstractJavaValueWriteTest {
 
         @Override
         public ValueFactory<
@@ -156,7 +157,10 @@ public abstract class JavaValueWriteTest extends AbstractJsonTextBuilderTest<
     }
 
     @Override
-    public void write(JsonTextBuilder<?, ?> out, Object value) throws IOException {
-        JsonUrlWriter.write(out, value);
+    public void write(
+            JsonTextBuilder<?, ?> dest,
+            Object value) throws IOException {
+
+        JsonUrlWriter.write(dest, value);
     }
 }

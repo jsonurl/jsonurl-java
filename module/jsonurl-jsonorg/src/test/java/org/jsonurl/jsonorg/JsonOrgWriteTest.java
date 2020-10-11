@@ -17,6 +17,7 @@
 
 package org.jsonurl.jsonorg;
 
+import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONWriter;
@@ -38,18 +39,19 @@ public class JsonOrgWriteTest extends AbstractJsonApiWriteTest<
         JSONObject> {
 
     @Override
-    public void write(JsonTextBuilder<?, ?> out, Object value) throws Exception {
-        JsonUrlWriter.write(out, value);
+    public void write(JsonTextBuilder<?, ?> dest, Object value)
+            throws IOException {
+        JsonUrlWriter.write(dest, value);
     }
 
     @Override
-    public JSONArray newArray(String s) {
-        return new JSONArray(s);
+    public JSONArray newArray(String text) {
+        return new JSONArray(text);
     }
 
     @Override
-    public JSONObject newObject(String s) {
-        return new JSONObject(s);
+    public JSONObject newObject(String text) {
+        return new JSONObject(text);
     }
 
     @Override

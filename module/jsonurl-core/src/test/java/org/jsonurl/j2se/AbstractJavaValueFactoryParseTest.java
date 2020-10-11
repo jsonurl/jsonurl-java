@@ -37,7 +37,7 @@ import org.junit.jupiter.api.Test;
  * @author David MacCormack
  * @since 2019-09-01
  */
-abstract class JavaValueFactoryParseTest extends AbstractParseTest<
+abstract class AbstractJavaValueFactoryParseTest extends AbstractParseTest<
         Object,
         Object,
         List<Object>,
@@ -52,7 +52,7 @@ abstract class JavaValueFactoryParseTest extends AbstractParseTest<
     /**
      * Create a new JavaValueFactoryParseTest.
      */
-    public JavaValueFactoryParseTest(JavaValueFactory factory) {
+    public AbstractJavaValueFactoryParseTest(JavaValueFactory factory) {
         super(factory);
     }
 
@@ -161,10 +161,15 @@ abstract class JavaValueFactoryParseTest extends AbstractParseTest<
     
     @Override
     protected JavaValueFactory newBigMathFactory(
-                MathContext mc,
+                MathContext mctxt,
                 String boundNeg,
                 String boundPos,
                 BigIntegerOverflow over) {
-        return new JavaValueFactory.BigMathFactory(mc, boundNeg, boundPos, over);
+
+        return new JavaValueFactory.BigMathFactory(
+                mctxt,
+                boundNeg,
+                boundPos,
+                over);
     }
 }

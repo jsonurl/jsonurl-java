@@ -1,7 +1,5 @@
-package org.jsonurl;
-
 /*
- * Copyright 2019 David MacCormack
+ * Copyright 2019-2020 David MacCormack
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -16,6 +14,8 @@ package org.jsonurl;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+package org.jsonurl;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -38,76 +38,77 @@ public interface JsonTextBuilder<A,R> {
     /**
      * Begin an object.
      */
-    public JsonTextBuilder<A,R> beginObject() throws IOException;
+    JsonTextBuilder<A,R> beginObject() throws IOException;
 
     /**
      * End an object.
      */
-    public JsonTextBuilder<A,R> endObject() throws IOException;
+    JsonTextBuilder<A,R> endObject() throws IOException;
 
     /**
      * Begin an array.
      */
-    public JsonTextBuilder<A,R> beginArray() throws IOException;
+    JsonTextBuilder<A,R> beginArray() throws IOException;
 
     /**
      * End an array.
      */
-    public JsonTextBuilder<A,R> endArray() throws IOException;
+    JsonTextBuilder<A,R> endArray() throws IOException;
 
     /**
      * Separate two values.
      */
-    public JsonTextBuilder<A,R> valueSeparator() throws IOException;
+    JsonTextBuilder<A,R> valueSeparator() throws IOException;
 
     /**
      * Separate a name from its value.
      */
-    public JsonTextBuilder<A,R> nameSeparator() throws IOException;
+    JsonTextBuilder<A,R> nameSeparator() throws IOException;
 
     /**
      * Add a null value.
      */
-    public JsonTextBuilder<A,R> addNull() throws IOException;
+    JsonTextBuilder<A,R> addNull() throws IOException;
 
     /**
      * Add a long value.
      */
-    public JsonTextBuilder<A,R> add(long value) throws IOException;
+    JsonTextBuilder<A,R> add(long value) throws IOException;
 
     /**
      * Add a double value.
      */
-    public JsonTextBuilder<A,R> add(double value) throws IOException;
+    JsonTextBuilder<A,R> add(double value) throws IOException;
 
     /**
      * Add a BigDecimal value.
      */
-    public JsonTextBuilder<A,R> add(BigDecimal value) throws IOException;
+    JsonTextBuilder<A,R> add(BigDecimal value) throws IOException;
 
     /**
      * Add a BigInteger value.
      */
-    public JsonTextBuilder<A,R> add(BigInteger value) throws IOException;
+    JsonTextBuilder<A,R> add(BigInteger value) throws IOException;
 
     /**
      * Add a boolean value.
      */
-    public JsonTextBuilder<A,R> add(boolean value) throws IOException;
+    JsonTextBuilder<A,R> add(boolean value) throws IOException;
 
     /**
      * Add a boolean value.
      */
-    public JsonTextBuilder<A,R> add(char value) throws IOException;
+    JsonTextBuilder<A,R> add(char value) throws IOException;
 
     /**
      * Add a string value.
+     * @param text a valid CharSequence
      * @param start start index
      * @param end stop index
      * @param isKey true if this is an object key
      */
-    public JsonTextBuilder<A,R> add(
-            CharSequence s,
+    JsonTextBuilder<A,R> add(
+            CharSequence text,
             int start,
             int end,
             boolean isKey) throws IOException;
@@ -173,12 +174,12 @@ public interface JsonTextBuilder<A,R> {
      *
      * <p>This is simply a convenience for
      * {@link #add(CharSequence, int, int, boolean)
-     * add(s,0,s.length(),false)}.
-     * @param s the character sequence to add 
+     * add(text,0,text.length(),false)}.
+     * @param text the character sequence to add 
      * @see #add(CharSequence, int, int, boolean)
      */
-    default JsonTextBuilder<A,R> add(CharSequence s) throws IOException {
-        return add(s, 0, s.length(), false);
+    default JsonTextBuilder<A,R> add(CharSequence text) throws IOException {
+        return add(text, 0, text.length(), false);
     }
 
     /**
@@ -186,13 +187,13 @@ public interface JsonTextBuilder<A,R> {
      *
      * <p>This is simply a convenience for
      * {@link #add(CharSequence, int, int, boolean)
-     * add(s,0,s.length(),false)}.
-     * @param s the character sequence to add 
+     * add(text,0,text.length(),false)}.
+     * @param text the character sequence to add 
      * @param isKey true if this is an object key
      * @see #add(CharSequence, int, int, boolean)
      */
-    default JsonTextBuilder<A,R> add(CharSequence s, boolean isKey) throws IOException {
-        return add(s, 0, s.length(), isKey);
+    default JsonTextBuilder<A,R> add(CharSequence text, boolean isKey) throws IOException {
+        return add(text, 0, text.length(), isKey);
     }
 
     /**
@@ -200,17 +201,17 @@ public interface JsonTextBuilder<A,R> {
      *
      * <p>This is simply a convenience for
      * {@link #add(CharSequence, int, int, boolean)
-     * add(s,start,end,false)}.
-     * @param s the character sequence to add
+     * add(text,start,end,false)}.
+     * @param text the character sequence to add
      * @param start start index
      * @param end stop index
      * @see #add(CharSequence, int, int, boolean)
      */
     default JsonTextBuilder<A,R> add(
-            CharSequence s,
+            CharSequence text,
             int start,
             int end) throws IOException {
-        return add(s, start, end, false);
+        return add(text, start, end, false);
     }
 
     /**
@@ -218,12 +219,12 @@ public interface JsonTextBuilder<A,R> {
      *
      * <p>This is simply a convenience for
      * {@link #add(CharSequence, int, int, boolean)
-     * add(s,0,s.length(),true)}.
-     * @param s the character sequence to add 
+     * add(text,0,text.length(),true)}.
+     * @param text the character sequence to add 
      * @see #add(CharSequence, int, int, boolean)
      */
-    default JsonTextBuilder<A,R> addKey(CharSequence s) throws IOException {
-        return add(s, 0, s.length(), true);
+    default JsonTextBuilder<A,R> addKey(CharSequence text) throws IOException {
+        return add(text, 0, text.length(), true);
     }
 
     /**
@@ -231,15 +232,15 @@ public interface JsonTextBuilder<A,R> {
      *
      * <p>This is simply a convenience for
      * {@link #add(CharSequence, int, int, boolean)
-     * add(s,start,end,true)}.
-     * @param s the character sequence to add 
+     * add(text,start,end,true)}.
+     * @param text the character sequence to add 
      * @see #add(CharSequence, int, int, boolean)
      */
     default JsonTextBuilder<A,R> addKey(
-            CharSequence s,
+            CharSequence text,
             int start,
             int end) throws IOException {
-        return add(s, start, end, true);
+        return add(text, start, end, true);
     }
 
     /**
@@ -254,5 +255,5 @@ public interface JsonTextBuilder<A,R> {
      * Build the result.
      * @return a valid object
      */
-    public R build();
+    R build();
 }

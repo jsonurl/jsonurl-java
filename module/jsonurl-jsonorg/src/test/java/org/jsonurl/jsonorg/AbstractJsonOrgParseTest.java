@@ -1,5 +1,3 @@
-package org.jsonurl.jsonorg;
-
 /*
  * Copyright 2019 David MacCormack
  * 
@@ -16,6 +14,8 @@ package org.jsonurl.jsonorg;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+package org.jsonurl.jsonorg;
 
 import java.math.MathContext;
 import java.util.Objects;
@@ -35,7 +35,7 @@ import org.jsonurl.ValueFactory;
  * @author David MacCormack
  * @since 2019-09-01
  */
-abstract class JsonOrgParseTest extends AbstractParseTest<
+abstract class AbstractJsonOrgParseTest extends AbstractParseTest<
     Object,
     Object,
     JSONArray,
@@ -50,7 +50,7 @@ abstract class JsonOrgParseTest extends AbstractParseTest<
     /**
      * Create a new JsonOrgParseTest.
      */
-    public JsonOrgParseTest(JsonOrgValueFactory factory) {
+    public AbstractJsonOrgParseTest(JsonOrgValueFactory factory) {
         super(factory);
     }
     
@@ -143,17 +143,17 @@ abstract class JsonOrgParseTest extends AbstractParseTest<
             Number,
             Object,
             String> newBigMathFactory(
-                MathContext mc,
+                MathContext mctxt,
                 String boundNeg,
                 String boundPos,
                 BigIntegerOverflow over) {
 
         return new JsonOrgValueFactory.BigMathFactory(
-            mc, boundNeg, boundPos, over);
+            mctxt, boundNeg, boundPos, over);
     }
 
     @Override
-    protected boolean isEqual(Object a, Object b) {
+    protected boolean isEqual(Object a, Object b) { // NOPMD - ShortVariable
         if (a == null) {
             return b == null;
         }
@@ -163,11 +163,13 @@ abstract class JsonOrgParseTest extends AbstractParseTest<
         }
 
         if (a instanceof JSONArray) {
-            return ((JSONArray)a).toList().equals(((JSONArray)b).toList());
+            return b instanceof JSONArray
+                && ((JSONArray)a).toList().equals(((JSONArray)b).toList());
         }
 
         if (a instanceof JSONObject) {
-            return ((JSONObject)a).toMap().equals(((JSONObject)b).toMap());
+            return b instanceof JSONObject
+                && ((JSONObject)a).toMap().equals(((JSONObject)b).toMap());
         }
 
         return Objects.equals(a, b);

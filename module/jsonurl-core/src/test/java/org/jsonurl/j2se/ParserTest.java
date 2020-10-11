@@ -50,22 +50,22 @@ class ParserTest {
 
     @Test
     void testMaxParseChars() {
-        Parser p = new Parser();
-        p.setMaxParseChars(13);
-        assertEquals(13, p.getMaxParseChars(), "getMaxParseChars");
+        Parser par = new Parser();
+        par.setMaxParseChars(13);
+        assertEquals(13, par.getMaxParseChars(), "getMaxParseChars");
     }
 
     @Test
     void testMaxParseDepth() {
-        Parser p = new Parser();
-        p.setMaxParseDepth(13);
-        assertEquals(13, p.getMaxParseDepth(), "getMaxParseDepth");
+        Parser par = new Parser();
+        par.setMaxParseDepth(13);
+        assertEquals(13, par.getMaxParseDepth(), "getMaxParseDepth");
     }
 
     @Test
     void testMaxParseValues() {
-        Parser p = new Parser();
-        p.setMaxParseValues(13);
-        assertEquals(13, p.getMaxParseValues(), "getMaxParseValues");
+        Parser par = new Parser();
+        par.setMaxParseValues(13);
+        assertEquals(13, par.getMaxParseValues(), "getMaxParseValues");
     }
 }

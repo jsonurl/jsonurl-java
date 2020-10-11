@@ -1,7 +1,5 @@
-package org.jsonurl;
-
 /*
- * Copyright 2019 David MacCormack
+ * Copyright 2019-2020 David MacCormack
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -16,6 +14,8 @@ package org.jsonurl;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+package org.jsonurl;
 
 /**
  * Character metadata.
@@ -143,6 +143,11 @@ final class CharUtil {
     };
 
     /**
+     * number of array members.
+     */
+    static final int CHARBITS_LENGTH = CHARBITS.length;
+
+    /**
      * table for decoding URL-encoded strings.
      */
     private static final int[] HEXDECODE_TABLE = {
@@ -210,27 +215,23 @@ final class CharUtil {
         }
     }
 
-    static final boolean isDigit(char c) {
-        return c <= 127 && ((CHARBITS[c] & IS_DIGIT) != 0);
+    static boolean isDigit(char c) { // NOPMD - ShortVariable
+        return c <= 127 && (CHARBITS[c] & IS_DIGIT) != 0;
     }
 
-    static final int hexDecode(char c) {
+    static int hexDecode(char c) { // NOPMD - ShortVariable
         return c > 127 ? -1 : HEXDECODE_TABLE[c];
     }
 
-    static final int digits(CharSequence s, int pos, int stop) {
-        for (;;) {
-            if (pos == stop) {
-                return stop;
-            }
-
-            char c = s.charAt(pos);
+    static int digits(CharSequence text, int pos, int stop) {
+        for (int i = pos; i < stop; i++) {
+            char c = text.charAt(i); // NOPMD - ShortVariable
             if (c > 127 || (CHARBITS[c] & IS_DIGIT) == 0) {
-                return pos;
+                return i; // NOPMD - OnlyOneReturn
             }
-            
-            pos++;
         }
+        
+        return stop;
     }
 
     private CharUtil() {

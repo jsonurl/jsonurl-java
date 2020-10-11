@@ -24,7 +24,7 @@ package org.jsonurl.jsonp;
  * @author David MacCormack
  * @since 2019-09-01
  */
-public class PrimitiveParseTest extends JsonpParseTest {
+public class PrimitiveParseTest extends AbstractJsonpParseTest {
 
     /**
      * Create a new PrimitiveParseTest.

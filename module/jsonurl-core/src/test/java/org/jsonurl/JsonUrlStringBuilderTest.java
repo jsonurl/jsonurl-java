@@ -1,5 +1,3 @@
-package org.jsonurl;
-
 /*
  * Copyright 2019 David MacCormack
  * 
@@ -17,7 +15,9 @@ package org.jsonurl;
  * under the License.
  */
 
+package org.jsonurl;
 
+import static org.jsonurl.AbstractParseTest.TAG_EXCEPTION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -35,18 +35,27 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * JsonUrlStringBuilder unit test.
  */
-@SuppressWarnings("PMD")
 class JsonUrlStringBuilderTest {
+
+    /**
+     * String used by multiple tests.
+     */
+    private static final String TEST_STRING = "bcde";
 
     @Test
     void testConstruct() {
-        assertNotNull(new JsonUrlStringBuilder());
-        assertNotNull(new JsonUrlStringBuilder(10));
+        assertNotNull(new JsonUrlStringBuilder(), "construct");
+    }
+
+    @Test
+    void testConstructSize() {
+        assertNotNull(new JsonUrlStringBuilder(10), "construct(size)");
     }
 
     @Test
     void testText() throws IOException {
-        assertEquals("(key1:(1,1,true,CharSequence,1.0,2))",
+        String expected = "(key1:(1,1,true,CharSequence,1.0,2))"; 
+        assertEquals(expected,
                 new JsonUrlStringBuilder()
                  .beginObject()
                  .append("key1")
@@ -60,52 +69,72 @@ class JsonUrlStringBuilderTest {
                    .add(2L)
                    .endArray()
                  .endObject()
-                 .build());
+                 .build(),
+                 expected);
+    }
 
-        final char c = 0xc0;
-        final String s = "bcde";
+    @Test
+    void testText2() throws IOException {
+        final char chr = 0xc0;
 
-        assertEquals("" + c + s + s.substring(1,  2),
+        String expected = chr + TEST_STRING + TEST_STRING.substring(1,  2);
+        assertEquals(expected,
                 new JsonUrlStringBuilder()
-                 .append(c)
-                 .append(s)
-                 .append(s, 1, 2)
-                 .build());
-        
-        assertEquals("(bcde:bcde,d:())",
+                 .append(chr)
+                 .append(TEST_STRING)
+                 .append(TEST_STRING, 1, 2)
+                 .build(),
+                 expected);
+    }
+
+    @Test
+    void testText3() throws IOException {
+        String expected = "(bcde:bcde,d:())";
+        assertEquals(expected,
                 new JsonUrlStringBuilder()
                  .beginObject()
-                 .addKey(s)
+                 .addKey(TEST_STRING)
                  .nameSeparator()
-                 .add(s)
+                 .add(TEST_STRING)
                  .valueSeparator()
-                 .addKey(s, 2, 3)
+                 .addKey(TEST_STRING, 2, 3)
                  .nameSeparator()
                  .addEmptyComposite()
                  .endObject()
-                 .build());
-        
-        assertEquals("(null,10,0)",
+                 .build(),
+                 expected);
+    }
+
+    @Test
+    void testText4() throws IOException {
+        String expected = "(null,10,0)";
+        assertEquals(expected,
                 new JsonUrlStringBuilder()
                  .beginObject()
                  .add((Number)null).valueSeparator()
                  .add((Number)BigDecimal.TEN).valueSeparator()
                  .add((Number)BigInteger.ZERO)
                  .endObject()
-                 .build());
+                 .build(),
+                 expected);
+    }
 
-        assertEquals("''", new JsonUrlStringBuilder().addKey("").build());
+    @Test
+    void testText5() throws IOException {
+        String expected = "''";
+        assertEquals(
+                expected,
+                new JsonUrlStringBuilder().addKey("").build(),
+                expected);
     }
 
     @ParameterizedTest
-    @Tag("parse")
-    @Tag("string")
-    @Tag("exception")
+    @Tag(TAG_EXCEPTION)
     @ValueSource(strings = {
-            Character.MIN_LOW_SURROGATE + "" + Character.MIN_HIGH_SURROGATE,
-            Character.MIN_HIGH_SURROGATE + "",
-            Character.MIN_HIGH_SURROGATE + "" + Character.MIN_HIGH_SURROGATE,
-            Character.MAX_HIGH_SURROGATE + "" + (Character.MAX_LOW_SURROGATE + 1),
+            Character.MIN_LOW_SURROGATE + "" + Character.MIN_HIGH_SURROGATE, // NOPMD
+            Character.MIN_HIGH_SURROGATE + "", // NOPMD
+            Character.MIN_HIGH_SURROGATE + "" + Character.MIN_HIGH_SURROGATE, // NOPMD
+            Character.MAX_HIGH_SURROGATE + "" + (Character.MAX_LOW_SURROGATE + 1), // NOPMD
     })
     void testException(String text) throws IOException {
         assertThrows(
@@ -118,8 +147,6 @@ class JsonUrlStringBuilderTest {
     }
 
     @ParameterizedTest
-    @Tag("parse")
-    @Tag("string")
     @ValueSource(strings = {
         "hello",
         "t", "tr", "tru", "True", "tRue", "trUe", "truE",
@@ -131,8 +158,6 @@ class JsonUrlStringBuilderTest {
     }
 
     @ParameterizedTest
-    @Tag("parse")
-    @Tag("string")
     @ValueSource(strings = {
         "true", "false", "null", "1", "1.0", "1e3", "1e-3",
     })
@@ -141,27 +166,21 @@ class JsonUrlStringBuilderTest {
     }
 
     @ParameterizedTest
-    @Tag("parse")
-    @Tag("string")
     @CsvSource({
         "1e+3,1e%2B3",
     })
-    void testEncodedString(String in, String out) throws IOException {
-        testValue(in, in, out);
+    void testEncodedString(String text, String expected) throws IOException {
+        testValue(text, text, expected);
     }
 
     @Test
-    @Tag("parse")
-    @Tag("string")
-    void testEncodedString() throws IOException {
+    void testEncodedString() throws IOException { // NOPMD - JUnitTestsShouldIncludeAssert
         testValue("'hello", "%27hello", "%27hello");
         testValue("hello,", "'hello,'", "'hello,'");
         testValue("hello, ", "'hello,+'", "'hello,+'");
     }
 
     @ParameterizedTest
-    @Tag("parse")
-    @Tag("string")
     @CsvSource({
         // CHECKSTYLE:OFF
         "'hello\u00A2world',hello%C2%A2world",
@@ -179,9 +198,20 @@ class JsonUrlStringBuilderTest {
             String text,
             String keyOutput,
             String nonKeyOutput) throws IOException {
-        assertEquals(keyOutput, new JsonUrlStringBuilder().addKey(text).build());
-        assertEquals(nonKeyOutput, new JsonUrlStringBuilder().add(text).build());
-        assertEquals(nonKeyOutput,
-            new JsonUrlStringBuilder().add(text, 0, text.length()).build());
+        
+        assertEquals(
+                keyOutput,
+                new JsonUrlStringBuilder().addKey(text).build(),
+                keyOutput);
+
+        assertEquals(
+                nonKeyOutput,
+                new JsonUrlStringBuilder().add(text).build(),
+                nonKeyOutput);
+
+        assertEquals(
+                nonKeyOutput,
+                new JsonUrlStringBuilder().add(text, 0, text.length()).build(),
+                nonKeyOutput);
     }
 }

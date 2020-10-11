@@ -1,7 +1,5 @@
-package org.jsonurl;
-
 /*
- * Copyright 2019 David MacCormack
+ * Copyright 2019-2020 David MacCormack
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -16,6 +14,8 @@ package org.jsonurl;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+package org.jsonurl;
 
 /**
  * NumberText provides access to a parsed JSON&#x2192;URL number literal.
@@ -33,7 +33,7 @@ public interface NumberText {
     /**
      * type of parsed exponent string.
      */
-    public enum Exponent {
+    enum Exponent {
         NONE,
         JUST_VALUE,
         POSITIVE_VALUE,
@@ -43,52 +43,52 @@ public interface NumberText {
     /**
      * Get the input/parsed text.
      */
-    public CharSequence getText();
+    CharSequence getText();
 
     /**
      * Get the start index of the number's integer part.
      */
-    public int getIntegerStartIndex();
+    int getIntegerStartIndex();
 
     /**
      * Get the stop index of the number's integer part.
      */
-    public int getIntegerStopIndex();
+    int getIntegerStopIndex();
 
     /**
      * Get the start index of the number's fractional part.
      */
-    public int getFractionalStartIndex();
+    int getFractionalStartIndex();
 
     /**
      * Get the stop index of the number's fractional part.
      */
-    public int getFractionalStopIndex();
+    int getFractionalStopIndex();
 
     /**
      * Get the start index of the number's exponent part.
      */
-    public int getExponentStartIndex();
+    int getExponentStartIndex();
 
     /**
      * Get the stop index of the number's exponent part.
      */
-    public int getExponentStopIndex();
+    int getExponentStopIndex();
 
     /**
      * Get the start index of the number (inside {@link #getText()}.
      */
-    public int getStartIndex();
+    int getStartIndex();
 
     /**
      * Get the stop index of the number (inside {@link #getText()}.
      */
-    public int getStopIndex();
+    int getStopIndex();
 
     /**
      * Get the parsed exponent's type.
      */
-    public Exponent getExponentType();
+    Exponent getExponentType();
 
     /**
      * Test if this text holds a negative number.

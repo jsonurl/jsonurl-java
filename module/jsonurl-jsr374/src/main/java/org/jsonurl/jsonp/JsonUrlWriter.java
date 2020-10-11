@@ -20,7 +20,6 @@ package org.jsonurl.jsonp;
 import java.io.IOException;
 import java.util.Map.Entry;
 import javax.json.JsonArray;
-import javax.json.JsonException;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonString;
@@ -34,14 +33,14 @@ import org.jsonurl.JsonTextBuilder;
  * @author David MacCormack
  * @since 2019-09-01
  */
-public final class JsonUrlWriter {
+public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
 
     private JsonUrlWriter() {
         // EMPTY
     }
 
-    private static final boolean isNull(Object in) {
-        return in == null || in == JsonValue.NULL;
+    private static boolean isNull(Object obj) {
+        return obj == null || obj == JsonValue.NULL;
     }
 
     /**
@@ -49,50 +48,50 @@ public final class JsonUrlWriter {
      * 
      * @param <A> Accumulator type
      * @param <R> Result type
-     * @param out non-null JsonTextBuilder
-     * @param in null or JsonValue
+     * @param dest non-null JsonTextBuilder
+     * @param value null or JsonValue
      */
-    public static final <A,R> void write(
-            JsonTextBuilder<A,R> out,
-            JsonValue in) throws IOException {
+    public static <A,R> void write(
+            JsonTextBuilder<A,R> dest,
+            JsonValue value) throws IOException {
 
-        if (isNull(in)) {
-            out.addNull();
+        if (isNull(value)) {
+            dest.addNull();
             return;
         }
         
-        if (in == JsonValue.TRUE) {
-            out.add(true);
+        if (value == JsonValue.TRUE) {
+            dest.add(true);
             return;
         }
-        if (in == JsonValue.FALSE) {
-            out.add(false);
-            return;
-        }
-
-        if (in instanceof JsonString) {
-            JsonString js = (JsonString)in;
-            out.add(js.getString());
+        if (value == JsonValue.FALSE) {
+            dest.add(false);
             return;
         }
 
-        if (in instanceof JsonNumber) {
-            JsonNumber n = (JsonNumber)in;
-            out.add(n.numberValue());
+        if (value instanceof JsonString) {
+            JsonString str = (JsonString)value;
+            dest.add(str.getString());
             return;
         }
 
-        if (in instanceof JsonObject) {
-            write(out, (JsonObject)in);
+        if (value instanceof JsonNumber) {
+            JsonNumber num = (JsonNumber)value;
+            dest.add(num.numberValue());
+            return;
+        }
+
+        if (value instanceof JsonObject) {
+            write(dest, (JsonObject)value);
             return;
         }
         
-        if (in instanceof JsonArray) {
-            write(out, (JsonArray)in);
+        if (value instanceof JsonArray) {
+            write(dest, (JsonArray)value);
             return;
         }
 
-        throw new JsonException("unsupported JsonValue: " + in.getClass());
+        org.jsonurl.j2se.JsonUrlWriter.write(dest, value);
     }
 
     /**
@@ -100,37 +99,37 @@ public final class JsonUrlWriter {
      * 
      * @param <A> Accumulator type
      * @param <R> Result type
-     * @param out non-null JsonTextBuilder
-     * @param in null or JsonObjectBuilder
+     * @param dest non-null JsonTextBuilder
+     * @param obj null or JsonObjectBuilder
      */
-    public static final <A,R> void write(
-            JsonTextBuilder<A,R> out,
-            JsonObject in) throws IOException {
+    public static <A,R> void write(
+            JsonTextBuilder<A,R> dest,
+            JsonObject obj) throws IOException {
         
-        if (isNull(in)) {
-            out.addNull();
+        if (isNull(obj)) {
+            dest.addNull();
             return;
         }
         
-        boolean comma = false; // NOPMD - I need to track this
+        boolean comma = false; // NOPMD - state across for loop
 
-        out.beginObject();
+        dest.beginObject();
         
-        for (Entry<String, JsonValue> e : in.entrySet()) {
+        for (Entry<String, JsonValue> e : obj.entrySet()) {
             String key = e.getKey();
 
             if (comma) {
-                out.valueSeparator();
+                dest.valueSeparator();
             }
             
-            comma = true; // NOPMD - I need to track this
+            comma = true; // NOPMD - state across for loop
             
-            out.addKey(key).nameSeparator();
+            dest.addKey(key).nameSeparator();
             
-            write(out, e.getValue());
+            write(dest, e.getValue());
         }
         
-        out.endObject();
+        dest.endObject();
     }
 
     /**
@@ -138,32 +137,30 @@ public final class JsonUrlWriter {
      * 
      * @param <A> Accumulator type
      * @param <R> Result type
-     * @param out non-null JsonTextBuilder
-     * @param in null or JsonArrayBuilder
+     * @param dest non-null JsonTextBuilder
+     * @param value null or JsonArrayBuilder
      */
-    public static final <A,R> void write(
-            JsonTextBuilder<A,R> out,
-            JsonArray in) throws IOException {
+    public static <A,R> void write(
+            JsonTextBuilder<A,R> dest,
+            JsonArray value) throws IOException {
         
-        if (isNull(in)) {
-            out.addNull();
+        if (isNull(value)) {
+            dest.addNull();
             return;
         }
 
-        boolean comma = false; // NOPMD - I need to track this
+        dest.beginArray();
 
-        out.beginArray();
+        final int length = value.size();
 
-        for (int i = 0, length = in.size(); i < length; i++) { // NOPMD
-            if (comma) {
-                out.valueSeparator();
+        for (int i = 0; i < length; i++) {
+            if (i > 0) {
+                dest.valueSeparator();
             }
-            
-            comma = true; // NOPMD - I need to track this
 
-            write(out, in.get(i));
+            write(dest, value.get(i));
         }
 
-        out.endArray();
+        dest.endArray();
     }
 }

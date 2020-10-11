@@ -23,9 +23,12 @@ apidocs/
 **/.settings/
 **/.pmd
 **/.ruleset
+**/.pmdruleset.xml
 
 #
 # General
 #
 **/.*.swp
+**/*.old
+**/*.old?
 

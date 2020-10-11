@@ -1,20 +1,3 @@
-/**
- * This package provides an extensible JSON&#x2192;URL parser core and
- * static utility methods.
- *
- * <p>If you need a parser bound to your own JSON model API then
- * a {@link org.jsonurl.ValueFactory ValueFactory} may be created and
- * supplied to an instance of {@link org.jsonurl.Parser Parser}. Otherwise,
- * if a parser based on J2SE datatypes is sufficient then
- * take a look at {@link org.jsonurl.j2se.JsonUrlParser JsonUrlParser} which
- * does just that. 
- * 
- * @author jsonurl.org
- * @author David MacCormack
- * @since 2019-09-01
- */
-package org.jsonurl;
-
 /*
  * Copyright 2019 David MacCormack
  * 
@@ -31,3 +14,20 @@ package org.jsonurl;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+/**
+ * This package provides an extensible JSON&#x2192;URL parser core and
+ * static utility methods.
+ *
+ * <p>If you need a parser bound to your own JSON model API then
+ * a {@link org.jsonurl.ValueFactory ValueFactory} may be created and
+ * supplied to an instance of {@link org.jsonurl.Parser Parser}. Otherwise,
+ * if a parser based on J2SE datatypes is sufficient then
+ * take a look at {@link org.jsonurl.j2se.JsonUrlParser JsonUrlParser} which
+ * does just that. 
+ * 
+ * @author jsonurl.org
+ * @author David MacCormack
+ * @since 2019-09-01
+ */
+package org.jsonurl;

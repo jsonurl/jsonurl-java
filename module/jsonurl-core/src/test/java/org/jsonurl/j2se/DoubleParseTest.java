@@ -1,5 +1,3 @@
-package org.jsonurl.j2se;
-
 /*
  * Copyright 2019 David MacCormack
  * 
@@ -17,6 +15,8 @@ package org.jsonurl.j2se;
  * under the License.
  */
 
+package org.jsonurl.j2se;
+
 /**
  * Unit test using JavaValueFactory.DOUBLE
  *
@@ -24,7 +24,7 @@ package org.jsonurl.j2se;
  * @author David MacCormack
  * @since 2019-09-01
  */
-public class DoubleParseTest extends JavaValueFactoryParseTest {
+public class DoubleParseTest extends AbstractJavaValueFactoryParseTest {
 
     /**
      * Create a new DoubleParseTest.

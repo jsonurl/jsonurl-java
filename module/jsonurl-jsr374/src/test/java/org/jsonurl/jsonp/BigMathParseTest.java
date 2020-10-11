@@ -27,12 +27,12 @@ import org.jsonurl.BigMathProvider;
  * @author David MacCormack
  * @since 2019-09-01
  */
-class BigMathParseTest extends JsonpParseTest {
+class BigMathParseTest extends AbstractJsonpParseTest {
 
     /**
      * Unit test using JsonpValueFactory.BIGMATH32.
      */
-    static final class Math32 extends JsonpParseTest {
+    static final class Math32 extends AbstractJsonpParseTest {
 
         /**
          * Create a new Math32.
@@ -45,7 +45,7 @@ class BigMathParseTest extends JsonpParseTest {
     /**
      * Unit test using JsonpValueFactory.BIGMATH64.
      */
-    static final class Math64 extends JsonpParseTest {
+    static final class Math64 extends AbstractJsonpParseTest {
 
         /**
          * Create a new Math64.
@@ -58,7 +58,7 @@ class BigMathParseTest extends JsonpParseTest {
     /**
      * Unit test using JsonpValueFactory.BIGMATH128.
      */
-    static final class Math128 extends JsonpParseTest {
+    static final class Math128 extends AbstractJsonpParseTest {
 
         /**
          * Create a new Math128.
@@ -71,7 +71,7 @@ class BigMathParseTest extends JsonpParseTest {
     /**
      * Unit test using JsonpValueFactory.BIGMATH32.
      */
-    static final class Decimal32 extends JsonpParseTest {
+    static final class Decimal32 extends AbstractJsonpParseTest {
 
         /**
          * Create a new Decimal32.
@@ -88,7 +88,7 @@ class BigMathParseTest extends JsonpParseTest {
     /**
      * Unit test using JsonpValueFactory.BIGMATH64.
      */
-    static final class Decimal64 extends JsonpParseTest {
+    static final class Decimal64 extends AbstractJsonpParseTest {
 
         /**
          * Create a new Decimal64.
@@ -105,7 +105,7 @@ class BigMathParseTest extends JsonpParseTest {
     /**
      * Unit test using JsonpValueFactory.BIGMATH128.
      */
-    static final class Decimal128 extends JsonpParseTest {
+    static final class Decimal128 extends AbstractJsonpParseTest {
 
         /**
          * Create a new Decimal128.

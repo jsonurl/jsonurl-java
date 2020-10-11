@@ -28,7 +28,7 @@ interface ParseResultFacade<R> {
     /**
      * Set the current parse location.
      */
-    ParseResultFacade<R> setLocation(int location);
+    ParseResultFacade<R> setLocation(int location); // NOPMD - LinguisticNaming
     
     /**
      * Get a top-level empty composite.
@@ -68,18 +68,22 @@ interface ParseResultFacade<R> {
     /**
      * Add the given literal.
      */
-    void addLiteral(CharSequence s, int start, int stop, boolean isEmptyUnquotedStringOK);
+    void addLiteral(
+            CharSequence text,
+            int start,
+            int stop,
+            boolean isEmptyUnquotedStringOK);
     
     /**
      * Add a single element array.
      */
     default void addSingleElementArray(
-            CharSequence s,
+            CharSequence text,
             int start,
             int stop,
             boolean isEmptyUnquotedStringOK) {
         beginArray();
-        addLiteral(s, start, stop, isEmptyUnquotedStringOK);
+        addLiteral(text, start, stop, isEmptyUnquotedStringOK);
         endArray();
     }
     
@@ -87,7 +91,7 @@ interface ParseResultFacade<R> {
      * Add object key.
      */
     void addObjectKey(
-        CharSequence s,
+        CharSequence text,
         int start,
         int stop,
         boolean isEmptyUnquotedStringOK);
@@ -110,7 +114,11 @@ interface ParseResultFacade<R> {
     /**
      * Get a top-level literal result.
      */
-    R getResult(CharSequence s, int start, int stop, boolean isEmptyUnquotedStringOK);
+    R getResult(
+            CharSequence text,
+            int start,
+            int stop,
+            boolean isEmptyUnquotedStringOK);
 
     /**
      * Test if the given result is valid.

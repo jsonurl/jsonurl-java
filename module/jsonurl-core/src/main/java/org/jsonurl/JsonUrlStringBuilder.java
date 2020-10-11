@@ -1,7 +1,5 @@
-package org.jsonurl;
-
 /*
- * Copyright 2019 David MacCormack
+ * Copyright 2019-2020 David MacCormack
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -16,6 +14,8 @@ package org.jsonurl;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+package org.jsonurl;
 
 /**
  * A JsonUrlTextAppender that appends JSON&#x2192;URL text to a StringBuilder.
@@ -55,8 +55,8 @@ public class JsonUrlStringBuilder extends
     /**
      * Create a new JsonUrlStringBuilder.
      */
-    public JsonUrlStringBuilder(StringBuilder sb) {
-        super(sb);
+    public JsonUrlStringBuilder(StringBuilder dest) {
+        super(dest);
     }
 
     @Override

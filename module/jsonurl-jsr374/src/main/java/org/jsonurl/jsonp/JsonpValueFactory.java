@@ -1,5 +1,3 @@
-package org.jsonurl.jsonp;
-
 /*
  * Copyright 2019 David MacCormack
  * 
@@ -16,6 +14,8 @@ package org.jsonurl.jsonp;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+package org.jsonurl.jsonp;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -47,6 +47,10 @@ import org.jsonurl.ValueType;
  * @author David MacCormack
  * @since 2019-09-01
  */
+
+//
+// this is a factory - the whole point is pass-through objects
+//
 public interface JsonpValueFactory extends ValueFactory<
         JsonValue,
         JsonStructure,
@@ -58,7 +62,23 @@ public interface JsonpValueFactory extends ValueFactory<
         JsonNumber,
         JsonValue,
         JsonString> {
-    
+
+
+    /**
+     * A singleton instance of {@link BigMathFactory} with 32-bit boundaries.
+     */
+    BigDecimalFactory BIGMATH32 = new BigDecimalFactory(MathContext.DECIMAL32);
+
+    /**
+     * A singleton instance of {@link BigMathFactory} with 64-bit boundaries.
+     */
+    BigDecimalFactory BIGMATH64 = new BigDecimalFactory(MathContext.DECIMAL64);
+
+    /**
+     * A singleton instance of {@link BigMathFactory} with 128-bit boundaries.
+     */
+    BigDecimalFactory BIGMATH128 = new BigDecimalFactory(MathContext.DECIMAL128);
+
     /**
      * A {@link JsonpValueFactory} that uses
      * {@link java.math.BigInteger BigInteger} and
@@ -88,7 +108,7 @@ public interface JsonpValueFactory extends ValueFactory<
      * implementation with a similar limitation) then use
      * {@link BigDecimalFactory} instead.
      */
-    public class BigMathFactory extends BigMath
+    class BigMathFactory extends BigMath
             implements JsonpValueFactory, ValueFactory.BigMathFactory<
                 JsonValue,
                 JsonStructure,
@@ -106,20 +126,20 @@ public interface JsonpValueFactory extends ValueFactory<
 
         /**
          * Create a new BigMathFactory JsonpValueFactory using the given MathContext.
-         * @param mc a valid MathContext or null
+         * @param mctxt a valid MathContext or null
          * @param bigIntegerBoundaryNeg negative value boundary
          * @param bigIntegerBoundaryPos positive value boundary
          * @param bigIntegerOverflow action on boundary overflow
          * @param jsonProvider a valid JsonProvider
          */
         public BigMathFactory(
-            MathContext mc,
+            MathContext mctxt,
             String bigIntegerBoundaryNeg,
             String bigIntegerBoundaryPos,
             BigIntegerOverflow bigIntegerOverflow,
             JsonProvider jsonProvider) {
 
-            super(mc,
+            super(mctxt,
                 bigIntegerBoundaryNeg,
                 bigIntegerBoundaryPos,
                 bigIntegerOverflow);
@@ -129,18 +149,18 @@ public interface JsonpValueFactory extends ValueFactory<
         
         /**
          * Create a new BigMathFactory JsonpValueFactory using the given MathContext.
-         * @param mc a valid MathContext or null
+         * @param mctxt a valid MathContext or null
          * @param bigIntegerBoundaryNeg negative value boundary
          * @param bigIntegerBoundaryPos positive value boundary
          * @param bigIntegerOverflow action on boundary overflow
          */
         public BigMathFactory(
-            MathContext mc,
+            MathContext mctxt,
             String bigIntegerBoundaryNeg,
             String bigIntegerBoundaryPos,
             BigIntegerOverflow bigIntegerOverflow) {
 
-            this(mc,
+            this(mctxt,
                 bigIntegerBoundaryNeg,
                 bigIntegerBoundaryPos,
                 bigIntegerOverflow,
@@ -149,19 +169,19 @@ public interface JsonpValueFactory extends ValueFactory<
 
         @Override
         public JsonNumber getNumber(NumberText text) {
-            Number m = NumberBuilder.build(text, false, this);
+            Number num = NumberBuilder.build(text, false, this);
 
-            if (m instanceof Long) {
-                return jsonProvider.createValue(m.longValue());
+            if (num instanceof Long) {
+                return jsonProvider.createValue(num.longValue());
 
-            } else if (m instanceof BigInteger) {
-                return jsonProvider.createValue((BigInteger)m);
+            } else if (num instanceof BigInteger) {
+                return jsonProvider.createValue((BigInteger)num);
 
-            } else if (m instanceof BigDecimal) {
-                return jsonProvider.createValue((BigDecimal)m);
+            } else if (num instanceof BigDecimal) {
+                return jsonProvider.createValue((BigDecimal)num);
 
             } else {
-                return jsonProvider.createValue(m.doubleValue());
+                return jsonProvider.createValue(num.doubleValue());
             }
         }
 
@@ -175,25 +195,25 @@ public interface JsonpValueFactory extends ValueFactory<
      * A {@link JsonpValueFactory} that uses
      * {@link java.math.BigDecimal BigDecimal} when necessary.
      */
-    public class BigDecimalFactory extends BigMathFactory {
+    class BigDecimalFactory extends BigMathFactory {
         /** Empty string. */
         private static final String EMPTY = "";
 
         /**
          * Create a new BigDecimalFactory JsonpValueFactory.
-         * @param mc a valid MathContext or null
+         * @param mctxt a valid MathContext or null
          */
-        public BigDecimalFactory(MathContext mc) {
-            super(mc, EMPTY, EMPTY, null);
+        public BigDecimalFactory(MathContext mctxt) {
+            super(mctxt, EMPTY, EMPTY, null);
         }
         
         /**
          * Create a new BigDecimalFactory JsonpValueFactory.
-         * @param mc a valid MathContext or null
+         * @param mctxt a valid MathContext or null
          * @param jsonProvider a valid JsonProvider
          */
-        public BigDecimalFactory(MathContext mc, JsonProvider jsonProvider) {
-            super(mc, EMPTY, EMPTY, null, jsonProvider);
+        public BigDecimalFactory(MathContext mctxt, JsonProvider jsonProvider) {
+            super(mctxt, EMPTY, EMPTY, null, jsonProvider);
         }
         
         @Override
@@ -216,19 +236,19 @@ public interface JsonpValueFactory extends ValueFactory<
      * NumberBuilder.build(text,true)}
      * to parse JSON&#x2192;URL numbers.
      */
-    public static final JsonpValueFactory PRIMITIVE = new JsonpValueFactory() {
+    JsonpValueFactory PRIMITIVE = new JsonpValueFactory() {
         /** My JsonProvider. */
         private JsonProvider jsonProvider = JsonProvider.provider();
 
         @Override
         public JsonNumber getNumber(NumberText text) {
-            Number m = NumberBuilder.build(text, true);
+            Number num = NumberBuilder.build(text, true);
 
-            if (m instanceof Long) {
-                return jsonProvider.createValue(m.longValue());
+            if (num instanceof Long) {
+                return jsonProvider.createValue(num.longValue());
 
             } else {
-                return jsonProvider.createValue(m.doubleValue());
+                return jsonProvider.createValue(num.doubleValue());
             }
         }
 
@@ -245,7 +265,7 @@ public interface JsonpValueFactory extends ValueFactory<
      * {@link java.lang.Double#valueOf(String) Double.valueOf(text)}
      * to parse JSON&#x2192;URL numbers.
      */
-    public static final JsonpValueFactory DOUBLE = new JsonpValueFactory() {
+    JsonpValueFactory DOUBLE = new JsonpValueFactory() {
         /** My JsonProvider. */
         private JsonProvider jsonProvider = JsonProvider.provider();
 
@@ -261,28 +281,10 @@ public interface JsonpValueFactory extends ValueFactory<
     };
 
     /**
-     * A singleton instance of {@link BigMathFactory} with 32-bit boundaries.
-     */
-    public static final BigDecimalFactory BIGMATH32 = new BigDecimalFactory(
-        MathContext.DECIMAL32);
-
-    /**
-     * A singleton instance of {@link BigMathFactory} with 64-bit boundaries.
-     */
-    public static final BigDecimalFactory BIGMATH64 = new BigDecimalFactory(
-        MathContext.DECIMAL64);
-
-    /**
-     * A singleton instance of {@link BigMathFactory} with 128-bit boundaries.
-     */
-    public static final BigDecimalFactory BIGMATH128 = new BigDecimalFactory(
-        MathContext.DECIMAL128);
-
-    /**
      * Get the JsonProvider for this factory.
      * @return a valid instance of JsonProvider
      */
-    public JsonProvider getJsonProvider();
+    JsonProvider getJsonProvider();
 
     @Override
     default JsonStructure getEmptyComposite() {
@@ -325,14 +327,14 @@ public interface JsonpValueFactory extends ValueFactory<
     }
 
     @Override
-    default JsonString getString(CharSequence s, int start, int stop) {
+    default JsonString getString(CharSequence text, int start, int stop) {
         return getJsonProvider().createValue(
-            String.valueOf(s.subSequence(start, stop)));
+            String.valueOf(text.subSequence(start, stop)));
     }
 
     @Override
-    default JsonString getString(String s) {
-        return getJsonProvider().createValue(s);
+    default JsonString getString(String text) {
+        return getJsonProvider().createValue(text);
     }
 
     @Override

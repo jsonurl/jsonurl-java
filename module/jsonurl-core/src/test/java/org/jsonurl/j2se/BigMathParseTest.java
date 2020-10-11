@@ -24,12 +24,12 @@ package org.jsonurl.j2se;
  * @author David MacCormack
  * @since 2019-09-01
  */
-class BigMathParseTest extends JavaValueFactoryParseTest {
+class BigMathParseTest extends AbstractJavaValueFactoryParseTest {
 
     /**
      * Unit test using JavaValueFactory.BIGMATH32.
      */
-    static final class Test32 extends JavaValueFactoryParseTest {
+    static final class Test32 extends AbstractJavaValueFactoryParseTest {
         /**
          * Create a new Test32.
          */
@@ -41,7 +41,7 @@ class BigMathParseTest extends JavaValueFactoryParseTest {
     /**
      * Unit test using JavaValueFactory.BIGMATH64.
      */
-    static final class Test64 extends JavaValueFactoryParseTest {
+    static final class Test64 extends AbstractJavaValueFactoryParseTest {
         /**
          * Create a new Test64.
          */
@@ -53,7 +53,7 @@ class BigMathParseTest extends JavaValueFactoryParseTest {
     /**
      * Unit test using JavaValueFactory.BIGMATH128.
      */
-    static final class Test128 extends JavaValueFactoryParseTest {
+    static final class Test128 extends AbstractJavaValueFactoryParseTest {
         /**
          * Create a new Test128.
          */
