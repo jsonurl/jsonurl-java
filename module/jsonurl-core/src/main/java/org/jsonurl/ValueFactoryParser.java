@@ -32,16 +32,16 @@ import java.util.EnumSet;
  * with specific types and an instance of
  * {@link org.jsonurl.ValueFactory ValueFactory}.
  * 
- * @param V value type (any JSON value)
- * @param C composite type (array or object)
- * @param ABT array builder type
- * @param A array type
- * @param JBT object builder type
- * @param J object type
- * @param B boolean type
- * @param M number type
- * @param N null type
- * @param S string type
+ * @param <V> value type (any JSON value)
+ * @param <C> composite type (array or object)
+ * @param <ABT> array builder type
+ * @param <A> array type
+ * @param <JBT> object builder type
+ * @param <J> object type
+ * @param <B> boolean type
+ * @param <M> number type
+ * @param <N> null type
+ * @param <S> string type
  */
 public class ValueFactoryParser<
         V,
@@ -64,14 +64,14 @@ public class ValueFactoryParser<
      * A {@link ValueFactoryParser} with {@link ValueFactory.TransparentBuilder
      * transparent} array and object builders.
      *
-     * @param V value type (any JSON value)
-     * @param C composite type (array or object)
-     * @param A array type
-     * @param J object type
-     * @param B boolean type
-     * @param M number type
-     * @param N null type
-     * @param S string type
+     * @param <V> value type (any JSON value)
+     * @param <C> composite type (array or object)
+     * @param <A> array type
+     * @param <J> object type
+     * @param <B> boolean type
+     * @param <M> number type
+     * @param <N> null type
+     * @param <S> string type
      *
      * @see org.jsonurl.ValueFactory.TransparentBuilder
      */
