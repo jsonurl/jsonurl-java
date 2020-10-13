@@ -50,6 +50,10 @@ public class ParseException extends RuntimeException {
         this.position = position;
     }
 
+    /**
+     * Get the position in the text where the exception occurred.
+     * @return a valid position or 0.
+     */
     public int getPosition() {
         return position;
     }

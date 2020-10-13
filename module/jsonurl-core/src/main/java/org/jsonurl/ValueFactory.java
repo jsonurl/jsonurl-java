@@ -63,14 +63,14 @@ public interface ValueFactory<
      * and whose JSON object builders and objects are the same instance of the
      * same class. 
      *
-     * @param V value type (any JSON value)
-     * @param C composite type (array or object)
-     * @param A array type
-     * @param J object type
-     * @param B boolean type
-     * @param M number type
-     * @param N null type
-     * @param S string type
+     * @param <V> value type (any JSON value)
+     * @param <C> composite type (array or object)
+     * @param <A> array type
+     * @param <J> object type
+     * @param <B> boolean type
+     * @param <M> number type
+     * @param <N> null type
+     * @param <S> string type
      *
      * @author jsonurl.org
      * @author David MacCormack

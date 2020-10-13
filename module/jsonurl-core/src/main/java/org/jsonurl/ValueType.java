@@ -23,11 +23,29 @@ import java.util.Set;
  * An enumeration of JSON&#x2192;URL value types.
  */
 public enum ValueType {
+    /**
+     * A {@code null} literal.
+     */
     NULL(true),
+    /**
+     * A {@code true} or {@code false} literal.
+     */
     BOOLEAN(true),
+    /**
+     * A number literal (e.g. 1, 1.2, 1e3, etc).
+     */
     NUMBER(true),
+    /**
+     * A string literal.
+     */
     STRING(true),
+    /**
+     * An array.
+     */
     ARRAY(false),
+    /**
+     * An object.
+     */
     OBJECT(false);
 
     /**
