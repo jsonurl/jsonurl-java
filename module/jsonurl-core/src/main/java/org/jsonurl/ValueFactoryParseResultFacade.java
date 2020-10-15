@@ -20,6 +20,7 @@ package org.jsonurl;
 import static org.jsonurl.JsonUrl.Parse.literal;
 import static org.jsonurl.JsonUrl.Parse.literalToJavaString;
 import static org.jsonurl.JsonUrl.Parse.newNumberBuilder;
+import static org.jsonurl.SyntaxException.Message.MSG_EXPECT_OBJECT_VALUE;
 
 import java.util.Deque;
 import java.util.LinkedList;
@@ -56,6 +57,11 @@ class ValueFactoryParseResultFacade<V,
     private final Deque<Object> builderStack = new LinkedList<>();
 
     /**
+     * The current parse position.
+     */
+    private int position;
+
+    /**
      * reusable buffer.
      *
      * <p>PMD warning suppressed because this is a buffer that's reset after
@@ -85,16 +91,24 @@ class ValueFactoryParseResultFacade<V,
     private boolean impliedObject;
 
     /**
+     * A MissingValueProvider.
+     */
+    private final MissingValueProvider<V> missingValueProvider;
+
+    /**
      * Create a new ValueFactoryParseResultFacade.
      */
     public ValueFactoryParseResultFacade(
             ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory,
             ABT impliedArray,
-            JBT impliedObject) {
+            JBT impliedObject,
+            MissingValueProvider<V> missingValueProvider) {
 
         this.factory = factory;
         this.numb = newNumberBuilder(factory);
- 
+        this.missingValueProvider = missingValueProvider == null
+                ? this::defaultMissingValueProvier : missingValueProvider;
+
         if (impliedArray != null) {
             this.impliedArray = true;
             builderStack.push(impliedArray);
@@ -175,8 +189,7 @@ class ValueFactoryParseResultFacade<V,
             int start,
             int stop,
             boolean isEmptyUnquotedStringOK) {
-        keyStack.push(literalToJavaString(
-            buf, numb, text, start, stop, isEmptyUnquotedStringOK));                
+        keyStack.push(parseKey(text, start, stop, isEmptyUnquotedStringOK));                
     }
 
     @Override
@@ -228,10 +241,7 @@ class ValueFactoryParseResultFacade<V,
 
     @Override
     public ParseResultFacade<V> setLocation(int location) {
-        //
-        // this class doesn't throw any exceptions so I don't need to
-        // store the location
-        //
+        this.position = location;
         return this;
     }
 
@@ -243,5 +253,41 @@ class ValueFactoryParseResultFacade<V,
     @Override
     public boolean isImpliedObject() {
         return impliedObject;
+    }
+
+    @Override
+    public ParseResultFacade<V> addMissingValue(
+            CharSequence text,
+            int start,
+            int stop) {
+
+        final String key = parseKey(text, start, stop, false);
+        keyStack.push(key);
+        factoryValueStack.push(missingValueProvider.getValue(key, position));
+
+        return this;
+    }
+
+    /**
+     * Parse the object key.
+     */
+    private String parseKey(
+            CharSequence text,
+            int start,
+            int stop,
+            boolean isEmptyUnquotedStringOK) {
+
+        return literalToJavaString(
+                buf, numb, text, start, stop, isEmptyUnquotedStringOK);
+    }
+
+    /**
+     * default implementation of MissingValueProvider.
+     */
+    private V defaultMissingValueProvier(String key, int pos) {
+        throw new SyntaxException(
+                MSG_EXPECT_OBJECT_VALUE,
+                String.format("%s: %s", MSG_EXPECT_OBJECT_VALUE, key),
+                pos);
     }
 }

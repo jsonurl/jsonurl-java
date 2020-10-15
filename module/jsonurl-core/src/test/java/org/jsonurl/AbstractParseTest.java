@@ -39,6 +39,7 @@ import java.util.Objects;
 import org.jsonurl.BigMathProvider.BigIntegerOverflow;
 import org.jsonurl.j2se.JavaValueFactory;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -114,6 +115,11 @@ public abstract class AbstractParseTest<
 
     /** ValueFactory. */
     protected ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory;
+    
+    @Nested
+    class ExceptionTests {
+        
+    }
 
     /** Create a new AbstractParseTest. */
     public AbstractParseTest(
@@ -636,20 +642,20 @@ public abstract class AbstractParseTest<
         assertThrows(
             SyntaxException.class,
             () -> parse(text));
-        
+
         if (text.length() > 2) {
             assertThrows(
                 SyntaxException.class,
                 () -> parseImpliedFactoryObject(text));
-            
+
             assertThrows(
                 SyntaxException.class,
                 () -> parseImpliedFactoryObject(text, 0, text.length()));
-    
+
             assertThrows(
                 SyntaxException.class,
                 () -> parseImpliedFactoryArray(text));
-            
+
             assertThrows(
                 SyntaxException.class,
                 () -> parseImpliedFactoryArray(text, 0, text.length()));
@@ -765,6 +771,84 @@ public abstract class AbstractParseTest<
         assertAllowEmptyUnquotedObjectValue(
             text,
             p.parseObject(makeImplied(text), factory, factory.newObjectBuilder()));
+    }
+    
+    @ParameterizedTest
+    @Tag(TAG_PARSE)
+    @CsvSource({
+        "'a,b:true','(a:hello,b:true)'",
+        "'a:hello,b','(a:hello,b:true)'",
+        "'a:hello,b,c:1','(a:hello,b:true,c:1)'",
+        "'a,b','(a:hello,b:true)'",
+        "'a&b=true','(a:hello,b:true)'",
+        "'a=hello&b','(a:hello,b:true)'",
+        "'a=hello&b,c=1','(a:hello,b:true,c:1)'",
+        "'a&b','(a:hello,b:true)'",
+
+    })
+    void testMissingObjectValueProvider(String text, String expectedText) {
+        Parser p = new Parser();
+        p.setFormUrlEncodedAllowed(true);
+
+        assertThrows(
+            SyntaxException.class,
+            () -> p.parseObject(text, this.factory),
+            text);
+
+        final JBT jbt = factory.newObjectBuilder();
+        J actual = p.parseObject(text, factory, jbt, (key, pos) -> {
+            switch (key) {
+            case "a":
+                return factory.getString("hello");
+            case "b":
+                return factory.getTrue();
+            default:
+                break;
+            }
+
+            return null;
+        });
+
+        //
+        // assertEquals is preferred, however, JSONObject doesn't implement
+        // it. So, fallback to assertTrue.
+        //
+        assertTrue(isEqual(p.parse(expectedText, factory), actual), text);
+    }
+    
+    @ParameterizedTest
+    @Tag(TAG_PARSE)
+    @ValueSource(strings = {
+        "(a,b:true)",
+        "b:(a,b:true)",
+        "a,b:(a,b:true)",
+        "(a&b=true)",
+        "b=(a,b:true)",
+        "a&b=(a,b:true)",
+    })
+    void testExceptionMissingObjectValue(String text) {
+        Parser p = new Parser();
+
+        assertThrows(
+            SyntaxException.class,
+            () -> p.parseObject(text, factory),
+            text);
+        
+        p.setFormUrlEncodedAllowed(true);
+        
+        assertThrows(
+            SyntaxException.class,
+            () -> p.parseObject(text, factory),
+            text);
+
+        assertThrows(
+            SyntaxException.class,
+            () -> p.parseObject(
+                text,
+                factory,
+                factory.newObjectBuilder(),
+                (key, pos) -> factory.getTrue()),
+            text);
     }
 
     private void assertObjectWfu(String text, J actual) {
@@ -1118,6 +1202,8 @@ public abstract class AbstractParseTest<
             "(a(",
             "(a:",
             "(a:b(",
+            "(a:b,a",
+            "(a:b,c&)",
     })
     void testExceptionObject(String text) {
         assertThrows(
