@@ -328,7 +328,34 @@ public class Parser { //NOPMD
                 JBT impliedObject) {
 
         return (J)parse(text, 0, text.length(), TYPE_VALUE_OBJECT,
-            new ValueFactoryParseResultFacade<>(factory, null, impliedObject));
+            new ValueFactoryParseResultFacade<>(
+                    factory, null, impliedObject, null));
+    }
+
+    /**
+     * Parse a character sequence as a JSON object. This simply calls
+     * {@link #parse(CharSequence, int, int, ValueType, ValueFactory)
+     * parse(s, 0, s.length(), EnumSet.of(ValueType.OBJECT), factory)}.
+     */
+    @SuppressWarnings("unchecked") // NOPMD 
+    public <V,
+            C extends V,
+            ABT,
+            A extends C,
+            JBT,
+            J extends C,
+            B extends V,
+            M extends V,
+            N extends V,
+            S extends V> J parseObject(
+                CharSequence text,
+                ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory,
+                JBT impliedObject,
+                MissingValueProvider<V> mvp) {
+
+        return (J)parse(text, 0, text.length(), TYPE_VALUE_OBJECT,
+            new ValueFactoryParseResultFacade<>(
+                    factory, null, impliedObject, mvp));
     }
 
     /**
@@ -354,7 +381,36 @@ public class Parser { //NOPMD
                 JBT impliedObject) {
 
         return (J)parse(text, off, length, TYPE_VALUE_OBJECT,
-            new ValueFactoryParseResultFacade<>(factory, null, impliedObject));
+            new ValueFactoryParseResultFacade<>(
+                    factory, null, impliedObject, null));
+    }
+
+    /**
+     * Parse a character sequence as a JSON object. This simply calls
+     * {@link #parse(CharSequence, int, int, ValueType, ValueFactory)
+     * parse(s, off, length, EnumSet.of(ValueType.OBJECT), factory)}.
+     */
+    @SuppressWarnings("unchecked")
+    public <V,
+            C extends V,
+            ABT,
+            A extends C,
+            JBT,
+            J extends C,
+            B extends V,
+            M extends V,
+            N extends V,
+            S extends V> J parseObject(
+                CharSequence text,
+                int off,
+                int length,
+                ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory,
+                JBT impliedObject,
+                MissingValueProvider<V> mvp) {
+
+        return (J)parse(text, off, length, TYPE_VALUE_OBJECT,
+            new ValueFactoryParseResultFacade<>(
+                    factory, null, impliedObject, mvp));
     }
 
     /**
@@ -423,7 +479,8 @@ public class Parser { //NOPMD
                 ABT impliedArray) {
 
         return (A)parse(text, 0, text.length(), TYPE_VALUE_ARRAY,
-            new ValueFactoryParseResultFacade<>(factory, impliedArray, null));
+            new ValueFactoryParseResultFacade<>(
+                    factory, impliedArray, null, null));
     }
 
     /**
@@ -449,7 +506,8 @@ public class Parser { //NOPMD
                 ABT impliedArray) {
 
         return (A)parse(text, off, length, TYPE_VALUE_ARRAY,
-            new ValueFactoryParseResultFacade<>(factory, impliedArray, null));
+            new ValueFactoryParseResultFacade<>(
+                    factory, impliedArray, null, null));
     }
 
     /**
@@ -537,7 +595,7 @@ public class Parser { //NOPMD
                 ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
         return parse(text, 0, text.length(), EnumSet.of(canReturn), factory);
     }
-
+    
     /**
      * Parse the given JSON&#x2192;URL text and return a JSON value.
      * The parse will start at the character offset given by {@code off}, and
@@ -572,7 +630,7 @@ public class Parser { //NOPMD
                 ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
 
         return parse(text, off, length, canReturn,
-            new ValueFactoryParseResultFacade<>(factory, null, null));
+            new ValueFactoryParseResultFacade<>(factory, null, null, null));
     }
 
     /**
@@ -747,7 +805,7 @@ public class Parser { //NOPMD
                     pos++;
                     continue;
 
-                case ')':
+                case END_COMPOSITE:
                     //
                     // found open paren followed by close paren; the empty
                     // composite value.
@@ -1141,6 +1199,14 @@ public class Parser { //NOPMD
                 pos += litlen;
 
                 if (pos == stop) {
+                    if (impliedObject && parseDepth == 1) {
+                        return result
+                            .setLocation(litpos)
+                            .addMissingValue(text, litpos, pos)
+                            .addObjectElement()
+                            .endObject()
+                            .getResult();
+                    }
                     throw new SyntaxException(MSG_STILL_OPEN, pos);
                 }
 
@@ -1155,6 +1221,25 @@ public class Parser { //NOPMD
                 case NAME_SEPARATOR:
                     break;
 
+                case WFU_VALUE_SEPARATOR:
+                    if (!wwwFormUrlEncoded || parseDepth != 1) {
+                        throw new SyntaxException(MSG_EXPECT_OBJECT_VALUE, pos);
+                    }
+                    // fall through
+                case VALUE_SEPARATOR:
+                    if (impliedObject && parseDepth == 1) {
+                        //
+                        // this may be a key that's missing a value; give
+                        // the result a chance to handle that case.
+                        //
+                        result
+                            .setLocation(litpos)
+                            .addMissingValue(text, litpos, pos);
+
+                        stateStack.set(0, State.OBJECT_AFTER_ELEMENT);
+                        continue;
+                    }
+                    // fall through
                 default:
                     throw new SyntaxException(MSG_EXPECT_OBJECT_VALUE, pos);
                 }

@@ -135,4 +135,15 @@ interface ParseResultFacade<R> {
      */
     boolean isImpliedArray();
 
+    /**
+     * Set a value for this given key.
+     *
+     * <p>An implied-object or wfu-implied-object may allow missing,
+     * top-level values. This method is called to supply it. It may also
+     * throw a ParseException if the feature is unsupported.
+     */
+    ParseResultFacade<R> addMissingValue(
+            CharSequence text,
+            int start,
+            int stop);
 }
