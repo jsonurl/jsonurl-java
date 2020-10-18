@@ -20,6 +20,9 @@ package org.jsonurl;
 /**
  * A JsonUrlTextAppender that appends JSON&#x2192;URL text to a StringBuilder.
  *
+ * <p>Note, like {@link java.lang.StringBuilder} an instance of this class is
+ * not thread-safe.
+ *
  * @author jsonurl.org
  * @author David MacCormack
  * @since 2019-09-01

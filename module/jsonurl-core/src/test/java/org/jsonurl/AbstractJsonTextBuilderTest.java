@@ -194,7 +194,7 @@ public abstract class AbstractJsonTextBuilderTest<
             boolean wwwFormUrlEncoded) throws IOException {
 
         JsonUrlStringBuilder jsb = new JsonUrlStringBuilder();
-        jsb.setImplied(implied);
+        jsb.setImpliedComposite(implied);
         jsb.setFormUrlEncoded(wwwFormUrlEncoded);
 
         write(jsb, value);

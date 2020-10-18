@@ -19,8 +19,10 @@ package org.jsonurl;
 
 import static org.jsonurl.AbstractParseTest.TAG_EXCEPTION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -50,6 +52,46 @@ class JsonUrlStringBuilderTest {
     @Test
     void testConstructSize() {
         assertNotNull(new JsonUrlStringBuilder(10), "construct(size)");
+    }
+
+    @Test
+    void testIsFormUrlEncoded() {
+        JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
+        assertFalse(jup.isFormUrlEncoded(), "FormUrlEncoded");
+        jup.setFormUrlEncoded(true);
+        assertTrue(jup.isFormUrlEncoded(), "FormUrlEncoded");
+    }
+
+    @Test
+    void testIsImpliedComposite() {
+        JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
+        assertFalse(jup.isImpliedComposite(), "ImpliedComposite");
+        jup.setImpliedComposite(true);
+        assertTrue(jup.isImpliedComposite(), "ImpliedComposite");
+    }
+
+    @Test
+    void testIsImpliedStringLiterals() {
+        JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
+        assertFalse(jup.isImpliedStringLiterals(), "ImpliedStringLiterals");
+        jup.setImpliedStringLiterals(true);
+        assertTrue(jup.isImpliedStringLiterals(), "ImpliedStringLiterals");
+    }
+
+    @Test
+    void testIsEmptyUnquotedKeyAllowed() {
+        JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
+        assertFalse(jup.isEmptyUnquotedKeyAllowed(), "EmptyUnquotedKeyAllowed");
+        jup.setEmptyUnquotedKeyAllowed(true);
+        assertTrue(jup.isEmptyUnquotedKeyAllowed(), "EmptyUnquotedKeyAllowed");
+    }
+
+    @Test
+    void testIsEmptyUnquotedValueAllowed() {
+        JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
+        assertFalse(jup.isEmptyUnquotedValueAllowed(), "EmptyUnquotedValueAllowed");
+        jup.setEmptyUnquotedValueAllowed(true);
+        assertTrue(jup.isEmptyUnquotedValueAllowed(), "EmptyUnquotedValueAllowed");
     }
 
     @Test
@@ -154,7 +196,7 @@ class JsonUrlStringBuilderTest {
         "n", "nu", "nul", "Null", "nUll", "nuLl", "nulL",
     })
     void testNonQuotedString(String text) throws IOException {
-        testValue(text, text, text);
+        testValue(text, text, text, text);
     }
 
     @ParameterizedTest
@@ -162,22 +204,25 @@ class JsonUrlStringBuilderTest {
         "true", "false", "null", "1", "1.0", "1e3", "1e-3",
     })
     void testQuotedString(String text) throws IOException {
-        testValue(text, text, '\'' + text + '\'');
+        testValue(text, text, '\'' + text + '\'', text);
     }
 
     @ParameterizedTest
     @CsvSource({
-        "1e+3,1e%2B3",
+        "1e+3,1e%2B3,1e%2B3",
     })
-    void testEncodedString(String text, String expected) throws IOException {
-        testValue(text, text, expected);
+    void testEncodedString(
+            String text,
+            String expected,
+            String expectedImpliedStringLiteral) throws IOException {
+        testValue(text, text, expected, expectedImpliedStringLiteral);
     }
 
     @Test
     void testEncodedString() throws IOException { // NOPMD - JUnitTestsShouldIncludeAssert
-        testValue("'hello", "%27hello", "%27hello");
-        testValue("hello,", "'hello,'", "'hello,'");
-        testValue("hello, ", "'hello,+'", "'hello,+'");
+        testValue("'hello", "%27hello", "%27hello", "'hello");
+        testValue("hello,", "'hello,'", "'hello,'", "hello%2C");
+        testValue("hello, ", "'hello,+'", "'hello,+'", "hello%2C+");
     }
 
     @ParameterizedTest
@@ -197,7 +242,8 @@ class JsonUrlStringBuilderTest {
     private void testValue(
             String text,
             String keyOutput,
-            String nonKeyOutput) throws IOException {
+            String nonKeyOutput,
+            String nonKeyImpliedStringLiteralOutput) throws IOException {
         
         assertEquals(
                 keyOutput,
@@ -213,5 +259,13 @@ class JsonUrlStringBuilderTest {
                 nonKeyOutput,
                 new JsonUrlStringBuilder().add(text, 0, text.length()).build(),
                 nonKeyOutput);
+        
+        assertEquals(
+                nonKeyImpliedStringLiteralOutput,
+                new JsonUrlStringBuilder()
+                    .setImpliedStringLiterals(true)
+                    .add(text, 0, text.length())
+                    .build(),
+                nonKeyImpliedStringLiteralOutput);
     }
 }
