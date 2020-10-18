@@ -23,6 +23,10 @@ import java.math.BigInteger;
 
 /**
  * A JsonTextBuilder that appends JSON&#x2192;URL text to any Appendable.
+ *
+ * <p>Note, like {@link java.lang.StringBuilder} an instance of this class is
+ * not thread-safe.
+ *
  * @param <A> Accumulator type
  * @param <R> Result type
  *
@@ -46,7 +50,23 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
     /**
      * Do not output the top level parens.
      */
-    private boolean implied;
+    private boolean impliedComposite;
+
+    /**
+     * All literals are strings.
+     */
+    private boolean impliedStringLiterals;
+    
+    /**
+     * Allow empty unquoted keys.
+     */
+    private boolean allowEmptyUnquotedKey;
+
+    /**
+     * Allow empty unquoted values.
+     */
+    private boolean allowEmptyUnquotedValue;
+
 
     /**
      * Current print depth.
@@ -102,37 +122,57 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
 
     @Override
     public JsonUrlTextAppender<A,R> add(BigDecimal value) throws IOException {
-        out.append(String.valueOf(value));
+        if (impliedStringLiterals) {
+            add(String.valueOf(value), false);
+
+        } else {
+            out.append(String.valueOf(value));    
+        }
         return this;
     }
 
     @Override
     public JsonUrlTextAppender<A,R> add(BigInteger value) throws IOException {
-        out.append(String.valueOf(value));
+        if (impliedStringLiterals) {
+            add(String.valueOf(value), false);
+
+        } else {
+            out.append(String.valueOf(value));    
+        }
         return this;
     }
 
     @Override
     public JsonUrlTextAppender<A,R> add(long value) throws IOException {
-        out.append(String.valueOf(value));
+        if (impliedStringLiterals) {
+            add(String.valueOf(value), false);
+
+        } else {
+            out.append(String.valueOf(value));    
+        }
         return this;
     }
 
     @Override
     public JsonUrlTextAppender<A,R> add(double value) throws IOException {
-        out.append(String.valueOf(value));
+        if (impliedStringLiterals) {
+            add(String.valueOf(value), false);
+
+        } else {
+            out.append(String.valueOf(value));    
+        }
         return this;
     }
 
     @Override
     public JsonUrlTextAppender<A,R> add(boolean value) throws IOException {
-        out.append(String.valueOf(value));
+        out.append(String.valueOf(value));    
         return this;
     }
 
     @Override
     public JsonUrlTextAppender<A,R> add(char value) throws IOException {
-        out.append(value);
+        out.append(value); // FIXME - need to encode
         return this;
     }
 
@@ -142,7 +182,14 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
             int start,
             int end,
             boolean isKey) throws IOException {
-        JsonUrl.appendLiteral(out, text, start, end, isKey);
+        JsonUrl.appendLiteral(
+                out,
+                text,
+                start,
+                end,
+                isKey,
+                isKey ? allowEmptyUnquotedKey : allowEmptyUnquotedValue,
+                impliedStringLiterals);
         return this;
     }
     
@@ -192,19 +239,75 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
 
     /**
      * Returns true if this appender is writing an implied array or object.
-     * @see #setImplied(boolean) 
+     * @see #setImpliedComposite(boolean) 
      */
-    public boolean isImplied() {
-        return implied;
+    public boolean isImpliedComposite() {
+        return impliedComposite;
     }
 
     /**
      * Set this to true to output an implied array or object.
      * @param implied true or false
      */
-    public JsonUrlTextAppender<A,R> setImplied(// NOPMD - LinguisticNaming
+    public JsonUrlTextAppender<A,R> setImpliedComposite(// NOPMD - LinguisticNaming
             boolean implied) {
-        this.implied = implied;
+        this.impliedComposite = implied;
+        return this;
+    }
+
+    /**
+     * Returns true if all literals are assumed to be strings.
+     * @see #setImpliedStringLiterals(boolean)
+     */
+    public boolean isImpliedStringLiterals() {
+        return impliedStringLiterals;
+    }
+
+    /**
+     * Set this to true to assume all literals are strings.
+     * @param implied true or false
+     */
+    public JsonUrlTextAppender<A,R> setImpliedStringLiterals(// NOPMD - LinguisticNaming
+            boolean implied) {
+        this.impliedStringLiterals = implied;
+        return this;
+    }
+    
+    /**
+     * Returns true if empty, unquoted keys are allowed.
+     * @see #setEmptyUnquotedKeyAllowed(boolean) 
+     */
+    public boolean isEmptyUnquotedKeyAllowed() {
+        return allowEmptyUnquotedKey;
+    }
+
+    /**
+     * Set this to true if you want to allow empty, unquoted keys.
+     * For example, {@code (:value)}.
+     * @param allow boolean
+     */
+    public JsonUrlTextAppender<A,R> setEmptyUnquotedKeyAllowed(// NOPMD - LinguisticNaming
+            boolean allow) {
+        this.allowEmptyUnquotedKey = allow;
+        return this;
+    }
+
+    /**
+     * Returns true if empty, unquoted values are allowed.
+     * @see #setEmptyUnquotedValueAllowed(boolean) 
+     */
+    public boolean isEmptyUnquotedValueAllowed() {
+        return allowEmptyUnquotedValue;
+    }
+
+    /**
+     * Set this to true to allow empty, unquoted values.
+     * For example, {@code (1,,3)}.
+     * @param allow boolean
+     */
+    public JsonUrlTextAppender<A,R> setEmptyUnquotedValueAllowed(// NOPMD - LinguisticNaming
+            boolean allow) {
+        this.allowEmptyUnquotedValue = allow;
         return this;
     }
 
@@ -216,7 +319,7 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
     }
 
     private JsonUrlTextAppender<A,R> beginComposite() throws IOException {
-        if (!implied || depth > 0) {
+        if (!impliedComposite || depth > 0) {
             out.append('(');
         }
 
@@ -227,7 +330,7 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
     private JsonUrlTextAppender<A,R> endComposite() throws IOException {
         depth--;
 
-        if (!implied || depth > 0) {
+        if (!impliedComposite || depth > 0) {
             out.append(')');
         }
         return this;

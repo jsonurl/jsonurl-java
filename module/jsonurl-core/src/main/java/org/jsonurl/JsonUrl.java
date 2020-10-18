@@ -50,6 +50,11 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
     private static final char APOS = '\'';
 
     /**
+     * The empty string.
+     */
+    private static final String EMPTY_STRING = "";
+
+    /**
      * a namespace to hide private, parse-specific static fields and methods.
      */
     static final class Parse { //NOPMD - internal utility class
@@ -163,8 +168,7 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
                 CharSequence text,
                 int start,
                 int stop,
-                boolean quoted,
-                boolean isEmptyUnquotedStringOK) {
+                boolean quoted) {
 
             boolean needEndQuote = quoted;
 
@@ -270,9 +274,15 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
                 throw new SyntaxException(MSG_BAD_UTF8, stop);
             }
             
-            if (!quoted && !isEmptyUnquotedStringOK && buf.length() == 0) {
-                throw new SyntaxException(MSG_EXPECT_LITERAL, start);
-            }
+            //
+            // removed check:
+            //
+            // if !quoted && !isEmptyUnquotedStringOK && buf.length() == 0
+            //     throw new SyntaxException(MSG_EXPECT_LITERAL, start);
+            //
+            // because it's dead code. Everything that calls this method
+            // has to check the length itself anyway.
+            //
 
             return buf.toString();
         }
@@ -296,10 +306,26 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
                 CharSequence text,
                 int start,
                 int stop,
-                boolean isEmptyUnquotedStringOK) {
+                boolean isEmptyUnquotedStringOK,
+                boolean isImpliedStringLiteral) {
+
+            if (stop <= start) {
+                if (isEmptyUnquotedStringOK) {
+                    return EMPTY_STRING;
+                }
+
+                throw new SyntaxException(MSG_EXPECT_LITERAL, start);
+            }
+
+            if (isImpliedStringLiteral) {
+                return string(buf, text, start, stop, false);
+            }
 
             if (text.charAt(start) == APOS) {
-                return string(buf, text, start + 1, stop, true, isEmptyUnquotedStringOK);
+                //
+                // quoted string
+                //
+                return string(buf, text, start + 1, stop, true);
             }
 
             String ret = getTrueFalseNull(text, start, stop);
@@ -317,7 +343,10 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
                 return text.subSequence(start, stop).toString();
             }
 
-            return string(buf, text, start, stop, false, isEmptyUnquotedStringOK);
+            //
+            // unquoted string
+            //
+            return string(buf, text, start, stop, false);
         }
 
         /**
@@ -335,6 +364,7 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
          * @param stop the stop index
          * @param factory a valid value factory
          * @param isEmptyUnquotedStringOK if true allow a zero length value
+         * @param isImpliedStringLiteral if true assume literals are strings
          */
         static <V> V literal(
                 StringBuilder buf,
@@ -343,7 +373,8 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
                 int start,
                 int stop,
                 ValueFactory<V,?,?,?,?,?,?,?,?,?> factory,
-                boolean isEmptyUnquotedStringOK) {
+                boolean isEmptyUnquotedStringOK,
+                boolean isImpliedStringLiteral) {
 
             if (stop <= start) {
                 if (isEmptyUnquotedStringOK) {
@@ -352,10 +383,18 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
 
                 throw new SyntaxException(MSG_EXPECT_LITERAL, start);
             }
+            
+            if (isImpliedStringLiteral) {
+                return factory.getString(
+                        string(buf, text, start, stop, false));
+            }
 
             if (text.charAt(start) == APOS) {
-                return factory.getString(string(
-                    buf, text, start + 1, stop, true, isEmptyUnquotedStringOK));
+                //
+                // quoted string
+                //
+                return factory.getString(
+                        string(buf, text, start + 1, stop, true));
             }
 
             V ret = factory.getTrueFalseNull(text, start, stop);
@@ -370,8 +409,10 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
                 return factory.getNumber(num);
             }
 
-            return factory.getString(string(
-                buf, text, start, stop, false, isEmptyUnquotedStringOK));
+            //
+            // unquoted string
+            //
+            return factory.getString(string(buf, text, start, stop, false));
         }
     }
 
@@ -481,9 +522,13 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
                 CharSequence text,
                 int start,
                 int end,
-                boolean quoted) throws IOException {
+                boolean quoted,
+                boolean isImpliedStringLiteral) throws IOException {
 
-            if (start < end && text.charAt(start) == APOS) {
+            if (!isImpliedStringLiteral
+                    && start < end
+                    && text.charAt(start) == APOS) {
+
                 //
                 // edge case: if the first character is a literal quote then
                 // it must always be encoded
@@ -497,7 +542,7 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
 
             for (int i = start; i < end; i++) {
                 char c = text.charAt(i);
-                
+
                 if (Character.isLowSurrogate(c)) {
                     throw new MalformedInputException(i);
                 }
@@ -689,12 +734,19 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
      * {@link org.jsonurl.Parser#parse(CharSequence, ValueFactory)
      * parse}) because this method is static.
      * 
+     * <p>If {@code isImpliedStringLiteral} is true then then
+     * {@code true}, {@code false}, {@code null}, and number literals
+     * will not be recognized. All literals are assumed to be strings.
+     * 
      * <p>Note, the third argument is a length not a position. It indicates
      * the number of characters to be parsed.
      *
      * @param text text to be parsed
      * @param start start position in text
      * @param length number of characters to parse
+     * @param factory a valid ValueFactory
+     * @param isEmptyUnquotedStringOK if true, allow empty unquoted strings
+     * @param isImpliedStringLiteral if true, assume all literals are strings
      * @return an object for the parsed literal
      */
     public static <V> V parseLiteral(
@@ -702,7 +754,8 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
             int start,
             int length,
             ValueFactory<V,?,?,?,?,?,?,?,?,?> factory,
-            boolean isEmptyUnquotedStringOK) {
+            boolean isEmptyUnquotedStringOK,
+            boolean isImpliedStringLiteral) {
 
         //
         // Note: not checking length == 0 here. That case is handled properly
@@ -716,62 +769,81 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
 
         parseLiteralLength(text, start, stop, errmsg);
 
-        return Parse.literal(null, null, text, start, stop, factory, isEmptyUnquotedStringOK);
+        return Parse.literal(
+                null,
+                null,
+                text,
+                start,
+                stop,
+                factory,
+                isEmptyUnquotedStringOK,
+                isImpliedStringLiteral);
     }
 
     /**
      * Parse a single literal value.
      *
      * <p>This simply calls
-     * {@link #parseLiteral(CharSequence, int, int, ValueFactory, boolean)
-     * parseLiteral(s, start, length, JavaValueFactory.PRIMITIVE, false)}.
+     * {@link #parseLiteral(CharSequence, int, int, ValueFactory, boolean, boolean)
+     * parseLiteral(s, start, length, JavaValueFactory.PRIMITIVE, false, false)}.
      *
-     * @see JsonUrl#parseLiteral(CharSequence, int, int, ValueFactory, boolean)
+     * @see #parseLiteral(CharSequence, int, int, ValueFactory, boolean, boolean)
      * @see JavaValueFactory#PRIMITIVE
      */
     public static Object parseLiteral(
             CharSequence text,
             int start,
             int length) {
-        return parseLiteral(text, start, length, JavaValueFactory.PRIMITIVE, false);
+
+        return parseLiteral(
+                text,
+                start,
+                length,
+                JavaValueFactory.PRIMITIVE,
+                false,
+                false);
     }
 
     /**
      * Parse a single literal value.
      *
      * <p>This simply calls
-     * {@link #parseLiteral(CharSequence, int, int, ValueFactory, boolean)
-     * parseLiteral(s, 0, s.length(), JavaValueFactory.PRIMITIVE, false)}.
+     * {@link #parseLiteral(CharSequence, int, int, ValueFactory, boolean, boolean)
+     * parseLiteral(s, 0, s.length(), JavaValueFactory.PRIMITIVE, false, false)}.
      *
-     * @see JsonUrl#parseLiteral(CharSequence, int, int, ValueFactory, boolean)
+     * @see #parseLiteral(CharSequence, int, int, ValueFactory, boolean, boolean)
      * @see JavaValueFactory#PRIMITIVE
      */
     public static Object parseLiteral(CharSequence text) {
-        return parseLiteral(text, 0, text.length(), JavaValueFactory.PRIMITIVE, false);
+        return parseLiteral(
+                text,
+                0,
+                text.length(),
+                JavaValueFactory.PRIMITIVE,
+                false,
+                false);
     }
 
     /**
      * Parse a single literal value.
      *
      * <p>This simply calls
-     * {@link #parseLiteral(CharSequence, int, int, ValueFactory, boolean)
-     * parseLiteral(s, 0, s.length(), factory, false)}.
-     * @see JsonUrl#parseLiteral(CharSequence, int, int, ValueFactory, boolean)
+     * {@link #parseLiteral(CharSequence, int, int, ValueFactory, boolean, boolean)
+     * parseLiteral(s, 0, s.length(), factory, false, false)}.
+     * @see #parseLiteral(CharSequence, int, int, ValueFactory, boolean, boolean)
      */
     public static <V> V parseLiteral(
             CharSequence text,
             ValueFactory<V,?,?,?,?,?,?,?,?,?> factory) {
-        return parseLiteral(text, 0, text.length(), factory, false);
+        return parseLiteral(text, 0, text.length(), factory, false, false);
     }
 
     /**
-     * Append a string literal
-     *
-     * <p>This method will append the given CharSequence as a string literal.
+     * Append the given CharSequence as a string literal.
      *
      * @param <T>   destination type
      * @param dest  destination
-     * @param text     source
+     * @param text  source
      * @param start offset in source
      * @param end   length of source
      * @return dest
@@ -781,18 +853,39 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
             CharSequence text,
             int start,
             int end,
-            boolean isKey) throws IOException {
+            boolean isKey,
+            boolean isEmptyUnquotedStringOK,
+            boolean isImpliedStringLiteral) throws IOException {
 
-        //
-        // the empty string must be quoted
-        //
         if (end <= start) {
+            //
+            // empty string
+            //
+            if (isEmptyUnquotedStringOK) {
+                return dest;
+            }
+
+            if (isImpliedStringLiteral) {
+                //
+                // no way to represent it
+                //
+                throw new IOException(MSG_EXPECT_LITERAL.getMessageText());
+            }
+
+            //
+            // the empty string must be quoted
+            //
             dest.append("''");
             return dest;
         }
 
+        if (isImpliedStringLiteral) {
+            Encode.encode(dest, text, start, end, false, true);
+            return dest;
+        }
+
         //
-        // true, false, null, and number values must be quoted
+        // true, false, null, and number literals must be quoted
         //
         boolean isLiteral = Parse.getTrueFalseNull(text, start, end) != null
                 || NumberBuilder.isNumber(text, start, end);
@@ -805,7 +898,8 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
                 dest.append(text, start, end);
 
             } else if (Encode.contains(text, start, end, '+')) {
-                Encode.encode(dest, text, start, end, false);
+                Encode.encode(dest, text, start, end, false, false);
+
             } else {
                 //
                 // this is a literal without a plus; it's safe to represent
@@ -824,14 +918,14 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
         switch (enc) { // NOPMD - SwitchStmtsShouldHaveDefault
         case FULL_ENCODING:
         case NO_QUOTE_WITH_SPACE:
-            Encode.encode(dest, text, start, end, false);
+            Encode.encode(dest, text, start, end, false, false);
             break;
         case QUOTE_NO_SPACE:
             dest.append('\'').append(text, start, end).append('\'');
             break;
         case QUOTE_WITH_SPACE:
             dest.append('\'');
-            Encode.encode(dest, text, start, end, true);
+            Encode.encode(dest, text, start, end, true, false);
             dest.append('\'');
             break;
         case SAFE_ASIS:

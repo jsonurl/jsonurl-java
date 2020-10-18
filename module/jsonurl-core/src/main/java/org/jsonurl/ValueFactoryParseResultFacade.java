@@ -163,10 +163,19 @@ class ValueFactoryParseResultFacade<V,
             CharSequence text,
             int start,
             int stop,
-            boolean isEmptyUnquotedStringOK) {
+            boolean isEmptyUnquotedStringOK,
+            boolean isImpliedStringLiteral) {
 
         factoryValueStack.push(
-            literal(buf, numb, text, start, stop, factory, isEmptyUnquotedStringOK));
+            literal(
+                    buf,
+                    numb,
+                    text,
+                    start,
+                    stop,
+                    factory,
+                    isEmptyUnquotedStringOK,
+                    isImpliedStringLiteral));
     }
 
     @Override
@@ -174,11 +183,21 @@ class ValueFactoryParseResultFacade<V,
             CharSequence text,
             int start,
             int stop,
-            boolean isEmptyUnquotedStringOK) {
+            boolean isEmptyUnquotedStringOK,
+            boolean isImpliedStringLiteral) {
         ABT sea = factory.newArrayBuilder();
 
-        factory.add(sea, literal(
-            buf, numb, text, start, stop, factory, isEmptyUnquotedStringOK));
+        factory.add(
+            sea,
+            literal(
+                buf,
+                numb,
+                text,
+                start,
+                stop,
+                factory,
+                isEmptyUnquotedStringOK,
+                isImpliedStringLiteral));
 
         factoryValueStack.push(factory.newArray(sea));                
     }
@@ -188,8 +207,14 @@ class ValueFactoryParseResultFacade<V,
             CharSequence text,
             int start,
             int stop,
-            boolean isEmptyUnquotedStringOK) {
-        keyStack.push(parseKey(text, start, stop, isEmptyUnquotedStringOK));                
+            boolean isEmptyUnquotedStringOK,
+            boolean isImpliedStringLiteral) {
+        keyStack.push(parseKey(
+                text,
+                start,
+                stop,
+                isEmptyUnquotedStringOK,
+                isImpliedStringLiteral));                
     }
 
     @Override
@@ -230,8 +255,18 @@ class ValueFactoryParseResultFacade<V,
             CharSequence text,
             int start,
             int stop,
-            boolean isEmptyUnquotedStringOK) {
-        return literal(buf, numb, text, start, stop, factory, isEmptyUnquotedStringOK);
+            boolean isEmptyUnquotedStringOK,
+            boolean isImpliedStringLiteral) {
+
+        return literal(
+                buf,
+                numb,
+                text,
+                start,
+                stop,
+                factory,
+                isEmptyUnquotedStringOK,
+                isImpliedStringLiteral);
     }
 
     @Override
@@ -259,9 +294,21 @@ class ValueFactoryParseResultFacade<V,
     public ParseResultFacade<V> addMissingValue(
             CharSequence text,
             int start,
-            int stop) {
+            int stop,
+            boolean isImpliedStringLiteral) {
 
-        final String key = parseKey(text, start, stop, false);
+        //
+        // note that isEmptyUnquotedStringOK is always false. This makes
+        // sense when you think about what's happening. We're supplying a
+        // missing value for a given key, so the key must be present.
+        //
+        final String key = parseKey(
+                text,
+                start,
+                stop,
+                false,
+                isImpliedStringLiteral);
+
         keyStack.push(key);
         factoryValueStack.push(missingValueProvider.getValue(key, position));
 
@@ -275,10 +322,17 @@ class ValueFactoryParseResultFacade<V,
             CharSequence text,
             int start,
             int stop,
-            boolean isEmptyUnquotedStringOK) {
+            boolean isEmptyUnquotedStringOK,
+            boolean isImpliedStringLiteral) {
 
         return literalToJavaString(
-                buf, numb, text, start, stop, isEmptyUnquotedStringOK);
+                buf,
+                numb,
+                text,
+                start,
+                stop,
+                isEmptyUnquotedStringOK,
+                isImpliedStringLiteral);
     }
 
     /**

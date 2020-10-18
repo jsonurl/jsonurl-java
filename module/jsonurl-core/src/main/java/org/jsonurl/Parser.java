@@ -156,6 +156,11 @@ public class Parser { //NOPMD
     private boolean allowEmptyUnquotedValue;
 
     /**
+     * Assume all literals are strings.
+     */
+    private boolean impliedStringLiterals;
+
+    /**
      * Get the maximum number of parsed characters.
      * @see #setMaxParseChars(int)
      */
@@ -261,6 +266,26 @@ public class Parser { //NOPMD
      */
     public void setEmptyUnquotedValueAllowed(boolean allow) {
         this.allowEmptyUnquotedValue = allow;
+    }
+
+    /**
+     * Test if this parser assumes all literals are strings.
+     * @see #setImpliedStringLiterals(boolean) 
+     */
+    public boolean isImpliedStringLiterals() {
+        return impliedStringLiterals;
+    }
+
+    /**
+     * If true the parser will assume all literals are strings.
+     *
+     *<p>This can be useful when you don't want the native Java type of a
+     * value to determine how it's encoded.
+     * 
+     * @param impliedStringLiterals boolean
+     */
+    public void setImpliedStringLiterals(boolean impliedStringLiterals) {
+        this.impliedStringLiterals = impliedStringLiterals;
     }
 
     /**
@@ -677,7 +702,12 @@ public class Parser { //NOPMD
             // literals then return one.
             //
             if (allowEmptyUnquotedValue) {
-                return result.getResult(text, off, off, true);
+                return result.getResult(
+                        text,
+                        off,
+                        off,
+                        true,
+                        impliedStringLiterals);
             }
             
             //
@@ -740,7 +770,12 @@ public class Parser { //NOPMD
                 throw new SyntaxException(MSG_EXPECT_LITERAL);
             }
 
-            R ret = result.getResult(text, off, stop, allowEmptyUnquotedValue);
+            R ret = result.getResult(
+                    text,
+                    off,
+                    stop,
+                    allowEmptyUnquotedValue,
+                    impliedStringLiterals);
 
             if (canReturn != null && !result.isValid(canReturn, ret)) {
                 throw new SyntaxException(
@@ -918,7 +953,12 @@ public class Parser { //NOPMD
                     result
                         .setLocation(litpos)
                         .beginArray()
-                        .addLiteral(text, litpos, pos, allowEmptyUnquotedValue);
+                        .addLiteral(
+                                text,
+                                litpos,
+                                pos,
+                                allowEmptyUnquotedValue,
+                                impliedStringLiterals);
 
                     continue;
 
@@ -940,7 +980,12 @@ public class Parser { //NOPMD
                     
                     result
                         .setLocation(litpos)
-                        .addSingleElementArray(text, litpos, pos, allowEmptyUnquotedValue);
+                        .addSingleElementArray(
+                                text,
+                                litpos,
+                                pos,
+                                allowEmptyUnquotedValue,
+                                impliedStringLiterals);
 
                     parseDepth--;
                     pos++;
@@ -1002,7 +1047,12 @@ public class Parser { //NOPMD
                     result
                         .setLocation(litpos)
                         .beginObject()
-                        .addObjectKey(text, litpos, pos, allowEmptyUnquotedKey);
+                        .addObjectKey(
+                                text,
+                                litpos,
+                                pos,
+                                allowEmptyUnquotedKey,
+                                impliedStringLiterals);
 
                     pos++;
                     continue;
@@ -1040,7 +1090,12 @@ public class Parser { //NOPMD
                 stateStack.set(0, State.ARRAY_AFTER_ELEMENT);
                 result
                     .setLocation(litpos)
-                    .addLiteral(text, litpos, pos, allowEmptyUnquotedValue);
+                    .addLiteral(
+                            text,
+                            litpos,
+                            pos,
+                            allowEmptyUnquotedValue,
+                            impliedStringLiterals);
 
                 if (pos == stop) {
                     if (parseDepth == 1 && impliedArray) {
@@ -1131,7 +1186,12 @@ public class Parser { //NOPMD
                 stateStack.set(0, State.OBJECT_AFTER_ELEMENT);
                 result
                     .setLocation(litpos)
-                    .addLiteral(text, litpos, pos, allowEmptyUnquotedValue);
+                    .addLiteral(
+                            text,
+                            litpos,
+                            pos,
+                            allowEmptyUnquotedValue,
+                            impliedStringLiterals);
                 
                 if (pos == stop) {
                     if (parseDepth == 1 && impliedObject) {
@@ -1202,7 +1262,7 @@ public class Parser { //NOPMD
                     if (impliedObject && parseDepth == 1) {
                         return result
                             .setLocation(litpos)
-                            .addMissingValue(text, litpos, pos)
+                            .addMissingValue(text, litpos, pos, impliedStringLiterals)
                             .addObjectElement()
                             .endObject()
                             .getResult();
@@ -1234,7 +1294,11 @@ public class Parser { //NOPMD
                         //
                         result
                             .setLocation(litpos)
-                            .addMissingValue(text, litpos, pos);
+                            .addMissingValue(
+                                    text,
+                                    litpos,
+                                    pos,
+                                    impliedStringLiterals);
 
                         stateStack.set(0, State.OBJECT_AFTER_ELEMENT);
                         continue;
@@ -1248,7 +1312,12 @@ public class Parser { //NOPMD
 
                 result
                     .setLocation(litpos)
-                    .addObjectKey(text, litpos, pos, allowEmptyUnquotedKey);
+                    .addObjectKey(
+                            text,
+                            litpos,
+                            pos,
+                            allowEmptyUnquotedKey,
+                            impliedStringLiterals);
 
                 pos++;
                 continue;
