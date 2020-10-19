@@ -36,6 +36,11 @@ public class JsonUrlStringBuilder extends
     private static final int DEFAULT_SIZE = 1 << 10;
 
     /**
+     * My StringBuilder.
+     */
+    private final StringBuilder builder; // NOPMD - AvoidStringBufferField
+
+    /**
      * Create a new JsonUrlStringBuilder.
      *
      * <p>This simply calls {@link #JsonUrlStringBuilder(int)
@@ -60,6 +65,7 @@ public class JsonUrlStringBuilder extends
      */
     public JsonUrlStringBuilder(StringBuilder dest) {
         super(dest);
+        this.builder = dest;
     }
 
     @Override
@@ -70,5 +76,14 @@ public class JsonUrlStringBuilder extends
     @Override
     public String toString() {
         return out.toString();
+    }
+
+    /**
+     * Clear the internal buffer.
+     * @return this
+     */
+    public JsonUrlStringBuilder clear() {
+        builder.setLength(0);
+        return this;
     }
 }

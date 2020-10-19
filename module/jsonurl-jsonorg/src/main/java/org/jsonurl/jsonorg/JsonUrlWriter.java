@@ -20,7 +20,6 @@ package org.jsonurl.jsonorg;
 import java.io.IOException;
 import java.util.Iterator;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONString;
 import org.jsonurl.JsonTextBuilder;
@@ -41,6 +40,21 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
     private static  boolean isNull(Object obj) {
         return obj == null || obj == JSONObject.NULL;
     }
+    
+    /**
+     * Write the given Java Object as JSON&#x2192;URL text.
+     * 
+     * @param <A> Accumulator type
+     * @param <R> Result type
+     * @param dest non-null JsonTextBuilder
+     * @param value null or Java Object
+     * @return true if dest was modified
+     */
+    public static <A,R> boolean write(
+            JsonTextBuilder<A,R> dest,
+            Object value) throws IOException {
+        return write(dest, false, value);
+    }
 
     /**
      * Write the given Java Object as JSON&#x2192;URL text.
@@ -49,37 +63,45 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param value null or Java Object
+     * @param skipNullValues do not write a value if it is null
+     * @return true if dest was modified
      */
-    public static <A,R> void write(
+    public static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
+            boolean skipNullValues,
             Object value) throws IOException {
 
         if (isNull(value)) {
+            if (skipNullValues) {
+                return false;
+            }
             dest.addNull();
-            return;
+            return true;
         }
 
         if (value instanceof JSONString) {
-            try {
-                String str = ((JSONString)value).toJSONString();
-                dest.add(str);
-            } catch (IOException e) {
-                throw new JSONException(e);
+            String str = ((JSONString)value).toJSONString();
+            if (isNull(str)) {
+                if (skipNullValues) { // NOPMD -- nested if
+                    return false;
+                }
+                dest.addNull();
+                return true;
             }
-            return;
+            dest.add(str);
+            return true;
         }
         
         if (value instanceof JSONObject) {
-            write(dest, (JSONObject)value);
-            return;
+            return write(dest, skipNullValues, (JSONObject)value);
         }
         
         if (value instanceof JSONArray) {
-            write(dest, (JSONArray)value);
-            return;
+            return write(dest, skipNullValues, (JSONArray)value);
         }
 
-        org.jsonurl.j2se.JsonUrlWriter.write(dest, value);
+        return org.jsonurl.j2se.JsonUrlWriter.write(
+            dest, skipNullValues, value);
     }
 
     /**
@@ -89,38 +111,60 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param obj null or JSONObject
+     * @return true if dest was modified
      */
-    public static <A,R> void write(
+    public static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
+            JSONObject obj) throws IOException {
+        return write(dest, false, obj);
+    }
+
+    /**
+     * Write the given JSONObject as JSON&#x2192;URL text.
+     * 
+     * @param <A> Accumulator type
+     * @param <R> Result type
+     * @param dest non-null JsonTextBuilder
+     * @param obj null or JSONObject
+     * @param skipNullValues do not write a value if it is null
+     * @return true if dest was modified
+     */
+    public static <A,R> boolean write(
+            JsonTextBuilder<A,R> dest,
+            boolean skipNullValues,
             JSONObject obj) throws IOException {
         
         if (isNull(obj)) {
+            if (skipNullValues) {
+                return false;
+            }
+            
             dest.addNull();
-            return;
+            return true;
         }
+
+        boolean ret = false;
 
         dest.beginObject();
 
         //
-        // this is the best we can do with the given interface
+        // PMD gives a false positive: ForLoopCanBeForeach.
         //
-        boolean comma = false; // NOPMD - state across for loop
-
-        for (Iterator<String> it = obj.keys(); it.hasNext();) { // NOPMD - ForLoopCanBeForeach
+        // This is an Iterator, not an Iterable. I can't use the "foreach"
+        // syntax here.
+        //
+        for (Iterator<String> it = obj.keys(); it.hasNext();) { // NOPMD - false positive
+            //
+            // this is the best we can do with the given interface -- get the
+            // key and then do a "get".
+            //
             String key = it.next();
-            
-            if (comma) {
-                dest.valueSeparator();
-            }
-
-            comma = true; // NOPMD - state across for loop
-            
-            dest.addKey(key).nameSeparator();
-            
-            write(dest, obj.get(key));
+            ret = write(dest, skipNullValues, key, obj.get(key), ret);
         }
         
         dest.endObject();
+        
+        return ret;
     }
 
     /**
@@ -130,30 +174,87 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param value null or JSONArray
+     * @return true if dest was modified
      */
-    public static <A,R> void write(
+    public static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
+            JSONArray value) throws IOException {
+        return write(dest, false, value);
+    }
+
+    /**
+     * Write the given JSONArray as JSON&#x2192;URL text.
+     * 
+     * @param <A> Accumulator type
+     * @param <R> Result type
+     * @param dest non-null JsonTextBuilder
+     * @param value null or JSONArray
+     * @param skipNullValues do not write a value if it is null
+     * @return true if dest was modified
+     */
+    public static <A,R> boolean write(
+            JsonTextBuilder<A,R> dest,
+            boolean skipNullValues,
             JSONArray value) throws IOException {
         
         if (isNull(value)) {
+            if (skipNullValues) {
+                return false;
+            }
+            
             dest.addNull();
-            return;
+            return true;
         }
+
+        boolean ret = false;
 
         dest.beginArray();
 
-        boolean comma = false; // NOPMD - I need to track this
-
         for (int i = 0, length = value.length(); i < length; i++) { // NOPMD
-            if (comma) {
-                dest.valueSeparator();
-            }
-
-            comma = true; // NOPMD - I need to track this
-
-            write(dest, value.get(i));
+            ret = write(dest, skipNullValues, value.get(i), ret);
         }
 
         dest.endArray();
+        return ret;
+    }
+    
+    private static <A,R> boolean write(
+            JsonTextBuilder<A,R> dest,
+            boolean skipNullValues,
+            Object value,
+            boolean comma) throws IOException {
+
+        if (skipNullValues && isNull(value)) {
+            return comma;
+        }
+
+        if (comma) {
+            dest.valueSeparator();
+        }
+
+        write(dest, skipNullValues, value);
+
+        return true;
+    }
+    
+    private static <A,R> boolean write(
+        JsonTextBuilder<A,R> dest,
+        boolean skipNullValues,
+        String key,
+        Object value,
+        boolean comma) throws IOException {
+
+        if (skipNullValues && isNull(value)) {
+            return comma;
+        }
+
+        if (comma) {
+            dest.valueSeparator();
+        }
+        
+        dest.addKey(key).nameSeparator();
+        
+        write(dest, skipNullValues, value);   
+        return true;
     }
 }

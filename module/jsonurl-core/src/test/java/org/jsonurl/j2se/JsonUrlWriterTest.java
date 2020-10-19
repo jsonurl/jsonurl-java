@@ -18,6 +18,7 @@
 package org.jsonurl.j2se;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
@@ -32,13 +33,13 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 /**
- * Unit test for writing JSON&#x2192;URL text.
+ * Unit test for write() cases that don't very with the factory.
  *
  * @author jsonurl.org
  * @author David MacCormack
  * @since 2020-09-01
  */
-class JavaValueWriteStaticTest {
+class JsonUrlWriterTest {
 
     /**
      * null literal.
@@ -53,15 +54,27 @@ class JavaValueWriteStaticTest {
          * Test case input values.
          */
         final Object values;
-        
+
         /**
          * Test case expected output.
          */
         final String expected;
 
+        /**
+         * Test case expected output when skipNullValues is true.
+         */
+        final String skipNullExpected;
+
         ArrayTestCase(Object values, String expected) {
             this.values = values;
             this.expected = expected;
+            this.skipNullExpected = expected;
+        }
+
+        ArrayTestCase(Object values, String expected, String skipNullExpected) {
+            this.values = values;
+            this.expected = expected;
+            this.skipNullExpected = skipNullExpected;
         }
 
     }
@@ -91,16 +104,31 @@ class JavaValueWriteStaticTest {
     @ParameterizedTest
     @MethodSource
     void testArray(ArrayTestCase test) throws IOException {
+        //
+        // skipNullValues = false
+        //
         JsonUrlStringBuilder jsb = new JsonUrlStringBuilder();
         JsonUrlWriter.write(jsb, test.values);
 
         assertEquals(test.expected, jsb.build(), test.expected);
+
+        //
+        // skipNullValues = true
+        //
+        jsb = new JsonUrlStringBuilder();
+        JsonUrlWriter.write(jsb, true, test.values);
+
+        assertEquals(
+                test.skipNullExpected,
+                jsb.build(),
+                test.skipNullExpected);
     }
     
     static final Stream<ArrayTestCase> testArray() {
         return Stream.of(
             new ArrayTestCase(
-                new String[] {"hello", "world"},
+                new String[] {"hello", null, "world"},
+                "(hello,null,world)",
                 "(hello,world)"),
 
             new ArrayTestCase(
@@ -203,6 +231,10 @@ class JavaValueWriteStaticTest {
         JsonUrlStringBuilder jsb = new JsonUrlStringBuilder();
         JsonUrlWriter.write(jsb, (Object[])null);
         assertEquals(NULL, jsb.build(), Object.class.toString());
+
+        assertFalse(
+                JsonUrlWriter.write(jsb.clear(), true, (Object[])null),
+                Object.class.toString());
     }
     
     @Test
@@ -210,6 +242,10 @@ class JavaValueWriteStaticTest {
         JsonUrlStringBuilder jsb = new JsonUrlStringBuilder();
         JsonUrlWriter.write(jsb, (Iterable<?>)null);
         assertEquals(NULL, jsb.build(), Iterable.class.toString());
+
+        assertFalse(
+                JsonUrlWriter.write(jsb.clear(), true, (Iterable<?>)null),
+                Iterable.class.toString());
     }
 
     @Test
@@ -217,6 +253,10 @@ class JavaValueWriteStaticTest {
         JsonUrlStringBuilder jsb = new JsonUrlStringBuilder();
         JsonUrlWriter.write(jsb, (Map<?,?>)null);
         assertEquals(NULL, jsb.build(), Iterable.class.toString());
+
+        assertFalse(
+                JsonUrlWriter.write(jsb.clear(), true, (Map<?,?>)null),
+                Iterable.class.toString());
     }
 
     @Test

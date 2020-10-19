@@ -116,29 +116,45 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
 
     @Override
     public JsonUrlTextAppender<A,R> addNull() throws IOException {
+        if (impliedStringLiterals) {
+            throw new IOException(
+                "can not represent null when implied-string-literals is true");
+        }
+        
         out.append("null");
         return this;
     }
 
     @Override
     public JsonUrlTextAppender<A,R> add(BigDecimal value) throws IOException {
+        if (value == null) {
+            return addNull();
+        }
+
         if (impliedStringLiterals) {
             add(String.valueOf(value), false);
 
         } else {
             out.append(String.valueOf(value));    
         }
+
         return this;
     }
 
     @Override
     public JsonUrlTextAppender<A,R> add(BigInteger value) throws IOException {
+        if (value == null) {
+            return addNull();
+        }
+
         if (impliedStringLiterals) {
             add(String.valueOf(value), false);
 
         } else {
             out.append(String.valueOf(value));    
         }
+
+        
         return this;
     }
 
@@ -146,10 +162,10 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
     public JsonUrlTextAppender<A,R> add(long value) throws IOException {
         if (impliedStringLiterals) {
             add(String.valueOf(value), false);
-
         } else {
             out.append(String.valueOf(value));    
         }
+
         return this;
     }
 
@@ -157,10 +173,10 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
     public JsonUrlTextAppender<A,R> add(double value) throws IOException {
         if (impliedStringLiterals) {
             add(String.valueOf(value), false);
-
         } else {
             out.append(String.valueOf(value));    
         }
+
         return this;
     }
 
@@ -172,7 +188,7 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
 
     @Override
     public JsonUrlTextAppender<A,R> add(char value) throws IOException {
-        out.append(value); // FIXME - need to encode
+        out.append(value);
         return this;
     }
 
@@ -182,6 +198,14 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
             int start,
             int end,
             boolean isKey) throws IOException {
+
+        if (text == null) {
+            if (isKey) {
+                throw new IOException("object key can not be null");
+            }
+            return addNull();
+        }
+
         JsonUrl.appendLiteral(
                 out,
                 text,
@@ -190,6 +214,7 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
                 isKey,
                 isKey ? allowEmptyUnquotedKey : allowEmptyUnquotedValue,
                 impliedStringLiterals);
+
         return this;
     }
     

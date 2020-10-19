@@ -26,13 +26,13 @@ import org.jsonurl.JsonTextBuilder;
 import org.jsonurl.ValueFactoryParser;
 
 /**
- * Unit test for writing JSON&#x2192;URL text.
+ * Unit test for writing JSON&#x2192;URL text via the JSON.org API.
  *
  * @author jsonurl.org
  * @author David MacCormack
  * @since 2019-09-01
  */
-public class JsonOrgWriteTest extends AbstractJsonApiWriteTest<
+public class JsonOrgApiWriteTest extends AbstractJsonApiWriteTest<
         Object,
         Object,
         JSONArray,
