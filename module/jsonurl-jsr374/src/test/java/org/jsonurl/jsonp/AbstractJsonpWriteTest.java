@@ -15,11 +15,15 @@
  * under the License.
  */
 
-package org.jsonurl.j2se;
+package org.jsonurl.jsonp;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonStructure;
+import javax.json.JsonValue;
 import org.jsonurl.AbstractWriteTest;
 import org.jsonurl.JsonTextBuilder;
 import org.junit.jupiter.api.Nested;
@@ -31,24 +35,24 @@ import org.junit.jupiter.api.Nested;
  * @author David MacCormack
  * @since 2020-09-01
  */
-public abstract class AbstractJavaValueWriteTest
+public abstract class AbstractJsonpWriteTest
         extends AbstractWriteTest<
-            Object,
-            Object,
-            List<Object>,
-            List<Object>,
-            Map<String,Object>,
-            Map<String,Object>> {
+            JsonValue,
+            JsonStructure,
+            JsonArrayBuilder,
+            JsonArray,
+            JsonObjectBuilder,
+            JsonObject> {
 
     /**
      * JavaValueFactory.PRIMITIVE JavaValueWriteTest.
      */
     @Nested
-    static class PrimitiveWriteTest extends AbstractJavaValueWriteTest {
+    static class PrimitiveWriteTest extends AbstractJsonpWriteTest {
 
         @Override
-        public JavaValueFactory getFactory() {
-            return JavaValueFactory.PRIMITIVE;
+        public JsonpValueFactory getFactory() {
+            return JsonpValueFactory.PRIMITIVE;
         }
         
     }
@@ -57,11 +61,11 @@ public abstract class AbstractJavaValueWriteTest
      * JavaValueFactory.DOUBLE JavaValueWriteTest.
      */
     @Nested
-    static class DoubleWriteTest extends AbstractJavaValueWriteTest {
+    static class DoubleWriteTest extends AbstractJsonpWriteTest {
 
         @Override
-        public JavaValueFactory getFactory() {
-            return JavaValueFactory.DOUBLE;
+        public JsonpValueFactory getFactory() {
+            return JsonpValueFactory.DOUBLE;
         }
     }
 
@@ -69,11 +73,11 @@ public abstract class AbstractJavaValueWriteTest
      * JavaValueFactory.BIGMATH32 JavaValueWriteTest.
      */
     @Nested
-    static class BigMathWriteTest extends AbstractJavaValueWriteTest {
+    static class BigMathWriteTest extends AbstractJsonpWriteTest {
 
         @Override
-        public JavaValueFactory getFactory() {
-            return new JavaValueFactory.BigMathFactory(null, null, null, null);
+        public JsonpValueFactory getFactory() {
+            return new JsonpValueFactory.BigMathFactory(null, null, null, null);
         }
     }
 
@@ -81,11 +85,11 @@ public abstract class AbstractJavaValueWriteTest
      * JavaValueFactory.BIGMATH32 JavaValueWriteTest.
      */
     @Nested
-    static class BigMathWriteTest32 extends AbstractJavaValueWriteTest {
+    static class BigMathWriteTest32 extends AbstractJsonpWriteTest {
 
         @Override
-        public JavaValueFactory getFactory() {
-            return JavaValueFactory.BIGMATH32;
+        public JsonpValueFactory getFactory() {
+            return JsonpValueFactory.BIGMATH32;
         }
     }
 
@@ -93,11 +97,11 @@ public abstract class AbstractJavaValueWriteTest
      * JavaValueFactory.BIGMATH64 JavaValueWriteTest.
      */
     @Nested
-    static class BigMathWriteTest64 extends AbstractJavaValueWriteTest {
+    static class BigMathWriteTest64 extends AbstractJsonpWriteTest {
 
         @Override
-        public JavaValueFactory getFactory() {
-            return JavaValueFactory.BIGMATH64;
+        public JsonpValueFactory getFactory() {
+            return JsonpValueFactory.BIGMATH64;
         }
     }
 
@@ -105,19 +109,19 @@ public abstract class AbstractJavaValueWriteTest
      * JavaValueFactory.BIGMATH128 JavaValueWriteTest.
      */
     @Nested
-    static class BigMathWriteTest128 extends AbstractJavaValueWriteTest {
+    static class BigMathWriteTest128 extends AbstractJsonpWriteTest {
 
         @Override
-        public JavaValueFactory getFactory() {
-            return JavaValueFactory.BIGMATH128;
+        public JsonpValueFactory getFactory() {
+            return JsonpValueFactory.BIGMATH128;
         }
     }
 
     @Override
-    protected <I,R> boolean write(
+    public <I,R> boolean write(
             JsonTextBuilder<I, R> dest,
             boolean skipNullValues,
-            Object value) throws IOException {
+            JsonValue value) throws IOException {
 
         return JsonUrlWriter.write(dest, skipNullValues, value);
     }

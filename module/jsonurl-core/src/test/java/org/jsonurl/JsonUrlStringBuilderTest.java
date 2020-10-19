@@ -94,6 +94,120 @@ class JsonUrlStringBuilderTest {
         assertTrue(jup.isEmptyUnquotedValueAllowed(), "EmptyUnquotedValueAllowed");
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "hello",
+    })
+    void testClear(String text) throws IOException {
+        JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
+        assertEquals(text, jup.add(text).build(), text);
+        assertEquals(text, jup.clear().add(text).build(), text);
+    }
+
+    @Test
+    void testAddNull() throws IOException {
+        final String nullText = "null";
+
+        assertEquals(
+                nullText,
+                new JsonUrlStringBuilder().add((BigDecimal)null).build(),
+                nullText);
+        
+        assertEquals(
+                nullText,
+                new JsonUrlStringBuilder().add((BigInteger)null).build(),
+                nullText);
+        
+        assertEquals(
+                nullText,
+                new JsonUrlStringBuilder().add(null, 0, 0).build(),
+                nullText);
+
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "0",
+        "0.0",
+        "1",
+        "1.1",
+        "1.2345678912345567891234567890123456789012345678901234567890",
+    })
+    void testBigDecimal(String text) throws IOException {
+        BigDecimal expected = new BigDecimal(text);
+        JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
+        assertEquals(text, jup.add(expected).build(), text);
+        assertEquals(
+                text,
+                jup.clear()
+                   .setImpliedStringLiterals(true)
+                   .add(expected).build(),
+                text);
+
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "0",
+        "1",
+        "12345678912345567891234567890123456789012345678901234567890",
+    })
+    void testBigInteger(String text) throws IOException {
+        BigInteger expected = new BigInteger(text);
+        JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
+        assertEquals(text, jup.add(expected).build(), text);
+        assertEquals(
+                text,
+                jup.clear()
+                   .setImpliedStringLiterals(true)
+                   .add(expected).build(),
+                text);
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {
+        0,
+        1,
+        -1,
+        Long.MIN_VALUE,
+        Long.MAX_VALUE,
+    })
+    void testLong(long value) throws IOException {
+        String expected = String.valueOf(value);
+        JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
+        assertEquals(expected, jup.add(value).build(), expected);
+        assertEquals(
+                expected,
+                jup.clear()
+                   .setImpliedStringLiterals(true)
+                   .add(value).build(),
+                expected);
+    }
+
+    @ParameterizedTest
+    @ValueSource(doubles = {
+        0,
+        1,
+        -1,
+        1.0,
+        -1.0,
+        Float.MIN_VALUE,
+        Float.MAX_VALUE,
+        Double.MIN_VALUE,
+        Double.MAX_VALUE,
+    })
+    void testDouble(double value) throws IOException {
+        String expected = String.valueOf(value);
+        JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
+        assertEquals(expected, jup.add(value).build(), expected);
+        assertEquals(
+                expected,
+                jup.clear()
+                   .setImpliedStringLiterals(true)
+                   .add(value).build(),
+                expected);
+    }
+
     @Test
     void testText() throws IOException {
         String expected = "(key1:(1,1,true,CharSequence,1.0,2))"; 
@@ -178,7 +292,7 @@ class JsonUrlStringBuilderTest {
             Character.MIN_HIGH_SURROGATE + "" + Character.MIN_HIGH_SURROGATE, // NOPMD
             Character.MAX_HIGH_SURROGATE + "" + (Character.MAX_LOW_SURROGATE + 1), // NOPMD
     })
-    void testException(String text) throws IOException {
+    void testExceptionUtf8(String text) throws IOException {
         assertThrows(
             MalformedInputException.class,
             () -> new JsonUrlStringBuilder().addKey(text).build());
@@ -186,6 +300,20 @@ class JsonUrlStringBuilderTest {
         assertThrows(
             MalformedInputException.class,
             () -> new JsonUrlStringBuilder().add(text).build());
+    }
+
+    @Test
+    @Tag(TAG_EXCEPTION)
+    void testException() {
+        assertThrows(
+            IOException.class,
+            () -> new JsonUrlStringBuilder()
+                .setImpliedStringLiterals(true)
+                .addNull());
+
+        assertThrows(
+            IOException.class,
+            () -> new JsonUrlStringBuilder().addKey(null, 0, 0));
     }
 
     @ParameterizedTest

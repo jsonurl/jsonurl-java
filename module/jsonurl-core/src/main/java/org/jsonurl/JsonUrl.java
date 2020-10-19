@@ -846,9 +846,9 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
      * @param text  source
      * @param start offset in source
      * @param end   length of source
-     * @return dest
+     * @return true if dest was modified
      */
-    public static <T extends Appendable> T appendLiteral(// NOPMD - CyclomaticComplexity
+    public static <T extends Appendable> boolean appendLiteral(// NOPMD - CyclomaticComplexity
             T dest,
             CharSequence text,
             int start,
@@ -861,27 +861,20 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
             //
             // empty string
             //
-            if (isEmptyUnquotedStringOK) {
-                return dest;
-            }
-
-            if (isImpliedStringLiteral) {
-                //
-                // no way to represent it
-                //
-                throw new IOException(MSG_EXPECT_LITERAL.getMessageText());
+            if (isEmptyUnquotedStringOK || isImpliedStringLiteral) {
+                return false;
             }
 
             //
             // the empty string must be quoted
             //
             dest.append("''");
-            return dest;
+            return true;
         }
 
         if (isImpliedStringLiteral) {
             Encode.encode(dest, text, start, end, false, true);
-            return dest;
+            return true;
         }
 
         //
@@ -907,7 +900,7 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
                 //
                 dest.append('\'').append(text, start, end).append('\'');
             }
-            return dest;
+            return true;
         }
 
         //
@@ -933,6 +926,6 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
             break;
         }
 
-        return dest;
+        return true;
     }
 }

@@ -17,6 +17,10 @@
 
 package org.jsonurl.jsonorg;
 
+import static org.junit.jupiter.api.Assertions.assertSame;
+
+import org.junit.jupiter.api.Test;
+
 /**
  * Unit test using JsonOrgValueFactory.PRIMITIVE
  *
@@ -31,5 +35,13 @@ public class PrimitiveParseTest extends AbstractJsonOrgParseTest {
      */
     public PrimitiveParseTest() {
         super(JsonOrgValueFactory.PRIMITIVE);
+    }
+    
+    @Test
+    void testConstruct() {
+        assertSame(
+            new JsonUrlParser().getFactory(),
+            JsonOrgValueFactory.PRIMITIVE,
+            JsonOrgValueFactory.PRIMITIVE.getClass().getName());
     }
 }

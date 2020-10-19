@@ -37,7 +37,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  * @author David MacCormack
  * @since 2020-09-01
  */
-public abstract class AbstractJsonTextBuilderTest<
+public abstract class AbstractWriteTest<
     V,
     C extends V,
     ABT, // NOPMD - GenericsNaming 
@@ -55,15 +55,64 @@ public abstract class AbstractJsonTextBuilderTest<
      * @param dest destination
      * @param value value to write
      */
-    protected abstract void write(JsonTextBuilder<?,?> dest, V value)
-        throws IOException;
+    protected abstract <I,R> boolean write(
+            JsonTextBuilder<I,R> dest,
+            boolean skipNullValues,
+            V value) throws IOException;
 
     /**
      * Get an implementation-defined JSON&#x2192;URL ValueFactory.
      * @return a valid ValueFactory instance
      */
     protected abstract ValueFactory<V,C,ABT,A,JBT,J,?,?,?,?> getFactory();
-    
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "null",
+    })
+    void testSkipNullValue(String text) throws IOException {
+        assertFalse(write(
+                new JsonUrlStringBuilder(),
+                true,
+                new Parser().parse(text, factory)),
+                text);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "(a,b)",
+        "(a,null,b)",
+        "(null,a,null,b,null)",
+    })
+    void testArraySkipNullValue(String text) throws IOException {
+        JsonUrlStringBuilder dest = new JsonUrlStringBuilder();
+
+        assertTrue(write(
+                dest,
+                true,
+                new Parser().parseArray(text, factory)));
+
+        assertEquals("(a,b)", dest.build(), text);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "(a:b,c:d)",
+        "(a:b,c:d,e:null)",
+        "(e:null,a:b,c:d)",
+        "(e:null,a:b,f:null,c:d,g:null)",
+    })
+    void testObjectSkipNullValue(String text) throws IOException {
+        JsonUrlStringBuilder dest = new JsonUrlStringBuilder();
+
+        assertTrue(write(
+                dest,
+                true,
+                new Parser().parseObject(text, factory)));
+
+        assertEquals("(a:b,c:d)", dest.build(), text);
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {
         "()",
@@ -88,7 +137,7 @@ public abstract class AbstractJsonTextBuilderTest<
         // !implied && wwwFormUrlEncoded
         //
         A value = par.parseArray(text, factory);
-        assertTest(text, value, false, true);
+        assertTest(text, value, false, true, false);
 
         //
         // implied && wwwFormUrlEncoded
@@ -98,7 +147,7 @@ public abstract class AbstractJsonTextBuilderTest<
             factory,
             factory.newArrayBuilder());
 
-        assertTest(makeImplied(text), value, true, true);
+        assertTest(makeImplied(text), value, true, true, false);
 
         final String wfuText = replaceWfuChars(text);
         par.setFormUrlEncodedAllowed(false);
@@ -108,7 +157,7 @@ public abstract class AbstractJsonTextBuilderTest<
         // !implied && !wwwFormUrlEncoded
         //
         value = par.parseArray(wfuText, factory);
-        assertTest(wfuText, value, false, false);
+        assertTest(wfuText, value, false, false, false);
 
         //
         // implied && !wwwFormUrlEncoded
@@ -118,7 +167,7 @@ public abstract class AbstractJsonTextBuilderTest<
             factory,
             factory.newArrayBuilder());
 
-        assertTest(makeImplied(wfuText), value, true, false);
+        assertTest(makeImplied(wfuText), value, true, false, false);
     }
     
     @ParameterizedTest
@@ -142,7 +191,7 @@ public abstract class AbstractJsonTextBuilderTest<
         // !implied && wwwFormUrlEncoded
         //
         J value = par.parseObject(text, factory);
-        assertTest(text, value, false, true);
+        assertTest(text, value, false, true, false);
 
         //
         // implied && wwwFormUrlEncoded
@@ -152,7 +201,7 @@ public abstract class AbstractJsonTextBuilderTest<
             factory,
             factory.newObjectBuilder());
 
-        assertTest(makeImplied(text), value, true, true);
+        assertTest(makeImplied(text), value, true, true, false);
 
         final String wfuText = replaceWfuChars(text);
         par.setFormUrlEncodedAllowed(false);
@@ -162,7 +211,7 @@ public abstract class AbstractJsonTextBuilderTest<
         // !implied && !wwwFormUrlEncoded
         //
         value = par.parseObject(wfuText, factory);
-        assertTest(wfuText, value, false, false);
+        assertTest(wfuText, value, false, false, false);
 
         //
         // implied && !wwwFormUrlEncoded
@@ -172,7 +221,7 @@ public abstract class AbstractJsonTextBuilderTest<
             factory,
             factory.newObjectBuilder());
 
-        assertTest(makeImplied(wfuText), value, true, false);
+        assertTest(makeImplied(wfuText), value, true, false, false);
     }
 
     @ParameterizedTest
@@ -184,20 +233,21 @@ public abstract class AbstractJsonTextBuilderTest<
     })
     void testLiteral(String expected) throws IOException {
         V value = new ValueFactoryParser<>(getFactory()).parse(expected);
-        assertTest(expected, value, false, false);
+        assertTest(expected, value, false, false, false);
     }
     
     void assertTest(
             String expected,
             V value,
             boolean implied,
-            boolean wwwFormUrlEncoded) throws IOException {
+            boolean wwwFormUrlEncoded,
+            boolean skipNullValues) throws IOException {
 
         JsonUrlStringBuilder jsb = new JsonUrlStringBuilder();
         jsb.setImpliedComposite(implied);
         jsb.setFormUrlEncoded(wwwFormUrlEncoded);
 
-        write(jsb, value);
+        write(jsb, skipNullValues, value);
 
         String actual = jsb.build();
         assertEquals(expected, actual, expected);

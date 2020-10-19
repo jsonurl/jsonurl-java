@@ -659,7 +659,7 @@ public abstract class AbstractParseTest<
         p = new Parser();
         p.setImpliedStringLiterals(true);
         p.setEmptyUnquotedValueAllowed(true);
-        assertEquals(text, p.parse(text, factory));
+        assertEquals(factory.getString(text), p.parse(text, factory));
     }
 
     @ParameterizedTest
