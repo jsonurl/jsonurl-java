@@ -79,6 +79,19 @@ class JsonUrlStringBuilderTest {
     }
 
     @Test
+    void testSetImpliedStringLiterals() {
+        final String test = "SetImpliedStringLiterals";
+        JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
+        assertFalse(jup.isImpliedStringLiterals(), test);
+        assertFalse(jup.isEmptyUnquotedKeyAllowed(), test);
+        assertFalse(jup.isEmptyUnquotedValueAllowed(), test);
+        jup.setImpliedStringLiterals();
+        assertTrue(jup.isImpliedStringLiterals(), test);
+        assertTrue(jup.isEmptyUnquotedKeyAllowed(), test);
+        assertTrue(jup.isEmptyUnquotedValueAllowed(), test);
+    }
+
+    @Test
     void testIsEmptyUnquotedKeyAllowed() {
         JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
         assertFalse(jup.isEmptyUnquotedKeyAllowed(), "EmptyUnquotedKeyAllowed");

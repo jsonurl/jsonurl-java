@@ -117,8 +117,7 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
     @Override
     public JsonUrlTextAppender<A,R> addNull() throws IOException {
         if (impliedStringLiterals) {
-            throw new IOException(
-                "can not represent null when implied-string-literals is true");
+            throw new IOException("implied strings: unexpected null");
         }
         
         out.append("null");
@@ -295,6 +294,42 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
     public JsonUrlTextAppender<A,R> setImpliedStringLiterals(// NOPMD - LinguisticNaming
             boolean implied) {
         this.impliedStringLiterals = implied;
+        return this;
+    }
+
+    /**
+     * Use this method to enable implied string literals and common related
+     * options.
+     *
+     * <p>This is a convenience method for:
+     * <pre>
+     *   setEmptyUnquotedKeyAllowed(true);
+     *   setEmptyUnquotedValueAllowed(true);
+     *   setImpliedStringLiterals(true);
+     * </pre>
+     *
+     * <p>If {@link #isImpliedStringLiterals()} is true but
+     * {@link #isEmptyUnquotedValueAllowed()} is false then an empty string
+     * literal value will trigger an Exception because there wouldn't be any
+     * way to represent it.
+     * 
+     * <p>If {@link #isImpliedStringLiterals()} is true but
+     * {@link #isEmptyUnquotedKeyAllowed()} is false then an empty key will
+     * trigger an Exception because there wouldn't be any way to represent it.
+     * 
+     * <p>If you want the above behavior, because your data doesn't
+     * support those cases and you want the parser to catch them for you,
+     * then call {@link #setImpliedStringLiterals(boolean)
+     * setImpliedStringLiterals(true)} directly.
+     * 
+     * @see #setEmptyUnquotedKeyAllowed(boolean)
+     * @see #setEmptyUnquotedValueAllowed(boolean)
+     * @see #setImpliedStringLiterals(boolean)
+     */
+    public JsonUrlTextAppender<A,R> setImpliedStringLiterals() { // NOPMD - LinguisticNaming
+        this.setEmptyUnquotedKeyAllowed(true);
+        this.setEmptyUnquotedValueAllowed(true);
+        this.setImpliedStringLiterals(true);
         return this;
     }
     
