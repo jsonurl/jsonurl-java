@@ -26,16 +26,15 @@ import javax.json.JsonStructure;
 import javax.json.JsonValue;
 import org.jsonurl.AbstractWriteTest;
 import org.jsonurl.JsonTextBuilder;
-import org.junit.jupiter.api.Nested;
 
 /**
- * Unit test for writing JSON&#x2192;URL text.
+ * Abstract base class for JsonUrlStringBuilder + JsonpValueFactory unit tests.
  *
  * @author jsonurl.org
  * @author David MacCormack
  * @since 2020-09-01
  */
-public abstract class AbstractJsonpWriteTest
+abstract class AbstractJsonpWriteTest
         extends AbstractWriteTest<
             JsonValue,
             JsonStructure,
@@ -43,79 +42,6 @@ public abstract class AbstractJsonpWriteTest
             JsonArray,
             JsonObjectBuilder,
             JsonObject> {
-
-    /**
-     * JavaValueFactory.PRIMITIVE JavaValueWriteTest.
-     */
-    @Nested
-    static class PrimitiveWriteTest extends AbstractJsonpWriteTest {
-
-        @Override
-        public JsonpValueFactory getFactory() {
-            return JsonpValueFactory.PRIMITIVE;
-        }
-        
-    }
-
-    /**
-     * JavaValueFactory.DOUBLE JavaValueWriteTest.
-     */
-    @Nested
-    static class DoubleWriteTest extends AbstractJsonpWriteTest {
-
-        @Override
-        public JsonpValueFactory getFactory() {
-            return JsonpValueFactory.DOUBLE;
-        }
-    }
-
-    /**
-     * JavaValueFactory.BIGMATH32 JavaValueWriteTest.
-     */
-    @Nested
-    static class BigMathWriteTest extends AbstractJsonpWriteTest {
-
-        @Override
-        public JsonpValueFactory getFactory() {
-            return new JsonpValueFactory.BigMathFactory(null, null, null, null);
-        }
-    }
-
-    /**
-     * JavaValueFactory.BIGMATH32 JavaValueWriteTest.
-     */
-    @Nested
-    static class BigMathWriteTest32 extends AbstractJsonpWriteTest {
-
-        @Override
-        public JsonpValueFactory getFactory() {
-            return JsonpValueFactory.BIGMATH32;
-        }
-    }
-
-    /**
-     * JavaValueFactory.BIGMATH64 JavaValueWriteTest.
-     */
-    @Nested
-    static class BigMathWriteTest64 extends AbstractJsonpWriteTest {
-
-        @Override
-        public JsonpValueFactory getFactory() {
-            return JsonpValueFactory.BIGMATH64;
-        }
-    }
-
-    /**
-     * JavaValueFactory.BIGMATH128 JavaValueWriteTest.
-     */
-    @Nested
-    static class BigMathWriteTest128 extends AbstractJsonpWriteTest {
-
-        @Override
-        public JsonpValueFactory getFactory() {
-            return JsonpValueFactory.BIGMATH128;
-        }
-    }
 
     @Override
     public <I,R> boolean write(

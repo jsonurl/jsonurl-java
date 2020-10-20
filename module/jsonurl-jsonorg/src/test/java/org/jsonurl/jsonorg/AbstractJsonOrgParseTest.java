@@ -24,13 +24,9 @@ import org.json.JSONObject;
 import org.jsonurl.AbstractParseTest;
 import org.jsonurl.BigMathProvider.BigIntegerOverflow;
 import org.jsonurl.ValueFactory;
-import org.junit.jupiter.api.Nested;
 
 /**
- * Abstract base class for parser tests.
- *
- * <p>A specialization of this class may be created for each
- * factory constant defined in {@link JsonOrgValueFactory}.
+ * Abstract base class for Parser + JsonOrgValueFactory unit tests.
  * 
  * @author jsonurl.org
  * @author David MacCormack
@@ -49,93 +45,9 @@ abstract class AbstractJsonOrgParseTest extends AbstractParseTest<
     String> {
 
     /**
-     * Unit test using JsonOrgValueFactory.PRIMITIVE.
-     */
-    @Nested
-    static class PrimitiveParseTest extends AbstractJsonOrgParseTest {
-        /**
-         * Create a new PrimitiveParseTest.
-         */
-        public PrimitiveParseTest() {
-            super(JsonOrgValueFactory.PRIMITIVE);
-        }
-    }
-    
-    /**
-     * Unit test using JsonOrgValueFactory.DOUBLE.
-     */
-    @Nested
-    static class DoubleParseTest extends AbstractJsonOrgParseTest {
-        /**
-         * Create a new DoubleParseTest.
-         */
-        public DoubleParseTest() {
-            super(JsonOrgValueFactory.DOUBLE);
-        }
-    }
-    
-    /**
-     * Unit test using JsonOrgValueFactory.BigMathFactory.
-     *
-     * @author jsonurl.org
-     * @author David MacCormack
-     * @since 2019-09-01
-     */
-    @Nested
-    static class BigMathParseTest extends AbstractJsonOrgParseTest {
-        /**
-         * Create a new BigMathParseTest.
-         */
-        public BigMathParseTest() {
-            super(new JsonOrgValueFactory.BigMathFactory(null, null, null, null));
-        }
-    }
-    
-
-    /**
-     * Unit test using JsonOrgValueFactory.BIGMATH32.
-     */
-    @Nested
-    static final class BigMathParseTest32 extends AbstractJsonOrgParseTest {
-        /**
-         * Create a new BigMathParseTest32.
-         */
-        public BigMathParseTest32() {
-            super(JsonOrgValueFactory.BIGMATH32);
-        }
-    }
-    
-    /**
-     * Unit test using JsonOrgValueFactory.BIGMATH64.
-     */
-    @Nested
-    static final class BigMathParseTest64 extends AbstractJsonOrgParseTest {
-        /**
-         * Create a new BigMathParseTest64.
-         */
-        public BigMathParseTest64() {
-            super(JsonOrgValueFactory.BIGMATH64);
-        }
-    }
-
-    /**
-     * Unit test using JsonOrgValueFactory.BIGMATH128.
-     */
-    @Nested
-    static final class BigMathParseTest128 extends AbstractJsonOrgParseTest {
-        /**
-         * Create a new BigMathParseTest128.
-         */
-        public BigMathParseTest128() {
-            super(JsonOrgValueFactory.BIGMATH128);
-        }
-    }
-
-
-    /**
      * Create a new JsonOrgParseTest.
      */
-    public AbstractJsonOrgParseTest(JsonOrgValueFactory factory) {
+    AbstractJsonOrgParseTest(JsonOrgValueFactory factory) {
         super(factory);
     }
     
