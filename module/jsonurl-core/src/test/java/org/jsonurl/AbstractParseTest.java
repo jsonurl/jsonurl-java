@@ -1614,13 +1614,32 @@ public abstract class AbstractParseTest<
                     factory.newArrayBuilder()));
         }
         
-        private void assertAllowEmptyUnquotedObjectValue(String text, J actual) {
+        private void assertAllowEmptyUnquotedObjectValue(
+                String text,
+                J actual) {
+
             assertEquals(
                 factory.getString(""),
                 getString("a", actual),
                 text);
 
             assertTrue(getBoolean("b", actual), text);
+        }
+        
+        private void assertAllowEmptyUnquotedObjectValue(
+                Parser p,
+                String text) {
+
+            assertAllowEmptyUnquotedObjectValue(
+                text,
+                p.parseObject(text, factory));
+            
+            assertAllowEmptyUnquotedObjectValue(
+                text,
+                p.parseObject(
+                        makeImplied(text),
+                        factory,
+                        factory.newObjectBuilder()));
         }
         
         @ParameterizedTest
@@ -1635,18 +1654,13 @@ public abstract class AbstractParseTest<
                 SyntaxException.class,
                 () -> p.parse(text, factory),
                 text);
-            
+
+            //
+            // setEmptyUnquotedValueAllowed(true)
+            //
             p.setEmptyUnquotedValueAllowed(true);
-
             assertTrue(p.isEmptyUnquotedValueAllowed(), text);
-
-            assertAllowEmptyUnquotedObjectValue(
-                text,
-                p.parseObject(text, factory));
-            
-            assertAllowEmptyUnquotedObjectValue(
-                text,
-                p.parseObject(makeImplied(text), factory, factory.newObjectBuilder()));
+            assertAllowEmptyUnquotedObjectValue(p, text);
         }
 
 
@@ -1740,6 +1754,17 @@ public abstract class AbstractParseTest<
             assertTrue(isEqual(p.parse(expectedText, factory), actual), text);
         }
 
+    }
+
+    @Nested
+    class MiscTests {
+        @Test
+        void testGetFactory() {
+            assertSame(
+                factory,
+                new ValueFactoryParser<>(factory).getFactory(),
+                factory.getClass().getName());        
+        }
     }
 
     /**
@@ -1976,12 +2001,4 @@ public abstract class AbstractParseTest<
         return Objects.equals(a, b);
     }
     // CHECKSTYLE:ON
-    
-    @Test
-    void testGetFactory() {
-        assertSame(
-            factory,
-            new ValueFactoryParser<>(factory).getFactory(),
-            factory.getClass().getName());        
-    }    
 }

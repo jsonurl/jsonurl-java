@@ -137,11 +137,11 @@ abstract class AbstractJavaValueFactoryParseTest extends AbstractParseTest<
     @Override
     protected boolean getBoolean(String key, Map<String,Object> value) {
         Object ret = value.get(key);
-        
+
         if (ret instanceof Boolean) {
             return ((Boolean)ret).booleanValue();
         }
-        
+
         throw new IllegalArgumentException("value not boolean: " + ret);
     }
     

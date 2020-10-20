@@ -861,8 +861,12 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
             //
             // empty string
             //
-            if (isEmptyUnquotedStringOK || isImpliedStringLiteral) {
+            if (isEmptyUnquotedStringOK) {
                 return false;
+            }
+
+            if (isImpliedStringLiteral) {
+                throw new IOException("implied strings: unexpected empty string");
             }
 
             //
