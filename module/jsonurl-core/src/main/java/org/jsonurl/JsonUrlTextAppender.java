@@ -35,7 +35,7 @@ import java.math.BigInteger;
  * @since 2019-09-01
  */
 public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
-        implements JsonTextBuilder<A, R>, Appendable {
+    extends CommonOptions implements JsonTextBuilder<A, R>, Appendable {
 
     /**
      * Destination, provided in constructor.
@@ -43,29 +43,9 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
     protected final A out;
 
     /**
-     * Use application/x-www-form-urlencoded style separators at depth 0.
-     */
-    private boolean wwwFormUrlEncoded;
-
-    /**
      * Do not output the top level parens.
      */
     private boolean impliedComposite;
-
-    /**
-     * All literals are strings.
-     */
-    private boolean impliedStringLiterals;
-    
-    /**
-     * Allow empty unquoted keys.
-     */
-    private boolean allowEmptyUnquotedKey;
-
-    /**
-     * Allow empty unquoted values.
-     */
-    private boolean allowEmptyUnquotedValue;
 
 
     /**
@@ -116,7 +96,7 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
 
     @Override
     public JsonUrlTextAppender<A,R> addNull() throws IOException {
-        if (impliedStringLiterals) {
+        if (isImpliedStringLiterals()) {
             throw new IOException("implied strings: unexpected null");
         }
         
@@ -130,7 +110,7 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
             return addNull();
         }
 
-        if (impliedStringLiterals) {
+        if (isImpliedStringLiterals()) {
             add(String.valueOf(value), false);
 
         } else {
@@ -146,7 +126,7 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
             return addNull();
         }
 
-        if (impliedStringLiterals) {
+        if (isImpliedStringLiterals()) {
             add(String.valueOf(value), false);
 
         } else {
@@ -159,7 +139,7 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
 
     @Override
     public JsonUrlTextAppender<A,R> add(long value) throws IOException {
-        if (impliedStringLiterals) {
+        if (isImpliedStringLiterals()) {
             add(String.valueOf(value), false);
         } else {
             out.append(String.valueOf(value));    
@@ -170,7 +150,7 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
 
     @Override
     public JsonUrlTextAppender<A,R> add(double value) throws IOException {
-        if (impliedStringLiterals) {
+        if (isImpliedStringLiterals()) {
             add(String.valueOf(value), false);
         } else {
             out.append(String.valueOf(value));    
@@ -205,14 +185,17 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
             return addNull();
         }
 
+        boolean emptyOK = isKey
+                ? isEmptyUnquotedKeyAllowed() : isEmptyUnquotedValueAllowed();
+
         JsonUrl.appendLiteral(
                 out,
                 text,
                 start,
                 end,
                 isKey,
-                isKey ? allowEmptyUnquotedKey : allowEmptyUnquotedValue,
-                impliedStringLiterals);
+                emptyOK,
+                isImpliedStringLiterals());
 
         return this;
     }
@@ -239,29 +222,6 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
     }
 
     /**
-     * Returns true if application/x-www-form-urlencoded style separators are
-     * allowed for an implied top-level object or array.
-     * @see #setFormUrlEncoded(boolean) 
-     */
-    public boolean isFormUrlEncoded() {
-        return wwwFormUrlEncoded;
-    }
-
-    /**
-     * Set this to true if you want to allow {@code &amp} to be used as a
-     * top-level value separator and {@code =} to be used as top-level name
-     * separator. 
-     * 
-     * @param wwwFormUrlEncoded true or false
-     */
-    public JsonUrlTextAppender<A,R> setFormUrlEncoded(// NOPMD - LinguisticNaming
-            boolean wwwFormUrlEncoded) {
-
-        this.wwwFormUrlEncoded = wwwFormUrlEncoded;
-        return this;
-    }
-
-    /**
      * Returns true if this appender is writing an implied array or object.
      * @see #setImpliedComposite(boolean) 
      */
@@ -280,102 +240,10 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
     }
 
     /**
-     * Returns true if all literals are assumed to be strings.
-     * @see #setImpliedStringLiterals(boolean)
-     */
-    public boolean isImpliedStringLiterals() {
-        return impliedStringLiterals;
-    }
-
-    /**
-     * Set this to true to assume all literals are strings.
-     * @param implied true or false
-     */
-    public JsonUrlTextAppender<A,R> setImpliedStringLiterals(// NOPMD - LinguisticNaming
-            boolean implied) {
-        this.impliedStringLiterals = implied;
-        return this;
-    }
-
-    /**
-     * Use this method to enable implied string literals and common related
-     * options.
-     *
-     * <p>This is a convenience method for:
-     * <pre>
-     *   setEmptyUnquotedKeyAllowed(true);
-     *   setEmptyUnquotedValueAllowed(true);
-     *   setImpliedStringLiterals(true);
-     * </pre>
-     *
-     * <p>If {@link #isImpliedStringLiterals()} is true but
-     * {@link #isEmptyUnquotedValueAllowed()} is false then an empty string
-     * literal value will trigger an Exception because there wouldn't be any
-     * way to represent it.
-     * 
-     * <p>If {@link #isImpliedStringLiterals()} is true but
-     * {@link #isEmptyUnquotedKeyAllowed()} is false then an empty key will
-     * trigger an Exception because there wouldn't be any way to represent it.
-     * 
-     * <p>If you want the above behavior, because your data doesn't
-     * support those cases and you want the parser to catch them for you,
-     * then call {@link #setImpliedStringLiterals(boolean)
-     * setImpliedStringLiterals(true)} directly.
-     * 
-     * @see #setEmptyUnquotedKeyAllowed(boolean)
-     * @see #setEmptyUnquotedValueAllowed(boolean)
-     * @see #setImpliedStringLiterals(boolean)
-     */
-    public JsonUrlTextAppender<A,R> setImpliedStringLiterals() { // NOPMD - LinguisticNaming
-        this.setEmptyUnquotedKeyAllowed(true);
-        this.setEmptyUnquotedValueAllowed(true);
-        this.setImpliedStringLiterals(true);
-        return this;
-    }
-    
-    /**
-     * Returns true if empty, unquoted keys are allowed.
-     * @see #setEmptyUnquotedKeyAllowed(boolean) 
-     */
-    public boolean isEmptyUnquotedKeyAllowed() {
-        return allowEmptyUnquotedKey;
-    }
-
-    /**
-     * Set this to true if you want to allow empty, unquoted keys.
-     * For example, {@code (:value)}.
-     * @param allow boolean
-     */
-    public JsonUrlTextAppender<A,R> setEmptyUnquotedKeyAllowed(// NOPMD - LinguisticNaming
-            boolean allow) {
-        this.allowEmptyUnquotedKey = allow;
-        return this;
-    }
-
-    /**
-     * Returns true if empty, unquoted values are allowed.
-     * @see #setEmptyUnquotedValueAllowed(boolean) 
-     */
-    public boolean isEmptyUnquotedValueAllowed() {
-        return allowEmptyUnquotedValue;
-    }
-
-    /**
-     * Set this to true to allow empty, unquoted values.
-     * For example, {@code (1,,3)}.
-     * @param allow boolean
-     */
-    public JsonUrlTextAppender<A,R> setEmptyUnquotedValueAllowed(// NOPMD - LinguisticNaming
-            boolean allow) {
-        this.allowEmptyUnquotedValue = allow;
-        return this;
-    }
-
-    /**
      * Test if wwwFormUrlEncoded structural characters should be used.
      */
     private boolean useWfuStructChars() {
-        return wwwFormUrlEncoded && depth == 1;
+        return isFormUrlEncoded() && depth == 1;
     }
 
     private JsonUrlTextAppender<A,R> beginComposite() throws IOException {

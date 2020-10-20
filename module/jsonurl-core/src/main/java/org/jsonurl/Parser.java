@@ -54,7 +54,7 @@ import java.util.Set;
  * @author David MacCormack
  * @since 2019-09-01
  */
-public class Parser { //NOPMD
+public class Parser extends CommonOptions { //NOPMD
 
     /**
      * Parse state.
@@ -141,26 +141,6 @@ public class Parser { //NOPMD
     private static final char WFU_VALUE_SEPARATOR = '&';
 
     /**
-     * Allow application/x-www-form-urlencoded style separators.
-     */
-    private boolean wwwFormUrlEncoded;
-
-    /**
-     * Allow empty unquoted keys.
-     */
-    private boolean allowEmptyUnquotedKey;
-
-    /**
-     * Allow empty unquoted values.
-     */
-    private boolean allowEmptyUnquotedValue;
-
-    /**
-     * Assume all literals are strings.
-     */
-    private boolean impliedStringLiterals;
-
-    /**
      * Get the maximum number of parsed characters.
      * @see #setMaxParseChars(int)
      */
@@ -212,80 +192,6 @@ public class Parser { //NOPMD
      */
     public void setMaxParseValues(int maxParseValues) {
         this.maxParseValues = maxParseValues;
-    }
-
-    /**
-     * Returns true if application/x-www-form-urlencoded style separators are
-     * allowed for an implied top-level object or array.
-     * @see #setFormUrlEncodedAllowed(boolean) 
-     */
-    public boolean isFormUrlEncodedAllowed() {
-        return wwwFormUrlEncoded;
-    }
-
-    /**
-     * Set this to true if you want to allow {@code &amp} to be used as a
-     * top-level value separator and {@code =} to be used as top-level name
-     * separator. 
-     * 
-     * @param wwwFormUrlEncoded true or false
-     */
-    public void setFormUrlEncodedAllowed(boolean wwwFormUrlEncoded) {
-        this.wwwFormUrlEncoded = wwwFormUrlEncoded;
-    }
-
-    /**
-     * Returns true if the parser accepts empty, unquoted keys.
-     * @see #setEmptyUnquotedKeyAllowed(boolean) 
-     */
-    public boolean isEmptyUnquotedKeyAllowed() {
-        return allowEmptyUnquotedKey;
-    }
-
-    /**
-     * Set this to true if you want the parser to accept empty, unquoted keys.
-     * For example, {@code (:value)}.
-     * @param allow boolean
-     */
-    public void setEmptyUnquotedKeyAllowed(boolean allow) {
-        this.allowEmptyUnquotedKey = allow;
-    }
-
-    /**
-     * Returns true if the parser accepts empty, unquoted values.
-     * @see #setEmptyUnquotedValueAllowed(boolean) 
-     */
-    public boolean isEmptyUnquotedValueAllowed() {
-        return allowEmptyUnquotedValue;
-    }
-
-    /**
-     * Set this to true if you want the parser to accept empty, unquoted values.
-     * For example, {@code (1,,3)}.
-     * @param allow boolean
-     */
-    public void setEmptyUnquotedValueAllowed(boolean allow) {
-        this.allowEmptyUnquotedValue = allow;
-    }
-
-    /**
-     * Test if this parser assumes all literals are strings.
-     * @see #setImpliedStringLiterals(boolean) 
-     */
-    public boolean isImpliedStringLiterals() {
-        return impliedStringLiterals;
-    }
-
-    /**
-     * If true the parser will assume all literals are strings.
-     *
-     *<p>This can be useful when you don't want the native Java type of a
-     * value to determine how it's encoded.
-     * 
-     * @param impliedStringLiterals boolean
-     */
-    public void setImpliedStringLiterals(boolean impliedStringLiterals) {
-        this.impliedStringLiterals = impliedStringLiterals;
     }
 
     /**
@@ -701,13 +607,13 @@ public class Parser { //NOPMD
             // if the text is empty and the caller allows unquoted empty string
             // literals then return one.
             //
-            if (allowEmptyUnquotedValue) {
+            if (isEmptyUnquotedValueAllowed()) {
                 return result.getResult(
                         text,
                         off,
                         off,
                         true,
-                        impliedStringLiterals);
+                        isImpliedStringLiterals());
             }
             
             //
@@ -774,8 +680,8 @@ public class Parser { //NOPMD
                     text,
                     off,
                     stop,
-                    allowEmptyUnquotedValue,
-                    impliedStringLiterals);
+                    isEmptyUnquotedValueAllowed(),
+                    isImpliedStringLiterals());
 
             if (canReturn != null && !result.isValid(canReturn, ret)) {
                 throw new SyntaxException(
@@ -789,8 +695,7 @@ public class Parser { //NOPMD
 
         }
         
-        final boolean allowEmptyUnquotedKey = this.allowEmptyUnquotedKey;
-        final boolean wwwFormUrlEncoded = this.wwwFormUrlEncoded;
+        final boolean wwwFormUrlEncoded = this.isFormUrlEncoded();
 
         int parseDepth = 1;
         int parseValueCount = 0;
@@ -957,8 +862,8 @@ public class Parser { //NOPMD
                                 text,
                                 litpos,
                                 pos,
-                                allowEmptyUnquotedValue,
-                                impliedStringLiterals);
+                                isEmptyUnquotedValueAllowed(),
+                                isImpliedStringLiterals());
 
                     continue;
 
@@ -984,8 +889,8 @@ public class Parser { //NOPMD
                                 text,
                                 litpos,
                                 pos,
-                                allowEmptyUnquotedValue,
-                                impliedStringLiterals);
+                                isEmptyUnquotedValueAllowed(),
+                                isImpliedStringLiterals());
 
                     parseDepth--;
                     pos++;
@@ -1051,8 +956,8 @@ public class Parser { //NOPMD
                                 text,
                                 litpos,
                                 pos,
-                                allowEmptyUnquotedKey,
-                                impliedStringLiterals);
+                                isEmptyUnquotedKeyAllowed(),
+                                isImpliedStringLiterals());
 
                     pos++;
                     continue;
@@ -1094,8 +999,8 @@ public class Parser { //NOPMD
                             text,
                             litpos,
                             pos,
-                            allowEmptyUnquotedValue,
-                            impliedStringLiterals);
+                            isEmptyUnquotedValueAllowed(),
+                            isImpliedStringLiterals());
 
                 if (pos == stop) {
                     if (parseDepth == 1 && impliedArray) {
@@ -1190,8 +1095,8 @@ public class Parser { //NOPMD
                             text,
                             litpos,
                             pos,
-                            allowEmptyUnquotedValue,
-                            impliedStringLiterals);
+                            isEmptyUnquotedValueAllowed(),
+                            isImpliedStringLiterals());
                 
                 if (pos == stop) {
                     if (parseDepth == 1 && impliedObject) {
@@ -1262,7 +1167,11 @@ public class Parser { //NOPMD
                     if (impliedObject && parseDepth == 1) {
                         return result
                             .setLocation(litpos)
-                            .addMissingValue(text, litpos, pos, impliedStringLiterals)
+                            .addMissingValue(
+                                    text,
+                                    litpos,
+                                    pos,
+                                    isImpliedStringLiterals())
                             .addObjectElement()
                             .endObject()
                             .getResult();
@@ -1298,7 +1207,7 @@ public class Parser { //NOPMD
                                     text,
                                     litpos,
                                     pos,
-                                    impliedStringLiterals);
+                                    isImpliedStringLiterals());
 
                         stateStack.set(0, State.OBJECT_AFTER_ELEMENT);
                         continue;
@@ -1316,8 +1225,8 @@ public class Parser { //NOPMD
                             text,
                             litpos,
                             pos,
-                            allowEmptyUnquotedKey,
-                            impliedStringLiterals);
+                            isEmptyUnquotedKeyAllowed(),
+                            isImpliedStringLiterals());
 
                 pos++;
                 continue;

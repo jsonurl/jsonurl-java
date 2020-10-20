@@ -78,9 +78,9 @@ class ParserTest {
         final String name = "isFormUrlEncodedAllowed";
 
         Parser par = new Parser();
-        assertFalse(par.isFormUrlEncodedAllowed(), name);
-        par.setFormUrlEncodedAllowed(true);
-        assertTrue(par.isFormUrlEncodedAllowed(), name);
+        assertFalse(par.isFormUrlEncoded(), name);
+        par.setFormUrlEncoded(true);
+        assertTrue(par.isFormUrlEncoded(), name);
     }
 
     @Test

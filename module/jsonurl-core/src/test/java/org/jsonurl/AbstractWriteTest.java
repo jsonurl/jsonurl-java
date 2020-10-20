@@ -130,8 +130,8 @@ public abstract class AbstractWriteTest<
     void testArray(String text) throws IOException {
         Parser par = new Parser();
 
-        par.setFormUrlEncodedAllowed(true);
-        assertTrue(par.isFormUrlEncodedAllowed(), text);
+        par.setFormUrlEncoded(true);
+        assertTrue(par.isFormUrlEncoded(), text);
 
         //
         // !implied && wwwFormUrlEncoded
@@ -150,8 +150,8 @@ public abstract class AbstractWriteTest<
         assertTest(makeImplied(text), value, true, true, false);
 
         final String wfuText = replaceWfuChars(text);
-        par.setFormUrlEncodedAllowed(false);
-        assertFalse(par.isFormUrlEncodedAllowed(), wfuText);
+        par.setFormUrlEncoded(false);
+        assertFalse(par.isFormUrlEncoded(), wfuText);
 
         //
         // !implied && !wwwFormUrlEncoded
@@ -184,8 +184,8 @@ public abstract class AbstractWriteTest<
     void testObject(String text) throws IOException {
         Parser par = new Parser();
 
-        par.setFormUrlEncodedAllowed(true);
-        assertTrue(par.isFormUrlEncodedAllowed(), text);
+        par.setFormUrlEncoded(true);
+        assertTrue(par.isFormUrlEncoded(), text);
 
         //
         // !implied && wwwFormUrlEncoded
@@ -204,8 +204,8 @@ public abstract class AbstractWriteTest<
         assertTest(makeImplied(text), value, true, true, false);
 
         final String wfuText = replaceWfuChars(text);
-        par.setFormUrlEncodedAllowed(false);
-        assertFalse(par.isFormUrlEncodedAllowed(), wfuText);
+        par.setFormUrlEncoded(false);
+        assertFalse(par.isFormUrlEncoded(), wfuText);
 
         //
         // !implied && !wwwFormUrlEncoded
