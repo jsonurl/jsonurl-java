@@ -27,8 +27,10 @@ import javax.json.JsonString;
 import javax.json.JsonStructure;
 import javax.json.JsonValue;
 import org.jsonurl.AbstractParseTest;
+import org.jsonurl.BigMathProvider;
 import org.jsonurl.BigMathProvider.BigIntegerOverflow;
 import org.jsonurl.ValueFactory;
+import org.junit.jupiter.api.Nested;
 
 
 /**
@@ -52,6 +54,138 @@ abstract class AbstractJsonpParseTest extends AbstractParseTest<
         JsonNumber,
         JsonValue,
         JsonString> {
+
+    /**
+     * Unit test using JsonpValueFactory.PRIMITIVE.
+     */
+    @Nested
+    static class PrimitiveParseTest extends AbstractJsonpParseTest {
+        /**
+         * Create a new PrimitiveParseTest.
+         */
+        public PrimitiveParseTest() {
+            super(JsonpValueFactory.PRIMITIVE);
+        }
+    }
+    
+    /**
+     * Unit test using JsonpValueFactory.DOUBLE.
+     */
+    @Nested
+    static class DoubleParseTest extends AbstractJsonpParseTest {
+        /**
+         * Create a new DoubleParseTest.
+         */
+        public DoubleParseTest() {
+            super(JsonpValueFactory.DOUBLE);
+        }
+    }
+
+    /**
+     * Unit test using JsonpValueFactory.BigMathFactory.
+     *
+     * @author jsonurl.org
+     * @author David MacCormack
+     * @since 2019-09-01
+     */
+    @Nested
+    static class BigMathParseTest extends AbstractJsonpParseTest {
+
+        /**
+         * Create a new BigMathParseTest.
+         */
+        BigMathParseTest() {
+            super(new JsonpValueFactory.BigMathFactory(null, null, null, null));
+        }
+    }
+
+    /**
+     * Unit test using JsonpValueFactory.BIGMATH32.
+     */
+    @Nested
+    static final class BigMathParseTest32 extends AbstractJsonpParseTest {
+        /**
+         * Create a new BigMathParseTest32.
+         */
+        BigMathParseTest32() {
+            super(JsonpValueFactory.BIGMATH32);
+        }
+    }
+
+    /**
+     * Unit test using JsonpValueFactory.BIGMATH64.
+     */
+    @Nested
+    static final class BigMathParseTest64 extends AbstractJsonpParseTest {
+        /**
+         * Create a new BigMathParseTest64.
+         */
+        BigMathParseTest64() {
+            super(JsonpValueFactory.BIGMATH64);
+        }
+    }
+
+    /**
+     * Unit test using JsonpValueFactory.BIGMATH128.
+     */
+    @Nested
+    static final class BigMathParseTest128 extends AbstractJsonpParseTest {
+        /**
+         * Create a new BigMathParseTest128.
+         */
+        BigMathParseTest128() {
+            super(JsonpValueFactory.BIGMATH128);
+        }
+    }
+    
+    /**
+     * Unit test using JsonpValueFactory.BIGMATH32.
+     */
+    static final class BigDecimalParseTest32 extends AbstractJsonpParseTest {
+        /**
+         * Create a new BigDecimalParseTest32.
+         */
+        BigDecimalParseTest32() {
+            super(new JsonpValueFactory.BigMathFactory(
+                MathContext.DECIMAL32,
+                BigMathProvider.BIG_INTEGER32_BOUNDARY_NEG,
+                BigMathProvider.BIG_INTEGER32_BOUNDARY_POS,
+                null));
+        }
+    }
+
+    /**
+     * Unit test using JsonpValueFactory.BIGMATH64.
+     */
+    static final class BigDecimalParseTest64 extends AbstractJsonpParseTest {
+        /**
+         * Create a new BigDecimalParseTest64.
+         */
+        BigDecimalParseTest64() {
+            super(new JsonpValueFactory.BigMathFactory(
+                MathContext.DECIMAL64,
+                BigMathProvider.BIG_INTEGER64_BOUNDARY_NEG,
+                BigMathProvider.BIG_INTEGER64_BOUNDARY_POS,
+                null));
+        }
+    }
+
+    /**
+     * Unit test using JsonpValueFactory.BIGMATH128.
+     */
+    static final class BigDecimalParseTest128 extends AbstractJsonpParseTest {
+
+        /**
+         * Create a new BigDecimalParseTest128.
+         */
+        BigDecimalParseTest128() {
+            super(new JsonpValueFactory.BigMathFactory(
+                MathContext.DECIMAL128,
+                BigMathProvider.BIG_INTEGER128_BOUNDARY_NEG,
+                BigMathProvider.BIG_INTEGER128_BOUNDARY_POS,
+                null));
+        }
+    }
 
     /**
      * Create a new JsonpParseTest.

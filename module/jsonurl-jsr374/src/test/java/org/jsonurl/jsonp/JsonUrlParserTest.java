@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 David MacCormack
+ * Copyright 2019 David MacCormack
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -17,19 +17,29 @@
 
 package org.jsonurl.jsonp;
 
+import static org.junit.jupiter.api.Assertions.assertSame;
+
+import org.junit.jupiter.api.Test;
+
 /**
- * Unit test using JsonpValueFactory.PRIMITIVE
+ * Unit test for JsonUrlParser.
  *
  * @author jsonurl.org
  * @author David MacCormack
- * @since 2019-09-01
+ * @since 2019-10-01
  */
-public class PrimitiveParseTest extends AbstractJsonpParseTest {
+class JsonUrlParserTest {
 
-    /**
-     * Create a new PrimitiveParseTest.
-     */
-    public PrimitiveParseTest() {
-        super(JsonpValueFactory.PRIMITIVE);
+    @Test
+    void testConstruct() {
+        assertSame(
+            JsonpValueFactory.BIGMATH64,
+            new JsonUrlParser().getFactory(),
+            "new JsonUrlParser");
+
+        assertSame(
+            JsonpValueFactory.PRIMITIVE,
+            new JsonUrlParser(JsonpValueFactory.PRIMITIVE).getFactory(),
+            "new JsonUrlParser");
     }
 }

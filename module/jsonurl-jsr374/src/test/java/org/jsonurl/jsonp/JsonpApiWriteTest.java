@@ -38,7 +38,7 @@ import org.jsonurl.ValueFactoryParser;
  * @author David MacCormack
  * @since 2019-09-01
  */
-public class JsonpWriteTest extends AbstractJsonApiWriteTest<
+public class JsonpApiWriteTest extends AbstractJsonApiWriteTest<
         JsonValue,
         JsonStructure,
         JsonArray,

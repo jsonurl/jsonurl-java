@@ -15,21 +15,31 @@
  * under the License.
  */
 
-package org.jsonurl.jsonorg;
+package org.jsonurl.j2se;
+
+import static org.junit.jupiter.api.Assertions.assertSame;
+
+import org.junit.jupiter.api.Test;
 
 /**
- * Unit test using JsonOrgValueFactory.DOUBLE
+ * Unit test for JsonUrlParser.
  *
  * @author jsonurl.org
  * @author David MacCormack
- * @since 2019-09-01
+ * @since 2019-10-01
  */
-public class DoubleParseTest extends AbstractJsonOrgParseTest {
+class JsonUrlParserTest {
 
-    /**
-     * Create a new DoubleParseTest.
-     */
-    public DoubleParseTest() {
-        super(JsonOrgValueFactory.DOUBLE);
+    @Test
+    void testConstruct() {
+        assertSame(
+            JavaValueFactory.PRIMITIVE,
+            new JsonUrlParser().getFactory(),
+            "new JsonUrlParser");
+
+        assertSame(
+            JavaValueFactory.DOUBLE,
+            new JsonUrlParser(JavaValueFactory.DOUBLE).getFactory(),
+            "new JsonUrlParser");
     }
 }

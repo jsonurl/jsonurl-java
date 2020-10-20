@@ -32,7 +32,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /**
- * Unit test JsonUrlWriter.
+ * Unit test for JsonUrlWriter.
  *
  * @author jsonurl.org
  * @author David MacCormack
