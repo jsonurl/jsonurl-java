@@ -193,7 +193,7 @@ public abstract class AbstractParseTest<
                 () -> p.parse(text, factory));
 
 
-            p.setFormUrlEncodedAllowed(true);
+            p.setFormUrlEncoded(true);
 
             assertThrows(
                 SyntaxException.class,
@@ -337,7 +337,7 @@ public abstract class AbstractParseTest<
                 () -> p.parseObject(text, factory),
                 text);
             
-            p.setFormUrlEncodedAllowed(true);
+            p.setFormUrlEncoded(true);
             
             assertThrows(
                 SyntaxException.class,
@@ -1391,9 +1391,9 @@ public abstract class AbstractParseTest<
                     factory.newObjectBuilder()),
                 text);
 
-            p.setFormUrlEncodedAllowed(true);
+            p.setFormUrlEncoded(true);
 
-            assertTrue(p.isFormUrlEncodedAllowed(), text);
+            assertTrue(p.isFormUrlEncoded(), text);
 
             assertObjectWfu(text, p.parseObject(text, factory));
 
@@ -1436,9 +1436,9 @@ public abstract class AbstractParseTest<
                     factory.newArrayBuilder()),
                 text);
 
-            p.setFormUrlEncodedAllowed(true);
+            p.setFormUrlEncoded(true);
 
-            assertTrue(p.isFormUrlEncodedAllowed(), text);
+            assertTrue(p.isFormUrlEncoded(), text);
 
             assertArrayWfu(text, p.parseArray(text, factory));
 
@@ -1711,7 +1711,7 @@ public abstract class AbstractParseTest<
         })
         void testMissingObjectValueProvider(String text, String expectedText) {
             Parser p = new Parser();
-            p.setFormUrlEncodedAllowed(true);
+            p.setFormUrlEncoded(true);
 
             assertThrows(
                 SyntaxException.class,

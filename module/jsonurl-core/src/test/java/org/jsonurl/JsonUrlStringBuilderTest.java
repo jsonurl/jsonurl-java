@@ -150,11 +150,11 @@ class JsonUrlStringBuilderTest {
         BigDecimal expected = new BigDecimal(text);
         JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
         assertEquals(text, jup.add(expected).build(), text);
+
+        jup.setImpliedStringLiterals(true);
         assertEquals(
                 text,
-                jup.clear()
-                   .setImpliedStringLiterals(true)
-                   .add(expected).build(),
+                jup.clear().add(expected).build(),
                 text);
 
     }
@@ -169,11 +169,11 @@ class JsonUrlStringBuilderTest {
         BigInteger expected = new BigInteger(text);
         JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
         assertEquals(text, jup.add(expected).build(), text);
+        
+        jup.setImpliedStringLiterals(true);
         assertEquals(
                 text,
-                jup.clear()
-                   .setImpliedStringLiterals(true)
-                   .add(expected).build(),
+                jup.clear().add(expected).build(),
                 text);
     }
 
@@ -189,11 +189,11 @@ class JsonUrlStringBuilderTest {
         String expected = String.valueOf(value);
         JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
         assertEquals(expected, jup.add(value).build(), expected);
+        
+        jup.setImpliedStringLiterals(true);
         assertEquals(
                 expected,
-                jup.clear()
-                   .setImpliedStringLiterals(true)
-                   .add(value).build(),
+                jup.clear().add(value).build(),
                 expected);
     }
 
@@ -213,11 +213,11 @@ class JsonUrlStringBuilderTest {
         String expected = String.valueOf(value);
         JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
         assertEquals(expected, jup.add(value).build(), expected);
+        
+        jup.setImpliedStringLiterals(true);
         assertEquals(
                 expected,
-                jup.clear()
-                   .setImpliedStringLiterals(true)
-                   .add(value).build(),
+                jup.clear().add(value).build(),
                 expected);
     }
 
@@ -318,11 +318,13 @@ class JsonUrlStringBuilderTest {
     @Test
     @Tag(TAG_EXCEPTION)
     void testException() {
+
+        JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
+        jup.setImpliedStringLiterals(true);
+
         assertThrows(
             IOException.class,
-            () -> new JsonUrlStringBuilder()
-                .setImpliedStringLiterals(true)
-                .addNull());
+            () -> jup.addNull());
 
         assertThrows(
             IOException.class,
@@ -401,12 +403,12 @@ class JsonUrlStringBuilderTest {
                 new JsonUrlStringBuilder().add(text, 0, text.length()).build(),
                 nonKeyOutput);
         
+        JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
+        jup.setImpliedStringLiterals(true);
         assertEquals(
                 nonKeyImpliedStringLiteralOutput,
-                new JsonUrlStringBuilder()
-                    .setImpliedStringLiterals(true)
-                    .add(text, 0, text.length())
-                    .build(),
+                jup.add(text, 0, text.length())
+                   .build(),
                 nonKeyImpliedStringLiteralOutput);
     }
 }
