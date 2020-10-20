@@ -83,13 +83,13 @@
     <pmd.version>6.28.0</pmd.version>
     <pmd.config.file>config/pmd-ruleset.xml</pmd.config.file>
     <pmd.config.module.location>../../${pmd.config.file}</pmd.config.module.location>
-    <jacoco.minimum.coverage>0.40</jacoco.minimum.coverage>
+    <jacoco.minimum.coverage>0.80</jacoco.minimum.coverage>
 
     <sonar.organization>jsonurl</sonar.organization>
     <sonar.projectName>JSON->URL Java Artifacts</sonar.projectName>
     <sonar.java.checkstyle.reportPaths>target/checkstyle-result.xml</sonar.java.checkstyle.reportPaths>
     <sonar.java.pmd.reportPaths>target/pmd.xml</sonar.java.pmd.reportPaths>
-    <sonar.junit.reportPaths>**/surefire-reports/*.xml</sonar.junit.reportPaths>
+    <sonar.junit.reportPaths>target/surefire-reports</sonar.junit.reportPaths>
     <sonar.coverage.jacoco.xmlReportPaths>${basedir}/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
   </properties>
 
