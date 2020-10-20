@@ -17,15 +17,12 @@
 
 package org.jsonurl.j2se;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.math.MathContext;
 import java.util.List;
 import java.util.Map;
 import org.jsonurl.AbstractParseTest;
 import org.jsonurl.BigMathProvider.BigIntegerOverflow;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Nested;
 
 /**
  * Abstract base class for parser tests.
@@ -48,6 +45,87 @@ abstract class AbstractJavaValueFactoryParseTest extends AbstractParseTest<
         Number,
         Object,
         String> {
+    
+    /**
+     * Unit test using JavaValueFactory.PRIMITIVE.
+     */
+    @Nested
+    static class PrimitiveParseTest extends AbstractJavaValueFactoryParseTest {
+
+        /**
+         * Create a new PrimitiveParseTest.
+         */
+        public PrimitiveParseTest() {
+            super(JavaValueFactory.PRIMITIVE);
+        }
+    }
+    
+    /**
+     * Unit test using JavaValueFactory.DOUBLE.
+     */
+    @Nested
+    static class DoubleParseTest extends AbstractJavaValueFactoryParseTest {
+
+        /**
+         * Create a new DoubleParseTest.
+         */
+        public DoubleParseTest() {
+            super(JavaValueFactory.DOUBLE);
+        }
+    }
+    
+    /**
+     * Unit test using JavaValueFactory.BigMathFactory.
+     */
+    @Nested
+    static class BigMathParseTest extends AbstractJavaValueFactoryParseTest {
+        /**
+         * Create a new BigMathParseTest.
+         */
+        BigMathParseTest() {
+            super(new JavaValueFactory.BigMathFactory(null, null, null, null));
+        }
+    }
+    
+
+    /**
+     * Unit test using JavaValueFactory.BIGMATH32.
+     */
+    @Nested
+    static class BigMathParseTest32 extends AbstractJavaValueFactoryParseTest {
+        /**
+         * Create a new BigMathParseTest32.
+         */
+        BigMathParseTest32() {
+            super(JavaValueFactory.BIGMATH32);
+        }
+    }
+
+    /**
+     * Unit test using JavaValueFactory.BIGMATH64.
+     */
+    @Nested
+    static class BigMathParseTest64 extends AbstractJavaValueFactoryParseTest {
+        /**
+         * Create a new BigMathParseTest64.
+         */
+        BigMathParseTest64() {
+            super(JavaValueFactory.BIGMATH64);
+        }
+    }
+
+    /**
+     * Unit test using JavaValueFactory.BIGMATH128.
+     */
+    @Nested
+    static class BigMathParseTest128 extends AbstractJavaValueFactoryParseTest {
+        /**
+         * Create a new BigMathParseTest128.
+         */
+        BigMathParseTest128() {
+            super(JavaValueFactory.BIGMATH128);
+        }
+    }
 
     /**
      * Create a new JavaValueFactoryParseTest.
@@ -137,28 +215,6 @@ abstract class AbstractJavaValueFactoryParseTest extends AbstractParseTest<
         return value instanceof String ? (String)value : null;
     }
 
-    @Test
-    @DisplayName("JavaValueFactory.toJavaString")
-    void testToJavaString() {
-        String test = "Hello, World!";
-
-        assertEquals(
-            test,
-            JavaValueFactory.toJavaString(test, 0, test.length()),
-            test);
-        
-        assertEquals(
-            test.substring(1),
-            JavaValueFactory.toJavaString(test, 1, test.length()),
-            test);
-        
-        assertEquals(
-            test.substring(1),
-            JavaValueFactory.toJavaString(
-                new StringBuilder(test), 1, test.length()),
-            test);
-    }
-    
     @Override
     protected JavaValueFactory newBigMathFactory(
                 MathContext mctxt,

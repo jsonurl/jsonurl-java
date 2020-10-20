@@ -33,7 +33,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 /**
- * Unit test for write() cases that don't very with the factory.
+ * Unit test for JsonUrlWriter.
  *
  * @author jsonurl.org
  * @author David MacCormack

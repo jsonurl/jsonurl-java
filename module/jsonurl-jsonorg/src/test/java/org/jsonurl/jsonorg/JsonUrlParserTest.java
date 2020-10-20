@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 David MacCormack
+ * Copyright 2019 David MacCormack
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -15,21 +15,31 @@
  * under the License.
  */
 
-package org.jsonurl.jsonp;
+package org.jsonurl.jsonorg;
+
+import static org.junit.jupiter.api.Assertions.assertSame;
+
+import org.junit.jupiter.api.Test;
 
 /**
- * Unit test using JsonpValueFactory.DOUBLE.
+ * Unit test for JsonUrlParser.
  *
  * @author jsonurl.org
  * @author David MacCormack
- * @since 2019-09-01
+ * @since 2019-10-01
  */
-public class DoubleParseTest extends AbstractJsonpParseTest {
+class JsonUrlParserTest {
 
-    /**
-     * Create a new DoubleParseTest.
-     */
-    public DoubleParseTest() {
-        super(JsonpValueFactory.DOUBLE);
+    @Test
+    void testConstruct() {
+        assertSame(
+            JsonOrgValueFactory.PRIMITIVE,
+            new JsonUrlParser().getFactory(),
+            "new JsonUrlParser");
+
+        assertSame(
+            JsonOrgValueFactory.DOUBLE,
+            new JsonUrlParser(JsonOrgValueFactory.DOUBLE).getFactory(),
+            "new JsonUrlParser");
     }
 }

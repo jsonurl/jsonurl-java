@@ -190,7 +190,7 @@ public interface JsonpValueFactory extends ValueFactory<
             return jsonProvider;
         }
     }
-    
+
     /**
      * A {@link JsonpValueFactory} that uses
      * {@link java.math.BigDecimal BigDecimal} when necessary.
