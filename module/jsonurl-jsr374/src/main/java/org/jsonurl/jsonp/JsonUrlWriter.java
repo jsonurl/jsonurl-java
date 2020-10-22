@@ -17,6 +17,8 @@
 
 package org.jsonurl.jsonp;
 
+import static org.jsonurl.JsonUrlOptions.isSkipNulls;
+
 import java.io.IOException;
 import java.util.Map.Entry;
 import javax.json.JsonArray;
@@ -25,6 +27,7 @@ import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 import org.jsonurl.JsonTextBuilder;
+import org.jsonurl.JsonUrlOptions;
 
 /**
  * A utility class for serializing javax.json objects, arrays, and values as JSON&#x2192;URL text.
@@ -56,7 +59,7 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
     public static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
             JsonValue value) throws IOException {
-        return write(dest, false, value);
+        return write(dest, JsonUrlOptions.fromObject(dest), value);
     }
 
     /**
@@ -66,16 +69,16 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param value null or JsonValue
-     * @param skipNullValues do not write a value if it is null
+     * @param options a valid JsonUrlOptions or null
      * @return true if dest was modified
      */
     public static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
-            boolean skipNullValues,
+            JsonUrlOptions options,
             JsonValue value) throws IOException {
 
         if (isNull(value)) {
-            if (skipNullValues) {
+            if (isSkipNulls(options)) {
                 return false;
             }
 
@@ -105,15 +108,15 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
         }
 
         if (value instanceof JsonObject) {
-            return write(dest, skipNullValues, (JsonObject)value);
+            return write(dest, options, (JsonObject)value);
         }
         
         if (value instanceof JsonArray) {
-            return write(dest, skipNullValues, (JsonArray)value);
+            return write(dest, options, (JsonArray)value);
         }
 
         return org.jsonurl.j2se.JsonUrlWriter.write(
-                dest, skipNullValues, value);
+                dest, options, value);
     }
 
     /**
@@ -128,7 +131,7 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
     public static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
             JsonObject obj) throws IOException {
-        return write(dest, false, obj);
+        return write(dest, JsonUrlOptions.fromObject(dest), obj);
     }
 
     /**
@@ -138,16 +141,16 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param obj null or JsonObjectBuilder
-     * @param skipNullValues do not write a value if it is null
+     * @param options a valid JsonUrlOptions or null
      * @return true if dest was modified
      */
     public static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
-            boolean skipNullValues,
+            JsonUrlOptions options,
             JsonObject obj) throws IOException {
         
         if (isNull(obj)) {
-            if (skipNullValues) {
+            if (isSkipNulls(options)) {
                 return false;
             }
 
@@ -160,7 +163,7 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
         boolean ret = false;
         
         for (Entry<String, JsonValue> e : obj.entrySet()) {
-            ret = write(dest, skipNullValues, e.getKey(), e.getValue(), ret);
+            ret = write(dest, options, e.getKey(), e.getValue(), ret);
         }
         
         dest.endObject();
@@ -170,12 +173,12 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
     
     private static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
-            boolean skipNullValues,
+            JsonUrlOptions options,
             String key,
             JsonValue value,
             boolean comma) throws IOException {
 
-        if (skipNullValues && isNull(value)) {
+        if (isSkipNulls(options) && isNull(value)) {
             return comma;
         }
 
@@ -185,7 +188,7 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
         
         dest.addKey(key).nameSeparator();
         
-        write(dest, skipNullValues, value);   
+        write(dest, options, value);   
         return true;
     }
 
@@ -201,7 +204,7 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
     public static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
             JsonArray value) throws IOException {
-        return write(dest, false, value);
+        return write(dest, JsonUrlOptions.fromObject(dest), value);
     }
 
     /**
@@ -211,16 +214,16 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param value null or JsonArrayBuilder
-     * @param skipNullValues do not write a value if it is null
+     * @param options a valid JsonUrlOptions or null
      * @return true if dest was modified
      */
     public static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
-            boolean skipNullValues,
+            JsonUrlOptions options,
             JsonArray value) throws IOException {
         
         if (isNull(value)) {
-            if (skipNullValues) {
+            if (isSkipNulls(options)) {
                 return false;
             }
 
@@ -233,7 +236,7 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
         dest.beginArray();
 
         for (int i = 0, length = value.size(); i < length; i++) { // NOPMD - ForLoopVariableCount
-            ret = write(dest, skipNullValues, value.get(i), ret);
+            ret = write(dest, options, value.get(i), ret);
         }
 
         dest.endArray();
@@ -243,11 +246,11 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
     
     private static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
-            boolean skipNullValues,
+            JsonUrlOptions options,
             JsonValue value,
             boolean comma) throws IOException {
 
-        if (skipNullValues && isNull(value)) {
+        if (isSkipNulls(options) && isNull(value)) {
             return comma;
         }
 
@@ -255,7 +258,7 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
             dest.valueSeparator();
         }
 
-        write(dest, skipNullValues, value);
+        write(dest, options, value);
 
         return true;
     }
