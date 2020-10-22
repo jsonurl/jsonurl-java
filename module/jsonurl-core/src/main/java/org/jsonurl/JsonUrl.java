@@ -306,18 +306,17 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
                 CharSequence text,
                 int start,
                 int stop,
-                boolean isEmptyUnquotedStringOK,
-                boolean isImpliedStringLiteral) {
+                JsonUrlOptions options) {
 
             if (stop <= start) {
-                if (isEmptyUnquotedStringOK) {
+                if (JsonUrlOptions.isEmptyUnquotedKeyAllowed(options)) {
                     return EMPTY_STRING;
                 }
 
                 throw new SyntaxException(MSG_EXPECT_LITERAL, start);
             }
 
-            if (isImpliedStringLiteral) {
+            if (JsonUrlOptions.isImpliedStringLiterals(options)) {
                 return string(buf, text, start, stop, false);
             }
 
@@ -373,18 +372,17 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
                 int start,
                 int stop,
                 ValueFactory<V,?,?,?,?,?,?,?,?,?> factory,
-                boolean isEmptyUnquotedStringOK,
-                boolean isImpliedStringLiteral) {
+                JsonUrlOptions options) {
 
             if (stop <= start) {
-                if (isEmptyUnquotedStringOK) {
+                if (JsonUrlOptions.isEmptyUnquotedValueAllowed(options)) {
                     return factory.getString("");
                 }
 
                 throw new SyntaxException(MSG_EXPECT_LITERAL, start);
             }
             
-            if (isImpliedStringLiteral) {
+            if (JsonUrlOptions.isImpliedStringLiterals(options)) {
                 return factory.getString(
                         string(buf, text, start, stop, false));
             }
@@ -745,8 +743,7 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
      * @param start start position in text
      * @param length number of characters to parse
      * @param factory a valid ValueFactory
-     * @param isEmptyUnquotedStringOK if true, allow empty unquoted strings
-     * @param isImpliedStringLiteral if true, assume all literals are strings
+     * @param options parse options
      * @return an object for the parsed literal
      */
     public static <V> V parseLiteral(
@@ -754,8 +751,7 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
             int start,
             int length,
             ValueFactory<V,?,?,?,?,?,?,?,?,?> factory,
-            boolean isEmptyUnquotedStringOK,
-            boolean isImpliedStringLiteral) {
+            JsonUrlOptions options) {
 
         //
         // Note: not checking length == 0 here. That case is handled properly
@@ -764,8 +760,9 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
         
         int stop = start + length;
         
-        final SyntaxException.Message errmsg = isEmptyUnquotedStringOK
-            ? null : MSG_EXPECT_LITERAL;
+        final SyntaxException.Message errmsg =
+                JsonUrlOptions.isEmptyUnquotedValueAllowed(options)
+                    ? null : MSG_EXPECT_LITERAL;
 
         parseLiteralLength(text, start, stop, errmsg);
 
@@ -776,18 +773,17 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
                 start,
                 stop,
                 factory,
-                isEmptyUnquotedStringOK,
-                isImpliedStringLiteral);
+                options);
     }
 
     /**
      * Parse a single literal value.
      *
      * <p>This simply calls
-     * {@link #parseLiteral(CharSequence, int, int, ValueFactory, boolean, boolean)
+     * {@link #parseLiteral(CharSequence, int, int, ValueFactory, JsonUrlOptions)
      * parseLiteral(s, start, length, JavaValueFactory.PRIMITIVE, false, false)}.
      *
-     * @see #parseLiteral(CharSequence, int, int, ValueFactory, boolean, boolean)
+     * @see #parseLiteral(CharSequence, int, int, ValueFactory, JsonUrlOptions)
      * @see JavaValueFactory#PRIMITIVE
      */
     public static Object parseLiteral(
@@ -800,18 +796,17 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
                 start,
                 length,
                 JavaValueFactory.PRIMITIVE,
-                false,
-                false);
+                null);
     }
 
     /**
      * Parse a single literal value.
      *
      * <p>This simply calls
-     * {@link #parseLiteral(CharSequence, int, int, ValueFactory, boolean, boolean)
+     * {@link #parseLiteral(CharSequence, int, int, ValueFactory, JsonUrlOptions)
      * parseLiteral(s, 0, s.length(), JavaValueFactory.PRIMITIVE, false, false)}.
      *
-     * @see #parseLiteral(CharSequence, int, int, ValueFactory, boolean, boolean)
+     * @see #parseLiteral(CharSequence, int, int, ValueFactory, JsonUrlOptions)
      * @see JavaValueFactory#PRIMITIVE
      */
     public static Object parseLiteral(CharSequence text) {
@@ -820,22 +815,21 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
                 0,
                 text.length(),
                 JavaValueFactory.PRIMITIVE,
-                false,
-                false);
+                null);
     }
 
     /**
      * Parse a single literal value.
      *
      * <p>This simply calls
-     * {@link #parseLiteral(CharSequence, int, int, ValueFactory, boolean, boolean)
+     * {@link #parseLiteral(CharSequence, int, int, ValueFactory, JsonUrlOptions)
      * parseLiteral(s, 0, s.length(), factory, false, false)}.
-     * @see #parseLiteral(CharSequence, int, int, ValueFactory, boolean, boolean)
+     * @see #parseLiteral(CharSequence, int, int, ValueFactory, JsonUrlOptions)
      */
     public static <V> V parseLiteral(
             CharSequence text,
             ValueFactory<V,?,?,?,?,?,?,?,?,?> factory) {
-        return parseLiteral(text, 0, text.length(), factory, false, false);
+        return parseLiteral(text, 0, text.length(), factory, null);
     }
 
     /**
@@ -854,18 +848,21 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
             int start,
             int end,
             boolean isKey,
-            boolean isEmptyUnquotedStringOK,
-            boolean isImpliedStringLiteral) throws IOException {
+            JsonUrlOptions options) throws IOException {
 
         if (end <= start) {
             //
             // empty string
             //
-            if (isEmptyUnquotedStringOK) {
+            boolean emptyOK = isKey
+                    ? JsonUrlOptions.isEmptyUnquotedKeyAllowed(options)
+                    : JsonUrlOptions.isEmptyUnquotedValueAllowed(options);
+
+            if (emptyOK) {
                 return false;
             }
 
-            if (isImpliedStringLiteral) {
+            if (JsonUrlOptions.isImpliedStringLiterals(options)) {
                 throw new IOException("implied strings: unexpected empty string");
             }
 
@@ -876,7 +873,7 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
             return true;
         }
 
-        if (isImpliedStringLiteral) {
+        if (JsonUrlOptions.isImpliedStringLiterals(options)) {
             Encode.encode(dest, text, start, end, false, true);
             return true;
         }

@@ -94,17 +94,24 @@ class ValueFactoryParseResultFacade<V,
      * A MissingValueProvider.
      */
     private final MissingValueProvider<V> missingValueProvider;
+    
+    /**
+     * JsonUrlOptions.
+     */
+    private final JsonUrlOptions options;
 
     /**
      * Create a new ValueFactoryParseResultFacade.
      */
     public ValueFactoryParseResultFacade(
             ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory,
+            JsonUrlOptions options,
             ABT impliedArray,
             JBT impliedObject,
             MissingValueProvider<V> missingValueProvider) {
 
         this.factory = factory;
+        this.options = options;
         this.numb = newNumberBuilder(factory);
         this.missingValueProvider = missingValueProvider == null
                 ? this::defaultMissingValueProvier : missingValueProvider;
@@ -162,9 +169,7 @@ class ValueFactoryParseResultFacade<V,
     public void addLiteral(
             CharSequence text,
             int start,
-            int stop,
-            boolean isEmptyUnquotedStringOK,
-            boolean isImpliedStringLiteral) {
+            int stop) {
 
         factoryValueStack.push(
             literal(
@@ -174,17 +179,14 @@ class ValueFactoryParseResultFacade<V,
                     start,
                     stop,
                     factory,
-                    isEmptyUnquotedStringOK,
-                    isImpliedStringLiteral));
+                    options));
     }
 
     @Override
     public void addSingleElementArray(
             CharSequence text,
             int start,
-            int stop,
-            boolean isEmptyUnquotedStringOK,
-            boolean isImpliedStringLiteral) {
+            int stop) {
         ABT sea = factory.newArrayBuilder();
 
         factory.add(
@@ -196,8 +198,7 @@ class ValueFactoryParseResultFacade<V,
                 start,
                 stop,
                 factory,
-                isEmptyUnquotedStringOK,
-                isImpliedStringLiteral));
+                options));
 
         factoryValueStack.push(factory.newArray(sea));                
     }
@@ -206,15 +207,12 @@ class ValueFactoryParseResultFacade<V,
     public void addObjectKey(
             CharSequence text,
             int start,
-            int stop,
-            boolean isEmptyUnquotedStringOK,
-            boolean isImpliedStringLiteral) {
+            int stop) {
         keyStack.push(parseKey(
                 text,
                 start,
                 stop,
-                isEmptyUnquotedStringOK,
-                isImpliedStringLiteral));                
+                options));                
     }
 
     @Override
@@ -254,9 +252,7 @@ class ValueFactoryParseResultFacade<V,
     public V getResult(
             CharSequence text,
             int start,
-            int stop,
-            boolean isEmptyUnquotedStringOK,
-            boolean isImpliedStringLiteral) {
+            int stop) {
 
         return literal(
                 buf,
@@ -265,8 +261,7 @@ class ValueFactoryParseResultFacade<V,
                 start,
                 stop,
                 factory,
-                isEmptyUnquotedStringOK,
-                isImpliedStringLiteral);
+                options);
     }
 
     @Override
@@ -294,8 +289,7 @@ class ValueFactoryParseResultFacade<V,
     public ParseResultFacade<V> addMissingValue(
             CharSequence text,
             int start,
-            int stop,
-            boolean isImpliedStringLiteral) {
+            int stop) {
 
         //
         // note that isEmptyUnquotedStringOK is always false. This makes
@@ -306,8 +300,7 @@ class ValueFactoryParseResultFacade<V,
                 text,
                 start,
                 stop,
-                false,
-                isImpliedStringLiteral);
+                options);
 
         keyStack.push(key);
         factoryValueStack.push(missingValueProvider.getValue(key, position));
@@ -322,8 +315,7 @@ class ValueFactoryParseResultFacade<V,
             CharSequence text,
             int start,
             int stop,
-            boolean isEmptyUnquotedStringOK,
-            boolean isImpliedStringLiteral) {
+            JsonUrlOptions options) {
 
         return literalToJavaString(
                 buf,
@@ -331,8 +323,7 @@ class ValueFactoryParseResultFacade<V,
                 text,
                 start,
                 stop,
-                isEmptyUnquotedStringOK,
-                isImpliedStringLiteral);
+                options);
     }
 
     /**

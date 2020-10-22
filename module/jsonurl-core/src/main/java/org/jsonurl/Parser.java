@@ -260,7 +260,7 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
 
         return (J)parse(text, 0, text.length(), TYPE_VALUE_OBJECT,
             new ValueFactoryParseResultFacade<>(
-                    factory, null, impliedObject, null));
+                    factory, this, null, impliedObject, null));
     }
 
     /**
@@ -286,7 +286,7 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
 
         return (J)parse(text, 0, text.length(), TYPE_VALUE_OBJECT,
             new ValueFactoryParseResultFacade<>(
-                    factory, null, impliedObject, mvp));
+                    factory, this, null, impliedObject, mvp));
     }
 
     /**
@@ -313,7 +313,7 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
 
         return (J)parse(text, off, length, TYPE_VALUE_OBJECT,
             new ValueFactoryParseResultFacade<>(
-                    factory, null, impliedObject, null));
+                    factory, this, null, impliedObject, null));
     }
 
     /**
@@ -341,7 +341,7 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
 
         return (J)parse(text, off, length, TYPE_VALUE_OBJECT,
             new ValueFactoryParseResultFacade<>(
-                    factory, null, impliedObject, mvp));
+                    factory, this, null, impliedObject, mvp));
     }
 
     /**
@@ -411,7 +411,7 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
 
         return (A)parse(text, 0, text.length(), TYPE_VALUE_ARRAY,
             new ValueFactoryParseResultFacade<>(
-                    factory, impliedArray, null, null));
+                    factory, this, impliedArray, null, null));
     }
 
     /**
@@ -438,7 +438,7 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
 
         return (A)parse(text, off, length, TYPE_VALUE_ARRAY,
             new ValueFactoryParseResultFacade<>(
-                    factory, impliedArray, null, null));
+                    factory, this, impliedArray, null, null));
     }
 
     /**
@@ -561,7 +561,8 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
                 ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory) {
 
         return parse(text, off, length, canReturn,
-            new ValueFactoryParseResultFacade<>(factory, null, null, null));
+            new ValueFactoryParseResultFacade<>(
+                    factory, this, null, null, null));
     }
 
     /**
@@ -611,9 +612,7 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
                 return result.getResult(
                         text,
                         off,
-                        off,
-                        true,
-                        isImpliedStringLiterals());
+                        off);
             }
             
             //
@@ -676,12 +675,7 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
                 throw new SyntaxException(MSG_EXPECT_LITERAL);
             }
 
-            R ret = result.getResult(
-                    text,
-                    off,
-                    stop,
-                    isEmptyUnquotedValueAllowed(),
-                    isImpliedStringLiterals());
+            R ret = result.getResult(text, off, stop);
 
             if (canReturn != null && !result.isValid(canReturn, ret)) {
                 throw new SyntaxException(
@@ -858,12 +852,7 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
                     result
                         .setLocation(litpos)
                         .beginArray()
-                        .addLiteral(
-                                text,
-                                litpos,
-                                pos,
-                                isEmptyUnquotedValueAllowed(),
-                                isImpliedStringLiterals());
+                        .addLiteral(text, litpos, pos);
 
                     continue;
 
@@ -885,12 +874,7 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
                     
                     result
                         .setLocation(litpos)
-                        .addSingleElementArray(
-                                text,
-                                litpos,
-                                pos,
-                                isEmptyUnquotedValueAllowed(),
-                                isImpliedStringLiterals());
+                        .addSingleElementArray(text, litpos, pos);
 
                     parseDepth--;
                     pos++;
@@ -952,12 +936,7 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
                     result
                         .setLocation(litpos)
                         .beginObject()
-                        .addObjectKey(
-                                text,
-                                litpos,
-                                pos,
-                                isEmptyUnquotedKeyAllowed(),
-                                isImpliedStringLiterals());
+                        .addObjectKey(text, litpos, pos);
 
                     pos++;
                     continue;
@@ -995,12 +974,7 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
                 stateStack.set(0, State.ARRAY_AFTER_ELEMENT);
                 result
                     .setLocation(litpos)
-                    .addLiteral(
-                            text,
-                            litpos,
-                            pos,
-                            isEmptyUnquotedValueAllowed(),
-                            isImpliedStringLiterals());
+                    .addLiteral(text, litpos, pos);
 
                 if (pos == stop) {
                     if (parseDepth == 1 && impliedArray) {
@@ -1091,12 +1065,7 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
                 stateStack.set(0, State.OBJECT_AFTER_ELEMENT);
                 result
                     .setLocation(litpos)
-                    .addLiteral(
-                            text,
-                            litpos,
-                            pos,
-                            isEmptyUnquotedValueAllowed(),
-                            isImpliedStringLiterals());
+                    .addLiteral(text, litpos, pos);
                 
                 if (pos == stop) {
                     if (parseDepth == 1 && impliedObject) {
@@ -1170,8 +1139,7 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
                             .addMissingValue(
                                     text,
                                     litpos,
-                                    pos,
-                                    isImpliedStringLiterals())
+                                    pos)
                             .addObjectElement()
                             .endObject()
                             .getResult();
@@ -1206,8 +1174,7 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
                             .addMissingValue(
                                     text,
                                     litpos,
-                                    pos,
-                                    isImpliedStringLiterals());
+                                    pos);
 
                         stateStack.set(0, State.OBJECT_AFTER_ELEMENT);
                         continue;
@@ -1221,12 +1188,7 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
 
                 result
                     .setLocation(litpos)
-                    .addObjectKey(
-                            text,
-                            litpos,
-                            pos,
-                            isEmptyUnquotedKeyAllowed(),
-                            isImpliedStringLiterals());
+                    .addObjectKey(text, litpos, pos);
 
                 pos++;
                 continue;

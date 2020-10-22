@@ -185,17 +185,13 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
             return addNull();
         }
 
-        boolean emptyOK = isKey
-                ? isEmptyUnquotedKeyAllowed() : isEmptyUnquotedValueAllowed();
-
         JsonUrl.appendLiteral(
                 out,
                 text,
                 start,
                 end,
                 isKey,
-                emptyOK,
-                isImpliedStringLiterals());
+                this);
 
         return this;
     }

@@ -452,7 +452,7 @@ public abstract class AbstractParseTest<
             // test Parser.setImpliedStringLiterals(true)
             //
             Parser p = new Parser();
-            p.setImpliedStringLiterals(true);
+            p.enableImpliedStringLiterals();
 
             assertEquals(
                     getFactoryString(urlDecode(in)),
@@ -466,8 +466,7 @@ public abstract class AbstractParseTest<
                             0,
                             in.length(),
                             factory,
-                            true,
-                            true),
+                            p),
                     in);
         }
 
@@ -490,7 +489,7 @@ public abstract class AbstractParseTest<
             // test Parser.setImpliedStringLiterals(true)
             //
             Parser p = new Parser();
-            p.setImpliedStringLiterals(true);
+            p.enableImpliedStringLiterals();
 
             assertEquals(
                     getFactoryString(text),
@@ -504,8 +503,7 @@ public abstract class AbstractParseTest<
                             0,
                             text.length(),
                             factory,
-                            true,
-                            true),
+                            p),
                     text);
         }
 
@@ -551,6 +549,9 @@ public abstract class AbstractParseTest<
                 Double.valueOf(JsonUrl.parseLiteral(txt, factory).toString()),
                 txt);
 
+            Parser p = new Parser();
+            p.setImpliedStringLiterals(true);
+
             //
             // check implied string literals
             //
@@ -561,12 +562,8 @@ public abstract class AbstractParseTest<
                             0,
                             text.length(),
                             factory,
-                            false,
-                            true),
+                            p),
                     text);
-            
-            Parser p = new Parser();
-            p.setImpliedStringLiterals(true);
 
             assertEquals(
                     getFactoryString(urlDecode(text)),
@@ -587,6 +584,9 @@ public abstract class AbstractParseTest<
             assertEquals(String.valueOf(nativeValue), txt, text);
             assertEquals(factoryValue, JsonUrl.parseLiteral(txt, factory), text);
 
+            Parser p = new Parser();
+            p.setImpliedStringLiterals(true);
+
             assertEquals(
                     getFactoryString(text),
                     JsonUrl.parseLiteral(
@@ -594,16 +594,12 @@ public abstract class AbstractParseTest<
                             0,
                             text.length(),
                             factory,
-                            false,
-                            true),
+                            p),
                     text);
-            
+
             //
             // test Parser.setImpliedStringLiterals(true)
             //
-            Parser p = new Parser();
-            p.setImpliedStringLiterals(true);
-
             assertEquals(
                     getFactoryString(text),
                     p.parse(text, factory),
@@ -646,7 +642,7 @@ public abstract class AbstractParseTest<
 
                 assertThrows(
                     SyntaxException.class,
-                    () -> JsonUrl.parseLiteral(text, 0, text.length(), factory, false, false));
+                    () -> JsonUrl.parseLiteral(text, 0, text.length(), factory, null));
 
             } else {
                 if (factory == JavaValueFactory.PRIMITIVE) {
@@ -656,27 +652,32 @@ public abstract class AbstractParseTest<
      
                 assertEquals(expected, JsonUrl.parseLiteral(text, factory));
                 assertEquals(expected, JsonUrl.parseLiteral(
-                        text, 0, text.length(), factory, false, false));
+                        text, 0, text.length(), factory, null));
             }
+
 
             //
             // test Parser.setEmptyUnquotedValueAllowed(true)
             //
+            Parser p = new Parser();
+            p.setEmptyUnquotedValueAllowed(true);
+
             assertEquals(expected, JsonUrl.parseLiteral(
                     text,
                     0,
                     text.length(),
                     factory,
-                    true,
-                    false));
+                    p));
 
-            Parser p = new Parser();
-            p.setEmptyUnquotedValueAllowed(true);
             assertEquals(expected, p.parse(text, factory));
 
             //
             // test Parser.setImpliedStringLiterals(true);
             //
+            p = new Parser();
+            p.setImpliedStringLiterals(true);
+            p.setEmptyUnquotedValueAllowed(true);
+
             assertEquals(
                     getFactoryString(text),
                     JsonUrl.parseLiteral(
@@ -684,13 +685,9 @@ public abstract class AbstractParseTest<
                             0,
                             text.length(),
                             factory,
-                            true,
-                            true),
+                            p),
                     text);
 
-            p = new Parser();
-            p.setImpliedStringLiterals(true);
-            p.setEmptyUnquotedValueAllowed(true);
             assertEquals(factory.getString(text), p.parse(text, factory));
         }
 
@@ -829,7 +826,7 @@ public abstract class AbstractParseTest<
             // test Parser.setImpliedStringLiterals(true)
             //
             Parser p = new Parser();
-            p.setImpliedStringLiterals(true);
+            p.enableImpliedStringLiterals();
 
             assertEquals(
                     getFactoryString(text),
@@ -843,8 +840,7 @@ public abstract class AbstractParseTest<
                             0,
                             text.length(),
                             factory,
-                            true,
-                            true),
+                            p),
                     text);
         }
 
@@ -961,7 +957,10 @@ public abstract class AbstractParseTest<
                         text);
                 }
             }
-            
+
+            Parser p = new Parser();
+            p.setImpliedStringLiterals(true);
+
             assertEquals(
                     getFactoryString(text),
                     JsonUrl.parseLiteral(
@@ -969,16 +968,12 @@ public abstract class AbstractParseTest<
                             0,
                             text.length(),
                             factory,
-                            false,
-                            true),
+                            p),
                     text);
 
             //
             // test Parser.setImpliedStringLiterals(true)
             //
-            Parser p = new Parser();
-            p.setImpliedStringLiterals(true);
-
             assertEquals(
                     getFactoryString(text),
                     p.parse(text, factory),
@@ -1796,16 +1791,6 @@ public abstract class AbstractParseTest<
             String text,
             Object expect,
             boolean isLiteral) {
-        parse(allow, text, expect, isLiteral, false, false);
-    }
-
-    private void parse(
-            EnumSet<ValueType> allow,
-            String text,
-            Object expect,
-            boolean isLiteral,
-            boolean allowEmptyString,
-            boolean impliedStringLiterals) {
 
         StringBuilder buf = new StringBuilder(1 << 10);
 
@@ -1846,8 +1831,7 @@ public abstract class AbstractParseTest<
                 PREFIX2.length(),
                 text.length(),
                 factory,
-                allowEmptyString,
-                impliedStringLiterals);
+                null);
     
             Object litCompare = expectValue;
             assertEquals(litCompare, litResult, text);
