@@ -68,12 +68,7 @@ interface ParseResultFacade<R> {
     /**
      * Add the given literal.
      */
-    void addLiteral(
-            CharSequence text,
-            int start,
-            int stop,
-            boolean isEmptyUnquotedStringOK,
-            boolean isImpliedStringLiteral);
+    void addLiteral(CharSequence text, int start, int stop);
     
     /**
      * Add a single element array.
@@ -86,22 +81,12 @@ interface ParseResultFacade<R> {
      * endArray();
      * </pre>
      */
-    void addSingleElementArray(
-            CharSequence text,
-            int start,
-            int stop,
-            boolean isEmptyUnquotedStringOK,
-            boolean isImpliedStringLiteral);
+    void addSingleElementArray(CharSequence text, int start, int stop);
     
     /**
      * Add object key.
      */
-    void addObjectKey(
-        CharSequence text,
-        int start,
-        int stop,
-        boolean isEmptyUnquotedStringOK,
-        boolean isImpliedStringLiteral);
+    void addObjectKey(CharSequence text, int start, int stop);
 
     /**
      * Add an array element.
@@ -121,12 +106,7 @@ interface ParseResultFacade<R> {
     /**
      * Get a top-level literal result.
      */
-    R getResult(
-            CharSequence text,
-            int start,
-            int stop,
-            boolean isEmptyUnquotedStringOK,
-            boolean isImpliedStringLiteral);
+    R getResult(CharSequence text, int start, int stop);
 
     /**
      * Test if the given result is valid.
@@ -153,6 +133,5 @@ interface ParseResultFacade<R> {
     ParseResultFacade<R> addMissingValue(
             CharSequence text,
             int start,
-            int stop,
-            boolean isImpliedStringLiteral);
+            int stop);
 }
