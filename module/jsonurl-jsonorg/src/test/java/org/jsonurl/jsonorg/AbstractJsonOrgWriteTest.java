@@ -42,9 +42,8 @@ abstract class AbstractJsonOrgWriteTest
     @Override
     protected <I,R> boolean write(
             JsonTextBuilder<I, R> dest,
-            boolean skipNullValues,
             Object value) throws IOException {
 
-        return JsonUrlWriter.write(dest, skipNullValues, value);
+        return JsonUrlWriter.write(dest, value);
     }
 }

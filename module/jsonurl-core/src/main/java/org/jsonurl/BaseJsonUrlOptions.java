@@ -18,13 +18,13 @@
 package org.jsonurl;
 
 /**
- * Common parse/print options.
+ * Base class implementation of {@link JsonUrlOptions}.
  *
  * @author jsonurl.org
  * @author David MacCormack
  * @since 2020-10-20
  */
-public class CommonOptions {
+public class BaseJsonUrlOptions implements JsonUrlOptions {
 
     /**
      * Use application/x-www-form-urlencoded style separators at depth 0.
@@ -46,41 +46,79 @@ public class CommonOptions {
      */
     private boolean allowEmptyUnquotedValue;
 
-
     /**
-     * Returns true if application/x-www-form-urlencoded style separators are
-     * allowed for an implied top-level object or array.
-     * @see #setFormUrlEncoded(boolean) 
+     * When read/writing, use empty string rather than null.
      */
+    private boolean skipNulls;
+
+    @Override
     public boolean isFormUrlEncoded() {
         return wwwFormUrlEncoded;
     }
 
     /**
-     * Set this to true if you want to allow {@code &amp} to be used as a
-     * top-level value separator and {@code =} to be used as top-level name
-     * separator. 
-     * 
-     * @param wwwFormUrlEncoded true or false
+     * Enable/disable the wfu-composite/wfu-implied-composite options.
+     * @param wfu true or false
+     * @see #isFormUrlEncoded()
      */
-    public void setFormUrlEncoded(boolean wwwFormUrlEncoded) {
-        this.wwwFormUrlEncoded = wwwFormUrlEncoded;
+    public void setFormUrlEncoded(boolean wfu) {
+        this.wwwFormUrlEncoded = wfu;
     }
 
-    /**
-     * Returns true if all literals are assumed to be strings.
-     * @see #setImpliedStringLiterals(boolean)
-     */
+    @Override
     public boolean isImpliedStringLiterals() {
         return impliedStringLiterals;
     }
 
     /**
-     * Set this to true to assume all literals are strings.
+     * Enable/disable the implied-string-literals option.
      * @param implied true or false
+     * @see #isImpliedStringLiterals()
      */
     public void setImpliedStringLiterals(boolean implied) {
         this.impliedStringLiterals = implied;
+    }
+
+    @Override
+    public boolean isEmptyUnquotedKeyAllowed() {
+        return allowEmptyUnquotedKey;
+    }
+
+    /**
+     * Enable/disable the the empty-unquoted-key option.
+     * @param allow true or false
+     * @see #isEmptyUnquotedKeyAllowed()
+     */
+    public void setEmptyUnquotedKeyAllowed(boolean allow) {
+        this.allowEmptyUnquotedKey = allow;
+    }
+
+    @Override
+    public boolean isEmptyUnquotedValueAllowed() {
+        return allowEmptyUnquotedValue;
+    }
+
+    /**
+     * Enable/disable the the empty-unquoted-value option.
+     * @param allow true or false
+     * @see #isEmptyUnquotedValueAllowed()
+     */
+    public void setEmptyUnquotedValueAllowed(boolean allow) {
+        this.allowEmptyUnquotedValue = allow;
+    }
+
+    @Override
+    public boolean isSkipNulls() {
+        return skipNulls;
+    }
+
+    /**
+     * Enable/disable the skip-nulls option.
+     * @param skipNulls true or false
+     * @see #isSkipNulls()
+     */
+    public void setSkipNulls(boolean skipNulls) {
+        this.skipNulls = skipNulls;
     }
 
     /**
@@ -112,43 +150,9 @@ public class CommonOptions {
      * @see #setEmptyUnquotedValueAllowed(boolean)
      * @see #setImpliedStringLiterals(boolean)
      */
-    public void setImpliedStringLiterals() {
+    public void enableImpliedStringLiterals() {
         setEmptyUnquotedKeyAllowed(true);
         setEmptyUnquotedValueAllowed(true);
         setImpliedStringLiterals(true);
-    }
-    
-    /**
-     * Returns true if empty, unquoted keys are allowed.
-     * @see #setEmptyUnquotedKeyAllowed(boolean) 
-     */
-    public boolean isEmptyUnquotedKeyAllowed() {
-        return allowEmptyUnquotedKey;
-    }
-
-    /**
-     * Set this to true if you want to allow empty, unquoted keys.
-     * For example, {@code (:value)}.
-     * @param allow boolean
-     */
-    public void setEmptyUnquotedKeyAllowed(boolean allow) {
-        this.allowEmptyUnquotedKey = allow;
-    }
-
-    /**
-     * Returns true if empty, unquoted values are allowed.
-     * @see #setEmptyUnquotedValueAllowed(boolean) 
-     */
-    public boolean isEmptyUnquotedValueAllowed() {
-        return allowEmptyUnquotedValue;
-    }
-
-    /**
-     * Set this to true to allow empty, unquoted values.
-     * For example, {@code (1,,3)}.
-     * @param allow boolean
-     */
-    public void setEmptyUnquotedValueAllowed(boolean allow) {
-        this.allowEmptyUnquotedValue = allow;
     }
 }

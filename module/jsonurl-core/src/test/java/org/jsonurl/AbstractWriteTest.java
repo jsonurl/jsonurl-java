@@ -57,7 +57,7 @@ public abstract class AbstractWriteTest<
      */
     protected abstract <I,R> boolean write(
             JsonTextBuilder<I,R> dest,
-            boolean skipNullValues,
+            // boolean skipNullValues,
             V value) throws IOException;
 
     /**
@@ -71,11 +71,9 @@ public abstract class AbstractWriteTest<
         "null",
     })
     void testSkipNullValue(String text) throws IOException {
-        assertFalse(write(
-                new JsonUrlStringBuilder(),
-                true,
-                new Parser().parse(text, factory)),
-                text);
+        JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
+        jup.setSkipNulls(true);
+        assertFalse(write(jup, new Parser().parse(text, factory)), text);
     }
 
     @ParameterizedTest
@@ -86,10 +84,10 @@ public abstract class AbstractWriteTest<
     })
     void testArraySkipNullValue(String text) throws IOException {
         JsonUrlStringBuilder dest = new JsonUrlStringBuilder();
+        dest.setSkipNulls(true);
 
         assertTrue(write(
                 dest,
-                true,
                 new Parser().parseArray(text, factory)));
 
         assertEquals("(a,b)", dest.build(), text);
@@ -104,10 +102,10 @@ public abstract class AbstractWriteTest<
     })
     void testObjectSkipNullValue(String text) throws IOException {
         JsonUrlStringBuilder dest = new JsonUrlStringBuilder();
+        dest.setSkipNulls(true);
 
         assertTrue(write(
                 dest,
-                true,
                 new Parser().parseObject(text, factory)));
 
         assertEquals("(a:b,c:d)", dest.build(), text);
@@ -246,8 +244,9 @@ public abstract class AbstractWriteTest<
         JsonUrlStringBuilder jsb = new JsonUrlStringBuilder();
         jsb.setImpliedComposite(implied);
         jsb.setFormUrlEncoded(wwwFormUrlEncoded);
+        jsb.setSkipNulls(skipNullValues);
 
-        write(jsb, skipNullValues, value);
+        write(jsb, value);
 
         String actual = jsb.build();
         assertEquals(expected, actual, expected);

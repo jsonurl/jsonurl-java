@@ -85,7 +85,7 @@ class JsonUrlStringBuilderTest {
         assertFalse(jup.isImpliedStringLiterals(), test);
         assertFalse(jup.isEmptyUnquotedKeyAllowed(), test);
         assertFalse(jup.isEmptyUnquotedValueAllowed(), test);
-        jup.setImpliedStringLiterals();
+        jup.enableImpliedStringLiterals();
         assertTrue(jup.isImpliedStringLiterals(), test);
         assertTrue(jup.isEmptyUnquotedKeyAllowed(), test);
         assertTrue(jup.isEmptyUnquotedValueAllowed(), test);

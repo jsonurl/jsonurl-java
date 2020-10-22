@@ -35,7 +35,7 @@ import java.math.BigInteger;
  * @since 2019-09-01
  */
 public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
-    extends CommonOptions implements JsonTextBuilder<A, R>, Appendable {
+    extends BaseJsonUrlOptions implements JsonTextBuilder<A, R>, Appendable {
 
     /**
      * Destination, provided in constructor.

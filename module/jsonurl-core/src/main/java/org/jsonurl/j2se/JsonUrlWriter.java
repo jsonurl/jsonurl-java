@@ -17,9 +17,12 @@
 
 package org.jsonurl.j2se;
 
+import static org.jsonurl.JsonUrlOptions.isSkipNulls;
+
 import java.io.IOException;
 import java.util.Map;
 import org.jsonurl.JsonTextBuilder;
+import org.jsonurl.JsonUrlOptions;
 
 /**
  * A utility class for serializing J2SE values as JSON&#x2192;URL text.
@@ -50,7 +53,7 @@ public final class JsonUrlWriter { // NOPMD
     public static <A,R> boolean write(// NOPMD
             JsonTextBuilder<A,R> dest,
             Object value) throws IOException {
-        return write(dest, false, value);
+        return write(dest, JsonUrlOptions.fromObject(dest), value);
     }
 
     /**
@@ -60,16 +63,16 @@ public final class JsonUrlWriter { // NOPMD
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param value null or Java Object
-     * @param skipNullValues do not write a value if it is null
+     * @param options a valid JsonUrlOptions or null
      * @return true if dest was modified
      */
     public static <A,R> boolean  write(// NOPMD
             JsonTextBuilder<A,R> dest,
-            boolean skipNullValues,
+            JsonUrlOptions options,
             Object value) throws IOException {
 
         if (isNull(value)) {
-            if (skipNullValues) {
+            if (isSkipNulls(options)) {
                 return false;
             }
             
@@ -93,11 +96,11 @@ public final class JsonUrlWriter { // NOPMD
         }
 
         if (value instanceof Map) {
-            return write(dest, skipNullValues, (Map<?,?>)value);
+            return write(dest, options, (Map<?,?>)value);
         }
 
         if (value instanceof Iterable) {
-            return write(dest, skipNullValues, (Iterable<?>)value);
+            return write(dest, options, (Iterable<?>)value);
         }
 
         if (value instanceof CharSequence) {
@@ -132,7 +135,7 @@ public final class JsonUrlWriter { // NOPMD
             if (type == Short.TYPE) {
                 return write(dest, (short[])value);
             }
-            return write(dest, skipNullValues, (Object[])value);
+            return write(dest, options, (Object[])value);
         }
 
         throw new IOException("unsupported class: " + value.getClass());
@@ -151,7 +154,7 @@ public final class JsonUrlWriter { // NOPMD
     public static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
             Map<?,?> value) throws IOException {
-        return write(dest, false, value);
+        return write(dest, JsonUrlOptions.fromObject(dest), value);
     }
     
     /**
@@ -161,16 +164,16 @@ public final class JsonUrlWriter { // NOPMD
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param value null or Java Object
-     * @param skipNullValues do not write key/value pair if it's null
+     * @param options a valid JsonUrlOptions or null
      * @return true if dest was modified
      */
     public static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
-            boolean skipNullValues,
+            JsonUrlOptions options,
             Map<?,?> value) throws IOException {
         
         if (isNull(value)) {
-            if (skipNullValues) {
+            if (isSkipNulls(options)) {
                 return false;
             }
             
@@ -190,7 +193,7 @@ public final class JsonUrlWriter { // NOPMD
 
             ret = write(
                     dest,
-                    skipNullValues,
+                    options,
                     (CharSequence)key,
                     e.getValue(),
                     ret);
@@ -203,12 +206,12 @@ public final class JsonUrlWriter { // NOPMD
     
     private static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
-            boolean skipNullValues,
+            JsonUrlOptions options,
             CharSequence key,
             Object value,
             boolean comma) throws IOException {
 
-        if (skipNullValues && isNull(value)) {
+        if (isSkipNulls(options) && isNull(value)) {
             return comma;
         }
 
@@ -218,7 +221,7 @@ public final class JsonUrlWriter { // NOPMD
         
         dest.addKey(key).nameSeparator();
         
-        write(dest, skipNullValues, value);   
+        write(dest, options, value);   
         return true;
     }
 
@@ -234,7 +237,7 @@ public final class JsonUrlWriter { // NOPMD
     public static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
             Iterable<?> value) throws IOException {
-        return write(dest, false, value);
+        return write(dest, JsonUrlOptions.fromObject(dest), value);
     }
 
     /**
@@ -244,15 +247,15 @@ public final class JsonUrlWriter { // NOPMD
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param value null or an iterable object
-     * @param skipNullValues do not write iterated value if it's null
+     * @param options a valid JsonUrlOptions or null
      */
     public static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
-            boolean skipNullValues,
+            JsonUrlOptions options,
             Iterable<?> value) throws IOException {
 
         if (isNull(value)) {
-            if (skipNullValues) {
+            if (isSkipNulls(options)) {
                 return false;
             }
             
@@ -265,7 +268,7 @@ public final class JsonUrlWriter { // NOPMD
         dest.beginArray();
 
         for (Object obj : value) {
-            ret = write(dest, skipNullValues, obj, ret);
+            ret = write(dest, options, obj, ret);
         }
 
         dest.endArray();
@@ -275,11 +278,11 @@ public final class JsonUrlWriter { // NOPMD
     
     private static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
-            boolean skipNullValues,
+            JsonUrlOptions options,
             Object value,
             boolean comma) throws IOException {
 
-        if (skipNullValues && isNull(value)) {
+        if (isSkipNulls(options) && isNull(value)) {
             return comma;
         }
 
@@ -287,7 +290,7 @@ public final class JsonUrlWriter { // NOPMD
             dest.valueSeparator();
         }
 
-        write(dest, skipNullValues, value);
+        write(dest, options, value);
 
         return true;
     }
@@ -561,7 +564,7 @@ public final class JsonUrlWriter { // NOPMD
     public static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
             Object... array) throws IOException {
-        return write(dest, false, array);
+        return write(dest, JsonUrlOptions.fromObject(dest), array);
     }
 
     /**
@@ -571,16 +574,16 @@ public final class JsonUrlWriter { // NOPMD
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param array null or a valid array
-     * @param skipNullValues do not write array member if it's null
+     * @param options a valid JsonUrlOptions or null
      * @return true if dest was modified
      */
     public static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
-            boolean skipNullValues,
+            JsonUrlOptions options,
             Object... array) throws IOException {
 
         if (isNull(array)) {
-            if (skipNullValues) {
+            if (isSkipNulls(options)) {
                 return false;
             }
             
@@ -593,7 +596,7 @@ public final class JsonUrlWriter { // NOPMD
         boolean ret = false;
 
         for (int i = 0; i < array.length; i++) { // NOPMD - ForLoopVariableCount
-            ret = write(dest, skipNullValues, array[i], ret);
+            ret = write(dest, options, array[i], ret);
         }
 
         dest.endArray();

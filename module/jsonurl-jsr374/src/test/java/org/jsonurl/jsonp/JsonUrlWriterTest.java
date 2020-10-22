@@ -43,37 +43,37 @@ class JsonUrlWriterTest {
 
     @Test
     void testNullObject() throws IOException {
+        JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
+
+        jup.setSkipNulls(true);
         assertFalse(
-            JsonUrlWriter.write(
-                new JsonUrlStringBuilder(),
-                true,
-                (JsonObject)null),
+            JsonUrlWriter.write(jup, (JsonObject)null),
             NULL);
 
-        JsonUrlStringBuilder dest = new JsonUrlStringBuilder();
+        jup = new JsonUrlStringBuilder();
         assertTrue(
-            JsonUrlWriter.write(dest, (JsonObject)null),
+            JsonUrlWriter.write(jup, (JsonObject)null),
             NULL);
 
-        assertEquals(NULL, dest.build(), NULL);
+        assertEquals(NULL, jup.build(), NULL);
 
     }
 
     @Test
     void testNullArray() throws IOException {
+        JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
+        
+        jup.setSkipNulls(true);
         assertFalse(
-            JsonUrlWriter.write(
-                new JsonUrlStringBuilder(),
-                true,
-                (JsonArray)null),
+            JsonUrlWriter.write(jup, (JsonArray)null),
             NULL);
 
-        JsonUrlStringBuilder dest = new JsonUrlStringBuilder();
+        jup = new JsonUrlStringBuilder();
         assertTrue(
-            JsonUrlWriter.write(dest, (JsonArray)null),
+            JsonUrlWriter.write(jup, (JsonArray)null),
             NULL);
 
-        assertEquals(NULL, dest.build(), NULL);
+        assertEquals(NULL, jup.build(), NULL);
 
     }
 }

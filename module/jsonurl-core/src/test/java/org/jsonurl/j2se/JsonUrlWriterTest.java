@@ -116,7 +116,8 @@ class JsonUrlWriterTest {
         // skipNullValues = true
         //
         jsb = new JsonUrlStringBuilder();
-        JsonUrlWriter.write(jsb, true, test.values);
+        jsb.setSkipNulls(true);
+        JsonUrlWriter.write(jsb, test.values);
 
         assertEquals(
                 test.skipNullExpected,
@@ -232,8 +233,10 @@ class JsonUrlWriterTest {
         JsonUrlWriter.write(jsb, (Object[])null);
         assertEquals(NULL, jsb.build(), Object.class.toString());
 
+        jsb.setSkipNulls(true);
+
         assertFalse(
-                JsonUrlWriter.write(jsb.clear(), true, (Object[])null),
+                JsonUrlWriter.write(jsb.clear(), (Object[])null),
                 Object.class.toString());
     }
     
@@ -243,8 +246,10 @@ class JsonUrlWriterTest {
         JsonUrlWriter.write(jsb, (Iterable<?>)null);
         assertEquals(NULL, jsb.build(), Iterable.class.toString());
 
+        jsb.setSkipNulls(true);
+
         assertFalse(
-                JsonUrlWriter.write(jsb.clear(), true, (Iterable<?>)null),
+                JsonUrlWriter.write(jsb.clear(), (Iterable<?>)null),
                 Iterable.class.toString());
     }
 
@@ -254,8 +259,10 @@ class JsonUrlWriterTest {
         JsonUrlWriter.write(jsb, (Map<?,?>)null);
         assertEquals(NULL, jsb.build(), Iterable.class.toString());
 
+        jsb.setSkipNulls(true);
+
         assertFalse(
-                JsonUrlWriter.write(jsb.clear(), true, (Map<?,?>)null),
+                JsonUrlWriter.write(jsb.clear(), (Map<?,?>)null),
                 Iterable.class.toString());
     }
 
