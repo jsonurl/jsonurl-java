@@ -63,7 +63,7 @@ abstract class AbstractJavaValueFactoryParseTest extends AbstractParseTest<
     @Override
     protected boolean getNull(String key, Map<String,Object> value) {
         Object ret = value.get(key);
-        return factory.getNull() == ret;
+        return factory.isNull(ret);
     }
 
     @Override
@@ -128,6 +128,11 @@ abstract class AbstractJavaValueFactoryParseTest extends AbstractParseTest<
     @Override
     protected String getStringValue(Object value) {
         return value instanceof String ? (String)value : null;
+    }
+
+    @Override
+    protected int getSize(List<Object> value) {
+        return factory.isNull(value) ? 0 : value.size();
     }
 
     @Override

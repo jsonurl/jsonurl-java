@@ -1608,7 +1608,62 @@ public abstract class AbstractParseTest<
                     factory,
                     factory.newArrayBuilder()));
         }
-        
+
+        private void assertSkipNullArrayValue(String text, A actual) {
+            assertEquals(
+                factory.getNumber(new NumberBuilder("1")),
+                getNumber(0, actual),
+                text);
+
+            assertEquals(
+                factory.getNumber(new NumberBuilder("3")),
+                getNumber(1, actual),
+                text);
+        }
+
+        @ParameterizedTest
+        @Tag(TAG_PARSE)
+        @ValueSource(strings = {
+            "(1,null,3)",
+            "(1,null,null,null,null,3)",
+            "(null,1,null,null,null,null,3,null)",
+        })
+        void testSkipNullArrayValue(String text) {
+            Parser p = new Parser();
+            p.setSkipNulls(true);
+
+            assertTrue(p.isSkipNulls(), text);
+
+            assertSkipNullArrayValue(text, p.parseArray(text, factory));
+
+            assertSkipNullArrayValue(
+                text,
+                p.parseArray(
+                    makeImplied(text),
+                    factory,
+                    factory.newArrayBuilder()));
+        }
+
+        @ParameterizedTest
+        @Tag(TAG_PARSE)
+        @ValueSource(strings = {
+            "(null)",
+            "(null,null,null,null)",
+        })
+        void testSkipNullSingleArrayValue(String text) {
+            Parser p = new Parser();
+            p.setSkipNulls(true);
+
+            assertTrue(p.isSkipNulls(), text);
+            assertEquals(0, getSize(p.parseArray(text, factory)), text);
+            assertEquals(0, getSize(
+                    p.parseArray(
+                        makeImplied(text),
+                        factory,
+                        factory.newArrayBuilder())),
+                    text);
+        }
+
         private void assertAllowEmptyUnquotedObjectValue(
                 String text,
                 J actual) {
@@ -1620,23 +1675,7 @@ public abstract class AbstractParseTest<
 
             assertTrue(getBoolean("b", actual), text);
         }
-        
-        private void assertAllowEmptyUnquotedObjectValue(
-                Parser p,
-                String text) {
 
-            assertAllowEmptyUnquotedObjectValue(
-                text,
-                p.parseObject(text, factory));
-            
-            assertAllowEmptyUnquotedObjectValue(
-                text,
-                p.parseObject(
-                        makeImplied(text),
-                        factory,
-                        factory.newObjectBuilder()));
-        }
-        
         @ParameterizedTest
         @Tag(TAG_PARSE)
         @ValueSource(strings = {
@@ -1655,9 +1694,50 @@ public abstract class AbstractParseTest<
             //
             p.setEmptyUnquotedValueAllowed(true);
             assertTrue(p.isEmptyUnquotedValueAllowed(), text);
-            assertAllowEmptyUnquotedObjectValue(p, text);
+
+            assertAllowEmptyUnquotedObjectValue(
+                    text,
+                    p.parseObject(text, factory));
+                
+            assertAllowEmptyUnquotedObjectValue(
+                text,
+                p.parseObject(
+                    makeImplied(text),
+                    factory,
+                    factory.newObjectBuilder()));
         }
 
+        private void assertSkipNullObjectValue(String text, J actual) {
+            assertTrue(getNull("a", actual), text);
+            assertTrue(getBoolean("b", actual), text);
+        }
+
+        @ParameterizedTest
+        @Tag(TAG_PARSE)
+        @ValueSource(strings = {
+            "(a:null,b:true)",
+            "(b:true,a:null)"
+        })
+        void testSkipNullObjectValue(String text) {
+            Parser p = new Parser();
+
+            //
+            // setEmptyUnquotedValueAllowed(true)
+            //
+            p.setSkipNulls(true);
+            assertTrue(p.isSkipNulls(), text);
+
+            assertSkipNullObjectValue(
+                    text,
+                    p.parseObject(text, factory));
+                
+            assertSkipNullObjectValue(
+                text,
+                p.parseObject(
+                    makeImplied(text),
+                    factory,
+                    factory.newObjectBuilder()));
+        }
 
         private void assertAllowEmptyUnquotedKey(String text, J actual) {
             assertFalse(getBoolean("", actual), text);
@@ -1971,6 +2051,7 @@ public abstract class AbstractParseTest<
     protected abstract M getNumber(String key, J value);
     protected abstract Number getNumberValue(V value);
     protected abstract String getStringValue(V value);
+    protected abstract int getSize(A value);
     protected abstract ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> newBigMathFactory(
         MathContext mc,
         String boundNeg,

@@ -104,8 +104,7 @@ abstract class AbstractJsonOrgParseTest extends AbstractParseTest<
     
     @Override
     protected boolean getNull(String key, JSONObject value) {
-        Object ret = value.get(key);
-        return factory.getNull() == ret;
+        return value.isNull(key);
     }
     
     @Override
@@ -126,6 +125,11 @@ abstract class AbstractJsonOrgParseTest extends AbstractParseTest<
     @Override
     protected String getStringValue(Object value) {
         return value instanceof String ? (String)value : null;
+    }
+
+    @Override
+    protected int getSize(JSONArray value) {
+        return factory.isNull(value) ? 0 : value.length();
     }
 
     @Override
