@@ -20,6 +20,7 @@ package org.jsonurl;
 import static org.jsonurl.AbstractParseTest.makeImplied;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -65,6 +66,41 @@ public abstract class AbstractWriteTest<
      * @return a valid ValueFactory instance
      */
     protected abstract ValueFactory<V,C,ABT,A,JBT,J,?,?,?,?> getFactory();
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "",
+    })
+    void testEmptyString(String text) throws IOException {
+        String test = "empty string";
+        String expected = "''";
+        JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
+        assertEquals(expected, jup.add(text).build(), test);
+        assertEquals(expected, jup.clear().addKey(text).build(), test);
+
+        jup.setImpliedStringLiterals(true);
+        assertThrows(
+            IOException.class,
+            () -> jup.clear().add(text).build());
+        assertThrows(
+            IOException.class,
+            () -> jup.clear().addKey(text).build());
+        
+        expected = "";
+        jup.setEmptyUnquotedKeyAllowed(true);
+        jup.setEmptyUnquotedValueAllowed(false);
+        assertEquals(expected, jup.addKey(text).build(), test);
+        assertThrows(
+            IOException.class,
+            () -> jup.clear().add(text).build());
+        
+        jup.setEmptyUnquotedKeyAllowed(false);
+        jup.setEmptyUnquotedValueAllowed(true);
+        assertEquals(expected, jup.add(text).build(), test);
+        assertThrows(
+            IOException.class,
+            () -> jup.clear().addKey(text).build());
+    }
 
     @ParameterizedTest
     @ValueSource(strings = {

@@ -129,6 +129,7 @@ public class BaseJsonUrlOptions implements JsonUrlOptions {
      * <pre>
      *   setEmptyUnquotedKeyAllowed(true);
      *   setEmptyUnquotedValueAllowed(true);
+     *   setSkipNulls(true);
      *   setImpliedStringLiterals(true);
      * </pre>
      *
@@ -136,11 +137,20 @@ public class BaseJsonUrlOptions implements JsonUrlOptions {
      * {@link #isEmptyUnquotedValueAllowed()} is false then an empty string
      * literal value will trigger an Exception because there wouldn't be any
      * way to represent it.
-     * 
+     *
      * <p>If {@link #isImpliedStringLiterals()} is true but
      * {@link #isEmptyUnquotedKeyAllowed()} is false then an empty key will
      * trigger an Exception because there wouldn't be any way to represent it.
-     * 
+     *
+     * <p>If {@link #isImpliedStringLiterals()} is true but
+     * {@link #isSkipNulls()} is false:<ul>
+     * <li>when writing to a {@link JsonTextBuilder} - a {@code null} will
+     * trigger an Exception because there wouldn't be a way to represent it.
+     * <li>during parse - no exception would occur (because a {@code null}
+     * value isn't possible) but the parse would happen as though
+     * {@code null} values were not present in the stream.
+     * </ul>
+     *
      * <p>If you want the above behavior, because your data doesn't
      * support those cases and you want the parser to catch them for you,
      * then call {@link #setImpliedStringLiterals(boolean)
@@ -153,6 +163,7 @@ public class BaseJsonUrlOptions implements JsonUrlOptions {
     public void enableImpliedStringLiterals() {
         setEmptyUnquotedKeyAllowed(true);
         setEmptyUnquotedValueAllowed(true);
+        setSkipNulls(true);
         setImpliedStringLiterals(true);
     }
 }

@@ -20,6 +20,7 @@ package org.jsonurl;
 import static org.jsonurl.JsonUrl.Parse.literal;
 import static org.jsonurl.JsonUrl.Parse.literalToJavaString;
 import static org.jsonurl.JsonUrl.Parse.newNumberBuilder;
+import static org.jsonurl.JsonUrlOptions.isSkipNulls;
 import static org.jsonurl.SyntaxException.Message.MSG_EXPECT_OBJECT_VALUE;
 
 import java.util.Deque;
@@ -187,18 +188,29 @@ class ValueFactoryParseResultFacade<V,
             CharSequence text,
             int start,
             int stop) {
-        ABT sea = factory.newArrayBuilder();
-
-        factory.add(
-            sea,
-            literal(
+        
+        V val = literal(
                 buf,
                 numb,
                 text,
                 start,
                 stop,
                 factory,
-                options));
+                options);
+
+        ABT sea = factory.newArrayBuilder();
+
+        boolean skip = factory.isNull(val) && isSkipNulls(options);        
+        if (!skip) {
+            //
+            // note that this produces an empty array rather than the empty
+            // composite value. This is really an implementation choice -- I
+            // think either would be "correct". I chose this because it isn't
+            // ambiguous; we know it's an array by the syntax, even if it's
+            // empty.
+            //
+            factory.add(sea, val);
+        }
 
         factoryValueStack.push(factory.newArray(sea));                
     }
@@ -219,10 +231,14 @@ class ValueFactoryParseResultFacade<V,
     public ParseResultFacade<V> addArrayElement() {
         V topval = factoryValueStack.pop();
 
-        @SuppressWarnings("unchecked")
-        ABT destArray = (ABT)builderStack.peek();
+        boolean skip = factory.isNull(topval) && isSkipNulls(options);
 
-        factory.add(destArray, topval);
+        if (!skip) {
+            @SuppressWarnings("unchecked")
+            ABT destArray = (ABT)builderStack.peek();
+    
+            factory.add(destArray, topval);
+        }
         return this;
     }
 
@@ -231,10 +247,14 @@ class ValueFactoryParseResultFacade<V,
         V topval = factoryValueStack.pop();
         String key = keyStack.pop();
 
-        @SuppressWarnings("unchecked")
-        JBT builder = (JBT)builderStack.peek();
+        boolean skip = factory.isNull(topval) && isSkipNulls(options);
 
-        factory.put(builder, key, topval);
+        if (!skip) {
+            @SuppressWarnings("unchecked")
+            JBT builder = (JBT)builderStack.peek();
+    
+            factory.put(builder, key, topval);
+        }
         return this;
     }
 
@@ -291,11 +311,6 @@ class ValueFactoryParseResultFacade<V,
             int start,
             int stop) {
 
-        //
-        // note that isEmptyUnquotedStringOK is always false. This makes
-        // sense when you think about what's happening. We're supplying a
-        // missing value for a given key, so the key must be present.
-        //
         final String key = parseKey(
                 text,
                 start,
