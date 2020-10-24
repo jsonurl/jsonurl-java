@@ -17,6 +17,8 @@
 
 package org.jsonurl.jsonorg;
 
+import static org.jsonurl.JsonUrlOptions.isCoerceNullToEmptyString;
+import static org.jsonurl.JsonUrlOptions.isEmptyUnquotedValueAllowed;
 import static org.jsonurl.JsonUrlOptions.isSkipNulls;
 
 import java.io.IOException;
@@ -28,7 +30,8 @@ import org.jsonurl.JsonTextBuilder;
 import org.jsonurl.JsonUrlOptions;
 
 /**
- * A utility class for serializing org.json objects, arrays, and values as JSON&#x2192;URL text.
+ * A utility class for serializing org.json objects, arrays, and values as
+ * JSON&#x2192;URL text.
  *
  * @author jsonurl.org
  * @author David MacCormack
@@ -78,8 +81,7 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
             if (isSkipNulls(options)) {
                 return false;
             }
-            dest.addNull();
-            return true;
+            return writeNull(dest, options);
         }
 
         if (value instanceof JSONString) {
@@ -88,8 +90,7 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
                 if (isSkipNulls(options)) { // NOPMD -- nested if
                     return false;
                 }
-                dest.addNull();
-                return true;
+                return writeNull(dest, options);
             }
             dest.add(str);
             return true;
@@ -142,8 +143,7 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
                 return false;
             }
             
-            dest.addNull();
-            return true;
+            return writeNull(dest, options);
         }
 
         boolean ret = false;
@@ -205,8 +205,7 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
                 return false;
             }
             
-            dest.addNull();
-            return true;
+            return writeNull(dest, options);
         }
 
         boolean ret = false;
@@ -259,5 +258,15 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
         
         write(dest, options, value);   
         return true;
+    }
+
+    private static <A,R> boolean writeNull(
+            JsonTextBuilder<A,R> dest,
+            JsonUrlOptions options) throws IOException {
+
+        dest.addNull();
+
+        return !(isCoerceNullToEmptyString(options)
+                && isEmptyUnquotedValueAllowed(options));
     }
 }

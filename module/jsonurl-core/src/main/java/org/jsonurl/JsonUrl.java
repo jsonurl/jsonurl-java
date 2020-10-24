@@ -24,6 +24,10 @@ import static org.jsonurl.CharUtil.IS_QSCHAR;
 import static org.jsonurl.CharUtil.IS_QUOTE;
 import static org.jsonurl.CharUtil.IS_STRUCTCHAR;
 import static org.jsonurl.CharUtil.hexDecode;
+import static org.jsonurl.JsonUrlOptions.isCoerceNullToEmptyString;
+import static org.jsonurl.JsonUrlOptions.isEmptyUnquotedKeyAllowed;
+import static org.jsonurl.JsonUrlOptions.isEmptyUnquotedValueAllowed;
+import static org.jsonurl.JsonUrlOptions.isImpliedStringLiterals;
 import static org.jsonurl.SyntaxException.Message.MSG_BAD_CHAR;
 import static org.jsonurl.SyntaxException.Message.MSG_BAD_PCT_ENC;
 import static org.jsonurl.SyntaxException.Message.MSG_BAD_QSTR;
@@ -95,7 +99,7 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
 
             return (ch1 << 4) | ch2;
         }
-        
+
         /**
          * parse true, false, and null literals.
          *
@@ -309,14 +313,14 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
                 JsonUrlOptions options) {
 
             if (stop <= start) {
-                if (JsonUrlOptions.isEmptyUnquotedKeyAllowed(options)) {
+                if (isEmptyUnquotedKeyAllowed(options)) {
                     return EMPTY_STRING;
                 }
 
                 throw new SyntaxException(MSG_EXPECT_LITERAL, start);
             }
 
-            if (JsonUrlOptions.isImpliedStringLiterals(options)) {
+            if (isImpliedStringLiterals(options)) {
                 return string(buf, text, start, stop, false);
             }
 
@@ -347,6 +351,33 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
             //
             return string(buf, text, start, stop, false);
         }
+        
+        private static <V> V literalEmptyString(
+                int start,
+                ValueFactory<V,?,?,?,?,?,?,?,?,?> factory,
+                JsonUrlOptions options) {
+
+            if (isEmptyUnquotedValueAllowed(options)) {
+                return factory.getString(EMPTY_STRING);
+            }
+
+            throw new SyntaxException(MSG_EXPECT_LITERAL, start);
+        }
+        
+        private static <V> V literalTrueFalseNull(
+                V value,
+                ValueFactory<V,?,?,?,?,?,?,?,?,?> factory,
+                JsonUrlOptions options) {
+
+            boolean coerce = factory.isNull(value)
+                    && isCoerceNullToEmptyString(options);
+            
+            if (coerce) {
+                return factory.getString(EMPTY_STRING);
+            }
+
+            return value;
+        }
 
         /**
          * parse a literal value
@@ -375,14 +406,10 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
                 JsonUrlOptions options) {
 
             if (stop <= start) {
-                if (JsonUrlOptions.isEmptyUnquotedValueAllowed(options)) {
-                    return factory.getString("");
-                }
-
-                throw new SyntaxException(MSG_EXPECT_LITERAL, start);
+                return literalEmptyString(start, factory, options);
             }
             
-            if (JsonUrlOptions.isImpliedStringLiterals(options)) {
+            if (isImpliedStringLiterals(options)) {
                 return factory.getString(
                         string(buf, text, start, stop, false));
             }
@@ -397,7 +424,7 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
 
             V ret = factory.getTrueFalseNull(text, start, stop);
             if (ret != null) {
-                return ret;
+                return literalTrueFalseNull(ret, factory, options);
             }
             
             final NumberBuilder num = nbuilder == null
@@ -588,6 +615,32 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
                 }
             }
         }
+
+        private static <T extends Appendable> boolean appendEmptyString(
+                T dest,
+                boolean isKey,
+                JsonUrlOptions options) throws IOException {
+            //
+            // empty string
+            //
+            boolean emptyOK = isKey
+                    ? isEmptyUnquotedKeyAllowed(options)
+                    : isEmptyUnquotedValueAllowed(options);
+
+            if (emptyOK) {
+                return false;
+            }
+
+            if (isImpliedStringLiterals(options)) {
+                throw new IOException("implied strings: unexpected empty string");
+            }
+
+            //
+            // the empty string must be quoted
+            //
+            dest.append("''");
+            return true;
+        }
     }
 
     private JsonUrl() {
@@ -761,8 +814,9 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
         int stop = start + length;
         
         final SyntaxException.Message errmsg =
-                JsonUrlOptions.isEmptyUnquotedValueAllowed(options)
-                    ? null : MSG_EXPECT_LITERAL;
+                isEmptyUnquotedValueAllowed(options)
+                    ? null
+                    : MSG_EXPECT_LITERAL;
 
         parseLiteralLength(text, start, stop, errmsg);
 
@@ -831,6 +885,7 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
             ValueFactory<V,?,?,?,?,?,?,?,?,?> factory) {
         return parseLiteral(text, 0, text.length(), factory, null);
     }
+    
 
     /**
      * Append the given CharSequence as a string literal.
@@ -839,7 +894,35 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
      * @param dest  destination
      * @param text  source
      * @param start offset in source
-     * @param end   length of source
+     * @param end   offset in source
+     * @return true if dest was modified
+     */
+    public static <T extends Appendable> boolean appendLiteral(
+            T dest,
+            CharSequence text,
+            int start,
+            int end,
+            boolean isKey) throws IOException {
+
+        return appendLiteral(
+                dest,
+                text,
+                start,
+                end,
+                isKey,
+                JsonUrlOptions.fromObject(dest));        
+    }
+
+
+    /**
+     * Append the given CharSequence as a string literal.
+     *
+     * @param <T>   destination type
+     * @param dest  destination
+     * @param text  source
+     * @param start offset in source
+     * @param end   offset in source
+     * @param options a valid JsonUrlOptions or null
      * @return true if dest was modified
      */
     public static <T extends Appendable> boolean appendLiteral(// NOPMD - CyclomaticComplexity
@@ -851,29 +934,10 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
             JsonUrlOptions options) throws IOException {
 
         if (end <= start) {
-            //
-            // empty string
-            //
-            boolean emptyOK = isKey
-                    ? JsonUrlOptions.isEmptyUnquotedKeyAllowed(options)
-                    : JsonUrlOptions.isEmptyUnquotedValueAllowed(options);
-
-            if (emptyOK) {
-                return false;
-            }
-
-            if (JsonUrlOptions.isImpliedStringLiterals(options)) {
-                throw new IOException("implied strings: unexpected empty string");
-            }
-
-            //
-            // the empty string must be quoted
-            //
-            dest.append("''");
-            return true;
+            return Encode.appendEmptyString(dest, isKey, options);
         }
 
-        if (JsonUrlOptions.isImpliedStringLiterals(options)) {
+        if (isImpliedStringLiterals(options)) {
             Encode.encode(dest, text, start, end, false, true);
             return true;
         }

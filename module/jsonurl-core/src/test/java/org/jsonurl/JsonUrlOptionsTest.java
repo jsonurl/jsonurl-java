@@ -28,8 +28,26 @@ import org.junit.jupiter.api.Test;
 class JsonUrlOptionsTest {
 
     @Test
+    void testIsCoerceNullToEmptyString() {
+        String test = "CoerceNullToEmptyString";
+
+        assertFalse(JsonUrlOptions.isCoerceNullToEmptyString(null), test);
+        assertFalse(new JsonUrlOptions() {}.isCoerceNullToEmptyString(), test);
+        
+        JsonUrlOptions options = new JsonUrlOptions() {
+            @Override
+            public boolean isCoerceNullToEmptyString() {
+                return true;
+            }
+        };
+
+        assertTrue(JsonUrlOptions.isCoerceNullToEmptyString(options), test);
+        assertTrue(options.isCoerceNullToEmptyString(), test);
+    }
+
+    @Test
     void testIsFormUrlEncoded() {
-        String test = "IsFormUrlEncoded";
+        String test = "FormUrlEncoded";
 
         assertFalse(JsonUrlOptions.isFormUrlEncoded(null), test);
         assertFalse(new JsonUrlOptions() {}.isFormUrlEncoded(), test);

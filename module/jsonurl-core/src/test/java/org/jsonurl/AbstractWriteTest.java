@@ -45,6 +45,12 @@ public abstract class AbstractWriteTest<
     A extends C,
     JBT, // NOPMD - GenericsNaming
     J extends C> {
+    
+    private static final String EMPTY_STRING = "";
+    
+    private static final String EMPTY_QSTRING = "''";
+    
+    private static final String NULL_QSTRING = "'null'";
 
     /**
      * Test ValueFactory.
@@ -100,6 +106,52 @@ public abstract class AbstractWriteTest<
         assertThrows(
             IOException.class,
             () -> jup.clear().addKey(text).build());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "null",
+    })
+    void testCoerceNullToEmptyString(String text) throws IOException {
+        Parser p = new Parser();
+        p.setCoerceNullToEmptyString(true);
+        assertEquals(
+                factory.getString(EMPTY_STRING),
+                p.parse(text, factory),
+                text);
+
+        V actual = new Parser().parse(text, factory);
+
+        JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
+        jup.setCoerceNullToEmptyString(true);
+        assertTrue(write(jup, actual), text);
+        assertEquals(
+                EMPTY_QSTRING,
+                jup.build(),
+                text);
+
+        jup.clear();
+        jup.setEmptyUnquotedValueAllowed(true);
+        assertFalse(write(jup, actual), text);
+        assertEquals(
+                EMPTY_STRING,
+                jup.build(),
+                text);
+
+        jup.clear();
+        assertTrue(
+            JsonUrl.appendLiteral(
+                jup,
+                text,
+                0,
+                text.length(),
+                false),
+            text);
+
+        assertEquals(
+                NULL_QSTRING,
+                jup.build(),
+                text);
     }
 
     @ParameterizedTest

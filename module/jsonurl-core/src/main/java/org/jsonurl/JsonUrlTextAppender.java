@@ -38,6 +38,11 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
     extends BaseJsonUrlOptions implements JsonTextBuilder<A, R>, Appendable {
 
     /**
+     * The empty string.
+     */
+    private static final String EMPTY_STRING = "";
+
+    /**
      * Destination, provided in constructor.
      */
     protected final A out;
@@ -96,11 +101,16 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
 
     @Override
     public JsonUrlTextAppender<A,R> addNull() throws IOException {
-        if (isImpliedStringLiterals()) {
+        if (isCoerceNullToEmptyString()) {
+            add(EMPTY_STRING);
+
+        } else  if (isImpliedStringLiterals()) {
             throw new IOException("implied strings: unexpected null");
+
+        } else {
+            out.append("null");    
         }
-        
-        out.append("null");
+
         return this;
     }
 

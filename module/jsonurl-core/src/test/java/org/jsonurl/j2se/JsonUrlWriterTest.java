@@ -174,63 +174,63 @@ class JsonUrlWriterTest {
     @Test
     void testNullBooleanArray() throws IOException {
         JsonUrlStringBuilder jsb = new JsonUrlStringBuilder();
-        JsonUrlWriter.write(jsb, (boolean[])null);
+        JsonUrlWriter.write(jsb, null, (boolean[])null);
         assertEquals(NULL, jsb.build(), Boolean.class.toString());
     }
 
     @Test
     void testNullByteArray() throws IOException {
         JsonUrlStringBuilder jsb = new JsonUrlStringBuilder();
-        JsonUrlWriter.write(jsb, (byte[])null);
+        JsonUrlWriter.write(jsb, null, (byte[])null);
         assertEquals(NULL, jsb.build(), Byte.class.toString());
     }
 
     @Test
     void testNullCharArray() throws IOException {
         JsonUrlStringBuilder jsb = new JsonUrlStringBuilder();
-        JsonUrlWriter.write(jsb, (char[])null);
+        JsonUrlWriter.write(jsb, null, (char[])null);
         assertEquals(NULL, jsb.build(), Character.class.toString());
     }
 
     @Test
     void testNullDoubleArray() throws IOException {
         JsonUrlStringBuilder jsb = new JsonUrlStringBuilder();
-        JsonUrlWriter.write(jsb, (double[])null);
+        JsonUrlWriter.write(jsb, null, (double[])null);
         assertEquals(NULL, jsb.build(), Double.class.toString());
     }
 
     @Test
     void testNullFloatArray() throws IOException {
         JsonUrlStringBuilder jsb = new JsonUrlStringBuilder();
-        JsonUrlWriter.write(jsb, (float[])null);
+        JsonUrlWriter.write(jsb, null, (float[])null);
         assertEquals(NULL, jsb.build(), Float.class.toString());
     }
 
     @Test
     void testNullIntArray() throws IOException {
         JsonUrlStringBuilder jsb = new JsonUrlStringBuilder();
-        JsonUrlWriter.write(jsb, (int[])null);
+        JsonUrlWriter.write(jsb, null, (int[])null);
         assertEquals(NULL, jsb.build(), Integer.class.toString());
     }
 
     @Test
     void testNullLongArray() throws IOException {
         JsonUrlStringBuilder jsb = new JsonUrlStringBuilder();
-        JsonUrlWriter.write(jsb, (long[])null);
+        JsonUrlWriter.write(jsb, null, (long[])null);
         assertEquals(NULL, jsb.build(), Long.class.toString());
     }
 
     @Test
     void testNullShortArray() throws IOException {
         JsonUrlStringBuilder jsb = new JsonUrlStringBuilder();
-        JsonUrlWriter.write(jsb, (short[])null);
+        JsonUrlWriter.write(jsb, null, (short[])null);
         assertEquals(NULL, jsb.build(), Short.class.toString());
     }
 
     @Test
     void testNullObjectArray() throws IOException {
         JsonUrlStringBuilder jsb = new JsonUrlStringBuilder();
-        JsonUrlWriter.write(jsb, (Object[])null);
+        JsonUrlWriter.write(jsb, null, (Object[])null);
         assertEquals(NULL, jsb.build(), Object.class.toString());
 
         jsb.setSkipNulls(true);
@@ -243,7 +243,7 @@ class JsonUrlWriterTest {
     @Test
     void testNullIterable() throws IOException {
         JsonUrlStringBuilder jsb = new JsonUrlStringBuilder();
-        JsonUrlWriter.write(jsb, (Iterable<?>)null);
+        JsonUrlWriter.write(jsb, null, (Iterable<?>)null);
         assertEquals(NULL, jsb.build(), Iterable.class.toString());
 
         jsb.setSkipNulls(true);
@@ -256,7 +256,7 @@ class JsonUrlWriterTest {
     @Test
     void testNullMap() throws IOException {
         JsonUrlStringBuilder jsb = new JsonUrlStringBuilder();
-        JsonUrlWriter.write(jsb, (Map<?,?>)null);
+        JsonUrlWriter.write(jsb, null, (Map<?,?>)null);
         assertEquals(NULL, jsb.build(), Iterable.class.toString());
 
         jsb.setSkipNulls(true);
@@ -269,7 +269,7 @@ class JsonUrlWriterTest {
     @Test
     void testNullEnum() throws IOException {
         JsonUrlStringBuilder jsb = new JsonUrlStringBuilder();
-        JsonUrlWriter.write(jsb, (Enum<?>)null);
+        JsonUrlWriter.write(jsb, null, (Enum<?>)null);
         assertEquals(NULL, jsb.build(), Enum.class.toString());
         
         assertEquals(NULL,
