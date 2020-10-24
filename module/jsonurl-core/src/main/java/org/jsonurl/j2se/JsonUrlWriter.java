@@ -17,6 +17,8 @@
 
 package org.jsonurl.j2se;
 
+import static org.jsonurl.JsonUrlOptions.isCoerceNullToEmptyString;
+import static org.jsonurl.JsonUrlOptions.isEmptyUnquotedValueAllowed;
 import static org.jsonurl.JsonUrlOptions.isSkipNulls;
 
 import java.io.IOException;
@@ -66,7 +68,7 @@ public final class JsonUrlWriter { // NOPMD
      * @param options a valid JsonUrlOptions or null
      * @return true if dest was modified
      */
-    public static <A,R> boolean  write(// NOPMD
+    public static <A,R> boolean write(// NOPMD
             JsonTextBuilder<A,R> dest,
             JsonUrlOptions options,
             Object value) throws IOException {
@@ -75,9 +77,8 @@ public final class JsonUrlWriter { // NOPMD
             if (isSkipNulls(options)) {
                 return false;
             }
-            
-            dest.addNull();
-            return true;
+
+            return writeNull(dest, options);
         }
 
         if (value instanceof Number) {
@@ -112,28 +113,28 @@ public final class JsonUrlWriter { // NOPMD
         if (clazz.isArray()) {
             Class<?> type = clazz.getComponentType();
             if (type == Boolean.TYPE) {
-                return write(dest, (boolean[])value);
+                return write(dest, options, (boolean[])value);
             }
             if (type == Byte.TYPE) {
-                return write(dest, (byte[])value);
+                return write(dest, options, (byte[])value);
             }
             if (type == Character.TYPE) {
-                return write(dest, (char[])value);
+                return write(dest, options, (char[])value);
             }
             if (type == Double.TYPE) {
-                return write(dest, (double[])value);
+                return write(dest, options, (double[])value);
             }
             if (type == Float.TYPE) {
-                return write(dest, (float[])value);
+                return write(dest, options, (float[])value);
             }
             if (type == Integer.TYPE) {
-                return write(dest, (int[])value);
+                return write(dest, options, (int[])value);
             }
             if (type == Long.TYPE) {
-                return write(dest, (long[])value);
+                return write(dest, options, (long[])value);
             }
             if (type == Short.TYPE) {
-                return write(dest, (short[])value);
+                return write(dest, options, (short[])value);
             }
             return write(dest, options, (Object[])value);
         }
@@ -259,8 +260,7 @@ public final class JsonUrlWriter { // NOPMD
                 return false;
             }
             
-            dest.addNull();
-            return true;
+            return writeNull(dest, options);
         }
 
         boolean ret = false;
@@ -306,23 +306,23 @@ public final class JsonUrlWriter { // NOPMD
      */
     public static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
+            JsonUrlOptions options,
             boolean... array) throws IOException {
 
         if (isNull(array)) {
-            dest.addNull();
-
-        } else {
-            dest.beginArray();
-    
-            for (int i = 0; i < array.length; i++) {
-                if (i > 0) {
-                    dest.valueSeparator();
-                }
-                dest.add(array[i]);
-            }
-    
-            dest.endArray();
+            return writeNull(dest, options);
         }
+
+        dest.beginArray();
+
+        for (int i = 0; i < array.length; i++) {
+            if (i > 0) {
+                dest.valueSeparator();
+            }
+            dest.add(array[i]);
+        }
+
+        dest.endArray();
         return true;
     }
 
@@ -337,25 +337,23 @@ public final class JsonUrlWriter { // NOPMD
      */
     public static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
+            JsonUrlOptions options,
             byte... array) throws IOException {
 
         if (isNull(array)) {
-            dest.addNull();
-
-        } else {
-    
-            dest.beginArray();
-    
-            for (int i = 0; i < array.length; i++) {
-                if (i > 0) {
-                    dest.valueSeparator();
-                }
-                dest.add(array[i]);
-            }
-    
-            dest.endArray();
+            return writeNull(dest, options);
         }
 
+        dest.beginArray();
+
+        for (int i = 0; i < array.length; i++) {
+            if (i > 0) {
+                dest.valueSeparator();
+            }
+            dest.add(array[i]);
+        }
+
+        dest.endArray();
         return true;
     }
 
@@ -370,23 +368,24 @@ public final class JsonUrlWriter { // NOPMD
      */
     public static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
+            JsonUrlOptions options,
             char... array) throws IOException {
 
         if (isNull(array)) {
-            dest.addNull();
-
-        } else {
-            dest.beginArray();
-
-            for (int i = 0; i < array.length; i++) {
-                if (i > 0) {
-                    dest.valueSeparator();
-                }
-                dest.add(array[i]);
-            }
-
-            dest.endArray();
+            return writeNull(dest, options);
         }
+
+        dest.beginArray();
+
+        for (int i = 0; i < array.length; i++) {
+            if (i > 0) {
+                dest.valueSeparator();
+            }
+            dest.add(array[i]);
+        }
+
+        dest.endArray();
+
         return true;
     }
 
@@ -401,23 +400,23 @@ public final class JsonUrlWriter { // NOPMD
      */
     public static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
+            JsonUrlOptions options,
             double... array) throws IOException {
 
         if (isNull(array)) {
-            dest.addNull();
-
-        } else {
-            dest.beginArray();
-
-            for (int i = 0; i < array.length; i++) {
-                if (i > 0) {
-                    dest.valueSeparator();
-                }
-                dest.add(array[i]);
-            }
-
-            dest.endArray();
+            return writeNull(dest, options);
         }
+
+        dest.beginArray();
+
+        for (int i = 0; i < array.length; i++) {
+            if (i > 0) {
+                dest.valueSeparator();
+            }
+            dest.add(array[i]);
+        }
+
+        dest.endArray();
         
         return true;
     }
@@ -433,23 +432,23 @@ public final class JsonUrlWriter { // NOPMD
      */
     public static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
+            JsonUrlOptions options,
             float... array) throws IOException {
 
         if (isNull(array)) {
-            dest.addNull();
-
-        } else {
-            dest.beginArray();
-
-            for (int i = 0; i < array.length; i++) {
-                if (i > 0) {
-                    dest.valueSeparator();
-                }
-                dest.add(array[i]);
-            }
-
-            dest.endArray();
+            return writeNull(dest, options);
         }
+
+        dest.beginArray();
+
+        for (int i = 0; i < array.length; i++) {
+            if (i > 0) {
+                dest.valueSeparator();
+            }
+            dest.add(array[i]);
+        }
+
+        dest.endArray();
 
         return true;
     }
@@ -465,23 +464,23 @@ public final class JsonUrlWriter { // NOPMD
      */
     public static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
+            JsonUrlOptions options,
             int... array) throws IOException {
 
         if (isNull(array)) {
-            dest.addNull();
-
-        } else {
-            dest.beginArray();
-
-            for (int i = 0; i < array.length; i++) {
-                if (i > 0) {
-                    dest.valueSeparator();
-                }
-                dest.add(array[i]);
-            }
-
-            dest.endArray();
+            return writeNull(dest, options);
         }
+
+        dest.beginArray();
+
+        for (int i = 0; i < array.length; i++) {
+            if (i > 0) {
+                dest.valueSeparator();
+            }
+            dest.add(array[i]);
+        }
+
+        dest.endArray();
         
         return true;
     }
@@ -497,24 +496,23 @@ public final class JsonUrlWriter { // NOPMD
      */
     public static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
+            JsonUrlOptions options,
             long... array) throws IOException {
 
         if (isNull(array)) {
-            dest.addNull();
-
-        } else {
-            dest.beginArray();
-
-            for (int i = 0; i < array.length; i++) {
-                if (i > 0) {
-                    dest.valueSeparator();
-                }
-                dest.add(array[i]);
-            }
-
-            dest.endArray();
-
+            return writeNull(dest, options);
         }
+
+        dest.beginArray();
+
+        for (int i = 0; i < array.length; i++) {
+            if (i > 0) {
+                dest.valueSeparator();
+            }
+            dest.add(array[i]);
+        }
+
+        dest.endArray();
 
         return true;
     }
@@ -530,24 +528,24 @@ public final class JsonUrlWriter { // NOPMD
      */
     public static <A,R> boolean write(
             JsonTextBuilder<A,R> dest,
+            JsonUrlOptions options,
             short... array) // NOPMD - AvoidUsingShortType
                 throws IOException {
 
         if (isNull(array)) {
-            dest.addNull();
-
-        } else {
-            dest.beginArray();
-
-            for (int i = 0; i < array.length; i++) {
-                if (i > 0) {
-                    dest.valueSeparator();
-                }
-                dest.add(array[i]);
-            }
-
-            dest.endArray();
+            return writeNull(dest, options);
         }
+
+        dest.beginArray();
+
+        for (int i = 0; i < array.length; i++) {
+            if (i > 0) {
+                dest.valueSeparator();
+            }
+            dest.add(array[i]);
+        }
+
+        dest.endArray();
 
         return true;
     }
@@ -586,9 +584,8 @@ public final class JsonUrlWriter { // NOPMD
             if (isSkipNulls(options)) {
                 return false;
             }
-            
-            dest.addNull();
-            return true;
+
+            return writeNull(dest, options);
         }
 
         dest.beginArray();
@@ -604,4 +601,13 @@ public final class JsonUrlWriter { // NOPMD
         return ret;
     }
 
+    private static <A,R> boolean writeNull(
+            JsonTextBuilder<A,R> dest,
+            JsonUrlOptions options) throws IOException {
+
+        dest.addNull();
+
+        return !(isCoerceNullToEmptyString(options)
+                && isEmptyUnquotedValueAllowed(options));
+    }
 }

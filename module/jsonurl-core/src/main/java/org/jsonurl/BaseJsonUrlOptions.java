@@ -49,6 +49,11 @@ public class BaseJsonUrlOptions implements JsonUrlOptions {
     /**
      * When read/writing, use empty string rather than null.
      */
+    private boolean coerceNullToEmptyString;
+
+    /**
+     * When read/writing, use empty string rather than null.
+     */
     private boolean skipNulls;
 
     @Override
@@ -119,6 +124,20 @@ public class BaseJsonUrlOptions implements JsonUrlOptions {
      */
     public void setSkipNulls(boolean skipNulls) {
         this.skipNulls = skipNulls;
+    }
+
+    @Override
+    public boolean isCoerceNullToEmptyString() {
+        return coerceNullToEmptyString;
+    }
+
+    /**
+     * Enable/disable the coerce-null-to-empty-string options.
+     * @param coerce true or false
+     * @see #isCoerceNullToEmptyString()
+     */
+    public void setCoerceNullToEmptyString(boolean coerce) {
+        this.coerceNullToEmptyString = coerce;
     }
 
     /**

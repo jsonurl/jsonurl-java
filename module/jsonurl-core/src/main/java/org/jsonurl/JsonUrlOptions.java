@@ -130,6 +130,26 @@ public interface JsonUrlOptions {
     }
 
     /**
+     * Test if the coerce-null-to-empty-string option is enabled.
+     * If this option is enabled then {@code null} values in the
+     * input or output will be replaced with an empty string.
+     * @return true if enabled
+     */
+    default boolean isCoerceNullToEmptyString() {
+        return false;
+    }
+
+    /**
+     * Test if the coerce-null-to-empty-string option is enabled,
+     * supplying the default value if necessary.
+     * @param opt a valid JsonUrlOptions or null
+     * @see #isCoerceNullToEmptyString()
+     */
+    static boolean isCoerceNullToEmptyString(JsonUrlOptions opt) {
+        return opt != null && opt.isCoerceNullToEmptyString() || false;
+    }
+
+    /**
      * Cast an object to JsonUrlOptions.
      * @param obj a valid object or null
      * @return {@code obj} if it is an instance of JsonUrlOptions; otherwise,

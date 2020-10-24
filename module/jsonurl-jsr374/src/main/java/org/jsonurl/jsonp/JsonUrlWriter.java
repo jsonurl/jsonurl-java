@@ -17,6 +17,8 @@
 
 package org.jsonurl.jsonp;
 
+import static org.jsonurl.JsonUrlOptions.isCoerceNullToEmptyString;
+import static org.jsonurl.JsonUrlOptions.isEmptyUnquotedValueAllowed;
 import static org.jsonurl.JsonUrlOptions.isSkipNulls;
 
 import java.io.IOException;
@@ -82,8 +84,7 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
                 return false;
             }
 
-            dest.addNull();
-            return true;
+            return writeNull(dest, options);
         }
         
         if (value == JsonValue.TRUE) {
@@ -154,8 +155,7 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
                 return false;
             }
 
-            dest.addNull();
-            return true;
+            return writeNull(dest, options);
         }
 
         dest.beginObject();
@@ -227,8 +227,7 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
                 return false;
             }
 
-            dest.addNull();
-            return true;
+            return writeNull(dest, options);
         }
 
         boolean ret = false;
@@ -261,5 +260,16 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
         write(dest, options, value);
 
         return true;
+    }
+    
+
+    private static <A,R> boolean writeNull(
+            JsonTextBuilder<A,R> dest,
+            JsonUrlOptions options) throws IOException {
+
+        dest.addNull();
+
+        return !(isCoerceNullToEmptyString(options)
+                && isEmptyUnquotedValueAllowed(options));
     }
 }
