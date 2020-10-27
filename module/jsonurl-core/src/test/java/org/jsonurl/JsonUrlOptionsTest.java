@@ -135,4 +135,22 @@ class JsonUrlOptionsTest {
         assertTrue(options.isSkipNulls(), test);
     }
 
+    @Test
+    void testFormUrlEncoded() {
+        String test = "FormUrlEncoded";
+
+        assertFalse(JsonUrlOptions.isFormUrlEncoded(null), test);
+        assertFalse(new JsonUrlOptions() {}.isFormUrlEncoded(), test);
+
+        JsonUrlOptions options = new JsonUrlOptions() {
+            @Override
+            public boolean isFormUrlEncoded() {
+                return true;
+            }
+        };
+
+        assertTrue(JsonUrlOptions.isFormUrlEncoded(options), test);
+        assertTrue(options.isFormUrlEncoded(), test);
+    }
+
 }

@@ -691,11 +691,28 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
         
         final boolean wwwFormUrlEncoded = this.isFormUrlEncoded();
 
+        //
+        // when I'm effectively a replacement for
+        // ServletRequest.getParameterValues() or similar then I need to
+        // accept and skip extra ampersands.
+        //
+        final boolean skipExtraAmps = wwwFormUrlEncoded
+                && (impliedArray || impliedObject);
+
         int parseDepth = 1;
         int parseValueCount = 0;
 
+        if (skipExtraAmps) {
+            //
+            // ignore random amps at the beginning of the string
+            //
+            while (pos < stop && text.charAt(pos) == WFU_VALUE_SEPARATOR) {
+                pos++;
+            }
+        }
+
         for (;;) {
-            if (pos == stop) {
+            if (stop <= pos) {
                 throw new SyntaxException(MSG_STILL_OPEN, pos);
             }
 
@@ -781,15 +798,21 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
                     stateStack.pop();
                     result.setLocation(pos).addEmptyComposite();
 
-                    if (pos == stop && parseDepth == 1) {
-                        if (impliedArray) {
-                            return result.addArrayElement().endArray().getResult();
-                        }
-                        if (impliedObject) {
-                            return result.addObjectElement().endObject().getResult();
+                    if (parseDepth == 1) { // NOPMD - AvoidLiteralsInIfCondition
+                        if (skipExtraAmps) {
+                            pos = JsonUrl.Parse.skipAmps(text, pos, stop);
                         }
 
-                        throw new SyntaxException(MSG_STILL_OPEN, pos);
+                        if (pos == stop) {
+                            if (impliedArray) {
+                                return result.addArrayElement().endArray().getResult();
+                            }
+                            if (impliedObject) {
+                                return result.addObjectElement().endObject().getResult();
+                            }
+
+                            throw new SyntaxException(MSG_STILL_OPEN, pos);
+                        }    
                     }
 
                     continue;
@@ -814,6 +837,8 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
 
                 pos += litlen;
 
+                int litend = pos; // NOPMD = capture literal end position
+
                 if (pos == stop) {
                     throw new SyntaxException(MSG_STILL_OPEN, pos);
                 }
@@ -825,6 +850,10 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
                     if (!wwwFormUrlEncoded || parseDepth != 1) {
                         throw new SyntaxException(MSG_BAD_CHAR, pos);
                     }
+                    //
+                    // not calling JsonUrl.Parse.skipAmps here because I
+                    // can't find a use case where it is needed
+                    //
                     // fall through
                 case VALUE_SEPARATOR:
                     //
@@ -852,7 +881,7 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
                     result
                         .setLocation(litpos)
                         .beginArray()
-                        .addLiteral(text, litpos, pos);
+                        .addLiteral(text, litpos, litend);
 
                     continue;
 
@@ -887,6 +916,9 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
                         throw new SyntaxException(MSG_EXTRA_CHARS, pos);
 
                     case 1:
+                        if (skipExtraAmps) {
+                            pos = JsonUrl.Parse.skipAmps(text, pos, stop);
+                        }
                         if (pos == stop) {
                             if (impliedArray) {
                                 return result
@@ -976,6 +1008,10 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
                     .setLocation(litpos)
                     .addLiteral(text, litpos, pos);
 
+                if (skipExtraAmps && parseDepth == 1) {
+                    pos = JsonUrl.Parse.skipAmps(text, pos, stop);
+                }
+
                 if (pos == stop) {
                     if (parseDepth == 1 && impliedArray) {
                         return result.addArrayElement().endArray().getResult();
@@ -993,6 +1029,11 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
                     if (!wwwFormUrlEncoded || parseDepth != 1) {
                         throw new SyntaxException(MSG_BAD_CHAR, pos);
                     }
+                    //
+                    // not calling JsonUrl.Parse.skipAmps here because I
+                    // can't find a use case where it is needed
+                    //
+
                     // fall through
                 case VALUE_SEPARATOR:
                     stateStack.set(0, State.IN_ARRAY);
@@ -1013,6 +1054,9 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
                         throw new SyntaxException(MSG_EXTRA_CHARS, pos);
 
                     case 1:
+                        if (skipExtraAmps) {
+                            pos = JsonUrl.Parse.skipAmps(text, pos, stop);
+                        }
                         if (pos == stop) {
                             if (impliedArray) {
                                 return result.addArrayElement().endArray().getResult();
@@ -1066,7 +1110,11 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
                 result
                     .setLocation(litpos)
                     .addLiteral(text, litpos, pos);
-                
+
+                if (skipExtraAmps && parseDepth == 1) {
+                    pos = JsonUrl.Parse.skipAmps(text, pos, stop);
+                }
+
                 if (pos == stop) {
                     if (parseDepth == 1 && impliedObject) {
                         return result.addObjectElement().endObject().getResult();    
@@ -1105,6 +1153,9 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
                         throw new SyntaxException(MSG_EXTRA_CHARS, pos);
 
                     case 1:
+                        if (skipExtraAmps) {
+                            pos = JsonUrl.Parse.skipAmps(text, pos, stop);
+                        }
                         if (pos == stop) {
                             if (impliedArray) {
                                 return result.addArrayElement().endArray().getResult();
@@ -1131,6 +1182,11 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
                 litpos = pos;
                 litlen = parseLiteralLength(text, pos, stop, MSG_STILL_OPEN);
                 pos += litlen;
+                litend = pos;
+
+                if (skipExtraAmps && parseDepth == 1) {
+                    pos = JsonUrl.Parse.skipAmps(text, pos, stop);
+                }
 
                 if (pos == stop) {
                     if (impliedObject && parseDepth == 1) {
@@ -1139,7 +1195,7 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
                             .addMissingValue(
                                     text,
                                     litpos,
-                                    pos)
+                                    litend)
                             .addObjectElement()
                             .endObject()
                             .getResult();
@@ -1174,7 +1230,7 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
                             .addMissingValue(
                                     text,
                                     litpos,
-                                    pos);
+                                    litend);
 
                         stateStack.set(0, State.OBJECT_AFTER_ELEMENT);
                         continue;
@@ -1188,7 +1244,7 @@ public class Parser extends BaseJsonUrlOptions { //NOPMD
 
                 result
                     .setLocation(litpos)
-                    .addObjectKey(text, litpos, pos);
+                    .addObjectKey(text, litpos, litend);
 
                 pos++;
                 continue;
