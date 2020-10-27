@@ -66,6 +66,43 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
         private Parse() {
         }
         
+        /**
+         * Used to skip/ignore "extra" ampersands in www-form-urlencoded data.
+         * This skipping/ignoring is done in order to be compatible with
+         * existing decoders (e.g. those built into browsers and web
+         * service/application containers), which also ignore "extra"
+         * ampersands rather than inserting empty values or throwing an
+         * Error/Exception.
+         *
+         * <p>Note, this skipping/ignoring is <b>only</b> for
+         * wfu-value-separator (ampersand), <b>not</b> value-separator
+         * (comma). This is on purpose. There's no compatibility concern
+         * in the later case and it allows for the option to use a zero
+         * length string as the empty string.
+         */
+        static int skipAmps(CharSequence text, int off, int end) {
+            if (off == end || text.charAt(off) != '&') {
+                // nothing to skip
+                return off;
+            }
+
+            int pos;
+
+            for (pos = off; pos < end && text.charAt(pos) == '&'; pos++) {
+                // skip all consecutive amps
+            }
+
+            if (pos == end) {
+                // one or more amps followed by end-of-string
+                return end;
+            }
+
+            //
+            // return the position of the last amp before the next usable char
+            //
+            return pos - 1;
+        }
+        
         static NumberBuilder newNumberBuilder(
             ValueFactory<?,?,?,?,?,?,?,?,?,?> factory) {
             

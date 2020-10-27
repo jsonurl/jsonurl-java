@@ -1400,6 +1400,50 @@ public abstract class AbstractParseTest<
                     factory.newObjectBuilder()));
         }
 
+        @ParameterizedTest
+        @Tag(TAG_PARSE)
+        @Tag(TAG_OBJECT)
+        @ValueSource(strings = {
+            "a=b&&c:d",
+            "a=b&c=d&",
+            "a=b&c=d&&",
+            "a=b&&c=d",
+            "a&&c=d",
+            "a=b&&c",
+            "a=b&&c&",
+            "&a=b&c=d",
+            "a=b&&c:d&&e:f",
+        })
+        void testObjectWfuExtraAmps(String text) {
+            Parser p = new Parser();
+            
+            assertThrows(
+                SyntaxException.class,
+                () -> p.parseObject(
+                    text,
+                    factory,
+                    factory.newObjectBuilder()),
+                text);
+
+            p.setFormUrlEncoded(true);
+
+            assertTrue(p.isFormUrlEncoded(), text);
+
+            assertObjectWfu(
+                text,
+                p.parseObject(
+                    text,
+                    factory,
+                    factory.newObjectBuilder(),
+                    (key, pos) -> {
+                        switch (key) {
+                        case "a": return factory.getString("b");
+                        case "c": return factory.getString("d");
+                        default: return null;
+                        }
+                    }));
+        }
+
         private void assertArrayWfu(String text, A actual) {
             assertEquals(
                 factory.getString("a"),
@@ -1441,6 +1485,49 @@ public abstract class AbstractParseTest<
                 text,
                 p.parseArray(
                     makeImplied(text),
+                    factory,
+                    factory.newArrayBuilder()));
+        }
+
+        @ParameterizedTest
+        @Tag(TAG_PARSE)
+        @Tag(TAG_ARRAY)
+        @ValueSource(strings = {
+            "&a",
+            "a&",
+            "&a&",
+            "a&&b",
+            "&a&b",
+            "&a&b&",
+            "a&b&",
+            "a&b&&c&d",
+            "a&b&c&&d",
+            "a&&false&&1.234&&null&&()&&(1)&&(1,2,3)&&(a:d,b:a)&&",
+            "a&true&",
+            "a&()&",
+            "a&(1)&",
+            "a&(1,2)&",
+            "a&(a:b)&",
+        })
+        void testArrayWfuExtraAmps(String text) {
+            Parser p = new Parser();
+
+            assertThrows(
+                SyntaxException.class,
+                () -> p.parseArray(
+                    text,
+                    factory,
+                    factory.newArrayBuilder()),
+                text);
+
+            p.setFormUrlEncoded(true);
+
+            assertTrue(p.isFormUrlEncoded(), text);
+
+            assertArrayWfu(
+                text,
+                p.parseArray(
+                    text,
                     factory,
                     factory.newArrayBuilder()));
         }
