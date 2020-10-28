@@ -568,11 +568,42 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
             }
         }
 
+        @SuppressWarnings({
+            "PMD.AvoidLiteralsInIfCondition",
+        })
+        private static void encode(
+                Appendable dest,
+                int codePoint,
+                String[] hexEncode,
+                int position) throws IOException {
+            
+            if (codePoint < 0x80) {
+                dest.append(hexEncode[codePoint]);
+
+            } else if (codePoint < 0x800) {
+                dest.append(hexEncode[0xC0 | (codePoint >> 6)]);
+                dest.append(hexEncode[0x80 | (codePoint & 0x3F)]);
+
+            } else if (codePoint < 0x10000) {
+                dest.append(hexEncode[0xE0 | (codePoint >> 12)]);
+                dest.append(hexEncode[0x80 | ((codePoint >> 6) & 0x3F)]);
+                dest.append(hexEncode[0x80 | (codePoint & 0x3F)]);
+
+            } else if (codePoint < 0x200000) {
+                dest.append(hexEncode[0xF0 | (codePoint >> 18)]);
+                dest.append(hexEncode[0x80 | ((codePoint >> 12) & 0x3F)]);
+                dest.append(hexEncode[0x80 | ((codePoint >> 6) & 0x3F)]);
+                dest.append(hexEncode[0x80 | (codePoint & 0x3F)]);
+
+            } else {
+                throw new MalformedInputException(position);
+            }
+        }
+
         /**
          * Hex encode as UTF-8 .
          */
         @SuppressWarnings({
-            "PMD.AvoidLiteralsInIfCondition",
             "PMD.AvoidReassigningParameters", // needed for edge case
             "PMD.CyclomaticComplexity", // yup, encoding UTF-8 branches a lot
             "PMD.ModifiedCyclomaticComplexity",
@@ -628,28 +659,8 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
                 } else {
                     cp = c;
                 }
-                
-                if (cp < 0x80) {
-                    dest.append(hexEncode[cp]);
 
-                } else if (cp < 0x800) {
-                    dest.append(hexEncode[0xC0 | (cp >> 6)]);
-                    dest.append(hexEncode[0x80 | (cp & 0x3F)]);
-
-                } else if (cp < 0x10000) {
-                    dest.append(hexEncode[0xE0 | (cp >> 12)]);
-                    dest.append(hexEncode[0x80 | ((cp >> 6) & 0x3F)]);
-                    dest.append(hexEncode[0x80 | (cp & 0x3F)]);
-
-                } else if (cp < 0x200000) {
-                    dest.append(hexEncode[0xF0 | (cp >> 18)]);
-                    dest.append(hexEncode[0x80 | ((cp >> 12) & 0x3F)]);
-                    dest.append(hexEncode[0x80 | ((cp >> 6) & 0x3F)]);
-                    dest.append(hexEncode[0x80 | (cp & 0x3F)]);
-
-                } else {
-                    throw new MalformedInputException(i);
-                }
+                encode(dest, cp, hexEncode, i);
             }
         }
 
@@ -1030,4 +1041,32 @@ public final class JsonUrl { // NOPMD - ClassNamingConventions
 
         return true;
     }
+    
+    /**
+     * Append the given UNICODE codepoint as a string literal.
+     * Note, this method effectively appends a string of length 1 and
+     * can't take advantage optimizations available to longer strings.
+     * It's primarily used for append character arrays. You don't
+     * want to call this in a loop as a means of appending a string.
+     * Use {@link #appendLiteral(Appendable, CharSequence, int, int, boolean, JsonUrlOptions)}
+     * for that.
+     *
+     * @param <T>       destination type
+     * @param dest      destination
+     * @param codePoint a UNICODE codePoint
+     * @param options   a valid JsonUrlOptions or null
+     */
+    public static <T extends Appendable> void appendCodePoint(
+            T dest,
+            int codePoint,
+            JsonUrlOptions options) throws IOException {
+
+        if (!isImpliedStringLiterals(options) && codePoint == APOS) {
+            dest.append("%27");
+
+        } else {
+            Encode.encode(dest, codePoint, CharUtil.HEXENCODE_UNQUOTED, 0);
+        }
+    }
+
 }

@@ -20,8 +20,10 @@ package org.jsonurl.j2se;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.nio.charset.MalformedInputException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -275,6 +277,43 @@ class JsonUrlWriterTest {
         assertEquals(NULL,
             new JsonUrlStringBuilder().add((Enum<?>)null).build(),
             Enum.class.toString());
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    void testCharArray(ArrayTestCase test) throws IOException {
+        JsonUrlStringBuilder jsb = new JsonUrlStringBuilder();
+        assertTrue(JsonUrlWriter.write(jsb, test.values), test.expected);
+        assertEquals(test.expected, jsb.build(), test.expected);
+    }
+
+    static Stream<ArrayTestCase> testCharArray() {
+        return Stream.of(
+            new ArrayTestCase(
+                    "\u00A2".toCharArray(), // NOPMD - UNICODE escape
+                    "(%C2%A2)"),
+            new ArrayTestCase(
+                    "\uD83C\uDF55".toCharArray(), // NOPMD - UNICODE escape
+                    "(%F0%9F%8D%95)")
+            );
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    void testWriteCharArrayException(char... chars) throws IOException {
+        assertThrows(
+            MalformedInputException.class,
+            () -> JsonUrlWriter.write(new JsonUrlStringBuilder(), chars));
+    }
+
+    static Stream<char[]> testWriteCharArrayException() {
+        return Stream.of(
+                new char[] {Character.MIN_LOW_SURROGATE},
+                new char[] {Character.MIN_HIGH_SURROGATE},
+                new char[] {
+                    Character.MIN_HIGH_SURROGATE,
+                    Character.MIN_HIGH_SURROGATE}
+                );
     }
 
     @Test

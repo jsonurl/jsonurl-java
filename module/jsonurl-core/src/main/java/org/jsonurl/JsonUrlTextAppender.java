@@ -115,6 +115,12 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
     }
 
     @Override
+    public JsonUrlTextAppender<A,R> addCodePoint(int codePoint) throws IOException {
+        JsonUrl.appendCodePoint(this, codePoint, this);
+        return this;
+    }
+
+    @Override
     public JsonUrlTextAppender<A,R> add(BigDecimal value) throws IOException {
         if (value == null) {
             return addNull();
@@ -172,12 +178,6 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
     @Override
     public JsonUrlTextAppender<A,R> add(boolean value) throws IOException {
         out.append(String.valueOf(value));    
-        return this;
-    }
-
-    @Override
-    public JsonUrlTextAppender<A,R> add(char value) throws IOException {
-        out.append(value);
         return this;
     }
 

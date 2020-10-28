@@ -71,6 +71,11 @@ public interface JsonTextBuilder<A,R> {
     JsonTextBuilder<A,R> addNull() throws IOException;
 
     /**
+     * Add a UNICODE codepoint.
+     */
+    JsonTextBuilder<A,R> addCodePoint(int codepoint) throws IOException;
+
+    /**
      * Add a long value.
      */
     JsonTextBuilder<A,R> add(long value) throws IOException;
@@ -94,11 +99,6 @@ public interface JsonTextBuilder<A,R> {
      * Add a boolean value.
      */
     JsonTextBuilder<A,R> add(boolean value) throws IOException;
-
-    /**
-     * Add a boolean value.
-     */
-    JsonTextBuilder<A,R> add(char value) throws IOException;
 
     /**
      * Add a string value.
