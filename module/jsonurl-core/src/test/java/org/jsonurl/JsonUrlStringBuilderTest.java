@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URLEncoder;
 import java.nio.charset.MalformedInputException;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -115,6 +116,63 @@ class JsonUrlStringBuilderTest {
         JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
         assertEquals(text, jup.add(text).build(), text);
         assertEquals(text, jup.clear().add(text).build(), text);
+    }
+
+    private void assertCodePoint(
+            String expected,
+            int codePoint) throws IOException {
+        assertCodePoint(expected, codePoint, false);
+    }
+
+    private void assertCodePoint(
+            String expected,
+            int codePoint,
+            boolean impliedStringLiteral) throws IOException {
+
+        JsonUrlStringBuilder jsb = new JsonUrlStringBuilder();
+        jsb.setImpliedStringLiterals(impliedStringLiteral);
+        String actual = jsb.clear().addCodePoint(codePoint).build();
+        assertEquals(expected, actual, expected);
+    }
+
+    @Test
+    void testAddCodePointSingleQuote() throws IOException {
+        assertCodePoint("%27", '\'', false);
+        assertCodePoint("'", '\'', true);
+    }
+
+    @Test
+    void testAddCodePointSpace() throws IOException {
+        assertCodePoint("+", ' ');
+    }
+    
+    @ParameterizedTest
+    @ValueSource(chars = {
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+        'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 
+        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+        'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+        '!', '-', '.', '_', '~', '!', '$', '*', '/', ';', '?', '@',
+    })
+    void testAddCodePointLiteral(char codePoint) throws IOException {
+        String expected = String.valueOf(codePoint);
+        String actual = new JsonUrlStringBuilder()
+                .addCodePoint(codePoint)
+                .build();
+
+        assertEquals(expected, actual, expected);
+    }
+    
+    @ParameterizedTest
+    @ValueSource(chars = {
+        '+', '\'', '(', ')', ',', ':'
+    })
+    void testAddCodePointEncoded(char codePoint) throws IOException {
+        String expected = URLEncoder.encode(
+                String.valueOf(codePoint), "UTF-8");
+
+        assertCodePoint(expected, codePoint);
     }
 
     @Test
@@ -313,6 +371,21 @@ class JsonUrlStringBuilderTest {
         assertThrows(
             MalformedInputException.class,
             () -> new JsonUrlStringBuilder().add(text).build());
+    }
+    
+    @ParameterizedTest
+    @Tag(TAG_EXCEPTION)
+    @ValueSource(ints = {
+        0x200000
+    })
+    void testAddCodePointException(int badCodePoint) throws IOException {
+        assertThrows(
+            MalformedInputException.class,
+            () -> new JsonUrlStringBuilder().addCodePoint(badCodePoint));
+
+        assertThrows(
+            MalformedInputException.class,
+            () -> new JsonUrlStringBuilder().addCodePoint(badCodePoint));
     }
 
     @Test

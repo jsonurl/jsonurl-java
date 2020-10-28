@@ -22,6 +22,7 @@ import static org.jsonurl.JsonUrlOptions.isEmptyUnquotedValueAllowed;
 import static org.jsonurl.JsonUrlOptions.isSkipNulls;
 
 import java.io.IOException;
+import java.nio.charset.MalformedInputException;
 import java.util.Map;
 import org.jsonurl.JsonTextBuilder;
 import org.jsonurl.JsonUrlOptions;
@@ -366,7 +367,7 @@ public final class JsonUrlWriter { // NOPMD
      * @param array null or a valid array
      * @return true if dest was modified
      */
-    public static <A,R> boolean write(
+    public static <A,R> boolean write(// NOPMD - CyclomaticComplexity
             JsonTextBuilder<A,R> dest,
             JsonUrlOptions options,
             char... array) throws IOException {
@@ -376,12 +377,42 @@ public final class JsonUrlWriter { // NOPMD
         }
 
         dest.beginArray();
+        
+        final int length = array.length;
 
-        for (int i = 0; i < array.length; i++) {
+        for (int i = 0; i < length; i++) {
             if (i > 0) {
                 dest.valueSeparator();
             }
-            dest.add(array[i]);
+
+            char chr = array[i];
+
+            if (Character.isLowSurrogate(chr)) {
+                throw new MalformedInputException(i);
+            }
+
+            int codePoint;
+
+            if (Character.isHighSurrogate(chr)) {
+                i++; // NOPMD - consumed two characters
+
+                if (i == length) {
+                    throw new MalformedInputException(i);
+                }
+
+                char low = array[i];
+
+                if (Character.isHighSurrogate(low)) {
+                    throw new MalformedInputException(i);
+                }
+
+                codePoint = Character.toCodePoint(chr, low);
+
+            } else {
+                codePoint = chr;
+            }
+
+            dest.addCodePoint(codePoint);
         }
 
         dest.endArray();
