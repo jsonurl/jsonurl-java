@@ -55,6 +55,7 @@
 
   <modules>
     <module>module/jsonurl-core</module>
+    <module>module/jsonurl-factory</module>
     <module>module/jsonurl-jsonorg</module>
     <module>module/jsonurl-jsr374</module>
   </modules>

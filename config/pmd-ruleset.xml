@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ruleset xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         name="M2Eclipse PMD RuleSet"
+         name="jsonurl-pmd-ruleset"
          xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
-   <description>M2Eclipse PMD RuleSet</description>
+   <description>jsonurl-pmd-ruleset</description>
    <rule ref="category/java/bestpractices.xml/AbstractClassWithoutAbstractMethod"/>
    <rule ref="category/java/bestpractices.xml/AccessorClassGeneration"/>
    <rule ref="category/java/bestpractices.xml/AccessorMethodGeneration"/>
@@ -18,7 +18,6 @@
    <rule ref="category/java/bestpractices.xml/CheckResultSet"/>
    <rule ref="category/java/bestpractices.xml/ConstantsInInterface"/>
    <rule ref="category/java/bestpractices.xml/DefaultLabelNotLastInSwitchStmt"/>
-   <rule ref="category/jsp/bestpractices.xml/DontNestJsfInJstlIteration"/>
    <rule ref="category/java/bestpractices.xml/DoubleBraceInitialization"/>
    <rule ref="category/java/bestpractices.xml/ForLoopCanBeForeach"/>
    <rule ref="category/java/bestpractices.xml/ForLoopVariableCount"/>
@@ -34,9 +33,6 @@
    <rule ref="category/java/bestpractices.xml/LooseCoupling"/>
    <rule ref="category/java/bestpractices.xml/MethodReturnsInternalArray"/>
    <rule ref="category/java/bestpractices.xml/MissingOverride"/>
-   <rule ref="category/jsp/bestpractices.xml/NoClassAttribute"/>
-   <rule ref="category/jsp/bestpractices.xml/NoHtmlComments"/>
-   <rule ref="category/jsp/bestpractices.xml/NoJspForward"/>
    <rule ref="category/java/bestpractices.xml/OneDeclarationPerLine"/>
    <rule ref="category/java/bestpractices.xml/PreserveStackTrace"/>
    <rule ref="category/java/bestpractices.xml/ReplaceEnumerationWithIterator"/>
@@ -63,15 +59,11 @@
    <rule ref="category/java/codestyle.xml/AvoidProtectedMethodInFinalClassNotExtending"/>
    <rule ref="category/java/codestyle.xml/AvoidUsingNativeCode"/>
    <rule ref="category/java/codestyle.xml/BooleanGetMethodName"/>
-<!--
-   <rule ref="category/java/codestyle.xml/CallSuperInConstructor"/>
--->
    <rule ref="category/java/codestyle.xml/ClassNamingConventions"/>
    <rule ref="category/java/codestyle.xml/ConfusingTernary"/>
    <rule ref="category/java/codestyle.xml/ControlStatementBraces"/>
    <rule ref="category/java/codestyle.xml/DontImportJavaLang"/>
    <rule ref="category/java/codestyle.xml/DuplicateImports"/>
-   <rule ref="category/jsp/codestyle.xml/DuplicateJspImports"/>
    <rule ref="category/java/codestyle.xml/EmptyMethodInAbstractClassShouldBeAbstract"/>
    <rule ref="category/java/codestyle.xml/ExtendsObject"/>
    <rule ref="category/java/codestyle.xml/FieldDeclarationsShouldBeAtStartOfClass"/>
@@ -87,9 +79,6 @@
    <rule ref="category/java/codestyle.xml/MDBAndSessionBeanNamingConvention"/>
    <rule ref="category/java/codestyle.xml/MethodNamingConventions"/>
    <rule ref="category/java/codestyle.xml/NoPackage"/>
-<!--
-   <rule ref="category/java/codestyle.xml/OnlyOneReturn"/>
--->
    <rule ref="category/java/codestyle.xml/PackageCase"/>
    <rule ref="category/java/codestyle.xml/PrematureDeclaration"/>
    <rule ref="category/java/codestyle.xml/RemoteInterfaceNamingConvention"/>
@@ -108,7 +97,6 @@
    <rule ref="category/java/codestyle.xml/UselessParentheses"/>
    <rule ref="category/java/codestyle.xml/UselessQualifiedThis"/>
    <rule ref="category/java/codestyle.xml/UseShortArrayInitializer"/>
-   <rule ref="category/java/codestyle.xml/UseUnderscoresInNumericLiterals"/>
    <rule ref="category/java/design.xml/AbstractClassWithoutAnyMethod"/>
    <rule ref="category/java/design.xml/AvoidCatchingGenericException"/>
    <rule ref="category/java/design.xml/AvoidDeeplyNestedIfStmts"/>
@@ -125,31 +113,14 @@
    <rule ref="category/java/design.xml/DoNotExtendJavaLangError"/>
    <rule ref="category/java/design.xml/ExceptionAsFlowControl"/>
 <!--
-   <rule ref="category/java/design.xml/ExcessiveClassLength"/>
--->
    <rule ref="category/java/design.xml/ExcessiveImports"/>
-<!--
-   <rule ref="category/java/design.xml/ExcessiveMethodLength"/>
 -->
    <rule ref="category/java/design.xml/ExcessiveParameterList"/>
    <rule ref="category/java/design.xml/ExcessivePublicCount"/>
    <rule ref="category/java/design.xml/FinalFieldCouldBeStatic"/>
-<!--
-   <rule ref="category/java/design.xml/GodClass"/>
--->
    <rule ref="category/java/design.xml/ImmutableField"/>
-<!--
-   <rule ref="category/java/design.xml/LawOfDemeter"/>
--->
    <rule ref="category/java/design.xml/LogicInversion"/>
-<!--
-   <rule ref="category/java/design.xml/LoosePackageCoupling"/>
--->
    <rule ref="category/java/design.xml/NcssCount"/>
-   <rule ref="category/jsp/design.xml/NoInlineScript"/>
-   <rule ref="category/jsp/design.xml/NoInlineStyleInformation"/>
-   <rule ref="category/jsp/design.xml/NoLongScripts"/>
-   <rule ref="category/jsp/design.xml/NoScriptlets"/>
    <rule ref="category/java/design.xml/NPathComplexity"/>
    <rule ref="category/java/design.xml/SignatureDeclareThrowsException"/>
    <rule ref="category/java/design.xml/SimplifiedTernary"/>
@@ -160,9 +131,6 @@
    <rule ref="category/java/design.xml/SingularField"/>
    <rule ref="category/java/design.xml/SwitchDensity"/>
    <rule ref="category/java/design.xml/TooManyFields"/>
-<!--
-   <rule ref="category/java/design.xml/TooManyMethods"/>
--->
    <rule ref="category/java/design.xml/UselessOverridingMethod"/>
    <rule ref="category/java/design.xml/UseObjectForClearerAPI"/>
    <rule ref="category/java/design.xml/UseUtilityClass"/>
@@ -181,7 +149,9 @@
    <rule ref="category/java/errorprone.xml/AvoidDecimalLiteralsInBigDecimalConstructor"/>
    <rule ref="category/java/errorprone.xml/AvoidDuplicateLiterals"/>
    <rule ref="category/java/errorprone.xml/AvoidEnumAsIdentifier"/>
+<!--
    <rule ref="category/java/errorprone.xml/AvoidFieldNameMatchingMethodName"/>
+-->
    <rule ref="category/java/errorprone.xml/AvoidFieldNameMatchingTypeName"/>
    <rule ref="category/java/errorprone.xml/AvoidInstanceofChecksInCatchClause"/>
    <rule ref="category/java/errorprone.xml/AvoidLiteralsInIfCondition"/>
@@ -189,9 +159,6 @@
    <rule ref="category/java/errorprone.xml/AvoidMultipleUnaryOperators"/>
    <rule ref="category/java/errorprone.xml/AvoidUsingOctalValues"/>
    <rule ref="category/java/errorprone.xml/BadComparison"/>
-<!--
-   <rule ref="category/java/errorprone.xml/BeanMembersShouldSerialize"/>
--->
    <rule ref="category/java/errorprone.xml/BrokenNullCheck"/>
    <rule ref="category/java/errorprone.xml/CallSuperFirst"/>
    <rule ref="category/java/errorprone.xml/CallSuperLast"/>
@@ -206,7 +173,6 @@
    <rule ref="category/java/errorprone.xml/ConstructorCallsOverridableMethod"/>
    <rule ref="category/java/errorprone.xml/DetachedTestCase"/>
    <rule ref="category/java/errorprone.xml/DoNotCallGarbageCollectionExplicitly"/>
-   <rule ref="category/java/errorprone.xml/DoNotCallSystemExit"/>
    <rule ref="category/java/errorprone.xml/DoNotExtendJavaLangThrowable"/>
    <rule ref="category/java/errorprone.xml/DoNotHardCodeSDCard"/>
    <rule ref="category/java/errorprone.xml/DoNotThrowExceptionInFinally"/>
@@ -231,11 +197,7 @@
    <rule ref="category/java/errorprone.xml/IdempotentOperations"/>
    <rule ref="category/java/errorprone.xml/ImportFromSamePackage"/>
    <rule ref="category/java/errorprone.xml/InstantiationToGetClass"/>
-<!-- error when running from CLI
-   <rule ref="category/pom/errorprone.xml/InvalidDependencyTypes"/>
--->
    <rule ref="category/java/errorprone.xml/InvalidLogMessageFormat"/>
-   <rule ref="category/jsp/errorprone.xml/JspEncoding"/>
    <rule ref="category/java/errorprone.xml/JumbledIncrementer"/>
    <rule ref="category/java/errorprone.xml/JUnitSpelling"/>
    <rule ref="category/java/errorprone.xml/JUnitStaticSuite"/>
@@ -249,9 +211,6 @@
    <rule ref="category/java/errorprone.xml/NonStaticInitializer"/>
    <rule ref="category/java/errorprone.xml/NullAssignment"/>
    <rule ref="category/java/errorprone.xml/OverrideBothEqualsAndHashcode"/>
-<!-- error when running from CLI
-   <rule ref="category/pom/errorprone.xml/ProjectVersionAsDependencyVersion"/>
--->
    <rule ref="category/java/errorprone.xml/ProperCloneImplementation"/>
    <rule ref="category/java/errorprone.xml/ProperLogger"/>
    <rule ref="category/java/errorprone.xml/ReturnEmptyArrayRatherThanNull"/>
@@ -283,9 +242,6 @@
    <rule ref="category/java/multithreading.xml/DoubleCheckedLocking"/>
    <rule ref="category/java/multithreading.xml/NonThreadSafeSingleton"/>
    <rule ref="category/java/multithreading.xml/UnsynchronizedStaticFormatter"/>
-<!--
-   <rule ref="category/java/multithreading.xml/UseConcurrentHashMap"/>
--->
    <rule ref="category/java/multithreading.xml/UseNotifyAllInsteadOfNotify"/>
    <rule ref="category/java/performance.xml/AddEmptyString"/>
    <rule ref="category/java/performance.xml/AppendCharacterWithChar"/>
@@ -307,7 +263,6 @@
    <rule ref="category/java/performance.xml/OptimizableToArrayCall"/>
    <rule ref="category/java/performance.xml/RedundantFieldInitializer"/>
    <rule ref="category/java/performance.xml/ShortInstantiation"/>
-   <rule ref="category/java/performance.xml/SimplifyStartsWith"/>
    <rule ref="category/java/performance.xml/StringInstantiation"/>
    <rule ref="category/java/performance.xml/StringToString"/>
    <rule ref="category/java/performance.xml/TooFewBranchesForASwitchStatement"/>
@@ -321,6 +276,5 @@
    <rule ref="category/java/performance.xml/UseStringBufferLength"/>
    <rule ref="category/java/security.xml/HardCodedCryptoKey"/>
    <rule ref="category/jsp/security.xml/IframeMissingSrcAttribute"/>
-   <rule ref="category/java/security.xml/InsecureCryptoIv"/>
    <rule ref="category/jsp/security.xml/NoUnsanitizedJSPExpression"/>
 </ruleset>

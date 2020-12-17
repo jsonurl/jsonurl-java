@@ -17,17 +17,19 @@
 
 package org.jsonurl.jsonorg;
 
-import static org.jsonurl.JsonUrlOptions.isCoerceNullToEmptyString;
-import static org.jsonurl.JsonUrlOptions.isEmptyUnquotedValueAllowed;
-import static org.jsonurl.JsonUrlOptions.isSkipNulls;
+import static org.jsonurl.JsonUrlOption.optionCoerceNullToEmptyString;
+import static org.jsonurl.JsonUrlOption.optionEmptyUnquotedValue;
+import static org.jsonurl.JsonUrlOption.optionSkipNulls;
+import static org.jsonurl.JsonUrlOptionable.getJsonUrlOptions;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONString;
-import org.jsonurl.JsonTextBuilder;
-import org.jsonurl.JsonUrlOptions;
+import org.jsonurl.JsonUrlOption;
+import org.jsonurl.text.JsonTextBuilder;
 
 /**
  * A utility class for serializing org.json objects, arrays, and values as
@@ -44,41 +46,43 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
     }
     
     private static  boolean isNull(Object obj) {
-        return obj == null || obj == JSONObject.NULL;
+        //
+        // PMD - CompareObjectsWithEquals
+        // this is intentional
+        //
+        return obj == null || obj == JSONObject.NULL; // NOPMD
     }
     
     /**
      * Write the given Java Object as JSON&#x2192;URL text.
      * 
-     * @param <A> Accumulator type
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param value null or Java Object
      * @return true if dest was modified
      */
-    public static <A,R> boolean write(
-            JsonTextBuilder<A,R> dest,
+    public static <R> boolean write(
+            JsonTextBuilder<R> dest,
             Object value) throws IOException {
-        return write(dest, JsonUrlOptions.fromObject(dest), value);
+        return write(dest, getJsonUrlOptions(dest), value);
     }
 
     /**
      * Write the given Java Object as JSON&#x2192;URL text.
      * 
-     * @param <A> Accumulator type
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param value null or Java Object
      * @param options a valid JsonUrlOptions or null
      * @return true if dest was modified
      */
-    public static <A,R> boolean write(
-            JsonTextBuilder<A,R> dest,
-            JsonUrlOptions options,
+    public static <R> boolean write(
+            JsonTextBuilder<R> dest,
+            Set<JsonUrlOption> options,
             Object value) throws IOException {
 
         if (isNull(value)) {
-            if (isSkipNulls(options)) {
+            if (optionSkipNulls(options)) {
                 return false;
             }
             return writeNull(dest, options);
@@ -87,7 +91,7 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
         if (value instanceof JSONString) {
             String str = ((JSONString)value).toJSONString();
             if (isNull(str)) {
-                if (isSkipNulls(options)) { // NOPMD -- nested if
+                if (optionSkipNulls(options)) { // NOPMD -- nested if
                     return false;
                 }
                 return writeNull(dest, options);
@@ -111,35 +115,33 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
     /**
      * Write the given JSONObject as JSON&#x2192;URL text.
      * 
-     * @param <A> Accumulator type
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param obj null or JSONObject
      * @return true if dest was modified
      */
-    public static <A,R> boolean write(
-            JsonTextBuilder<A,R> dest,
+    public static <R> boolean write(
+            JsonTextBuilder<R> dest,
             JSONObject obj) throws IOException {
-        return write(dest, JsonUrlOptions.fromObject(dest), obj);
+        return write(dest, getJsonUrlOptions(dest), obj);
     }
 
     /**
      * Write the given JSONObject as JSON&#x2192;URL text.
      * 
-     * @param <A> Accumulator type
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param obj null or JSONObject
      * @param options a valid JsonUrlOptions or null
      * @return true if dest was modified
      */
-    public static <A,R> boolean write(
-            JsonTextBuilder<A,R> dest,
-            JsonUrlOptions options,
+    public static <R> boolean write(
+            JsonTextBuilder<R> dest,
+            Set<JsonUrlOption> options,
             JSONObject obj) throws IOException {
         
         if (isNull(obj)) {
-            if (isSkipNulls(options)) {
+            if (optionSkipNulls(options)) {
                 return false;
             }
             
@@ -173,35 +175,33 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
     /**
      * Write the given JSONArray as JSON&#x2192;URL text.
      * 
-     * @param <A> Accumulator type
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param value null or JSONArray
      * @return true if dest was modified
      */
-    public static <A,R> boolean write(
-            JsonTextBuilder<A,R> dest,
+    public static <R> boolean write(
+            JsonTextBuilder<R> dest,
             JSONArray value) throws IOException {
-        return write(dest, JsonUrlOptions.fromObject(dest), value);
+        return write(dest, getJsonUrlOptions(dest), value);
     }
 
     /**
      * Write the given JSONArray as JSON&#x2192;URL text.
      * 
-     * @param <A> Accumulator type
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param value null or JSONArray
      * @param options a valid JsonUrlOptions or null
      * @return true if dest was modified
      */
-    public static <A,R> boolean write(
-            JsonTextBuilder<A,R> dest,
-            JsonUrlOptions options,
+    public static <R> boolean write(
+            JsonTextBuilder<R> dest,
+            Set<JsonUrlOption> options,
             JSONArray value) throws IOException {
         
         if (isNull(value)) {
-            if (isSkipNulls(options)) {
+            if (optionSkipNulls(options)) {
                 return false;
             }
             
@@ -220,13 +220,13 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
         return ret;
     }
     
-    private static <A,R> boolean write(
-            JsonTextBuilder<A,R> dest,
-            JsonUrlOptions options,
+    private static <R> boolean write(
+            JsonTextBuilder<R> dest,
+            Set<JsonUrlOption> options,
             Object value,
             boolean comma) throws IOException {
 
-        if (isSkipNulls(options) && isNull(value)) {
+        if (optionSkipNulls(options) && isNull(value)) {
             return comma;
         }
 
@@ -239,14 +239,14 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
         return true;
     }
     
-    private static <A,R> boolean write(
-        JsonTextBuilder<A,R> dest,
-        JsonUrlOptions options,
+    private static <R> boolean write(
+        JsonTextBuilder<R> dest,
+        Set<JsonUrlOption> options,
         String key,
         Object value,
         boolean comma) throws IOException {
 
-        if (isSkipNulls(options) && isNull(value)) {
+        if (optionSkipNulls(options) && isNull(value)) {
             return comma;
         }
 
@@ -260,13 +260,13 @@ public final class JsonUrlWriter { //NOPMD - ClassNamingConventions
         return true;
     }
 
-    private static <A,R> boolean writeNull(
-            JsonTextBuilder<A,R> dest,
-            JsonUrlOptions options) throws IOException {
+    private static <R> boolean writeNull(
+            JsonTextBuilder<R> dest,
+            Set<JsonUrlOption> options) throws IOException {
 
         dest.addNull();
 
-        return !(isCoerceNullToEmptyString(options)
-                && isEmptyUnquotedValueAllowed(options));
+        return !(optionCoerceNullToEmptyString(options)
+                && optionEmptyUnquotedValue(options));
     }
 }

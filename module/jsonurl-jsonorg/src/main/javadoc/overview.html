@@ -16,25 +16,9 @@
   under the License.
  -->
 <body>
-    This class library provides a JSON&#x2192;URL parser bound to
+    The <code>jsonurl-jsonorg</code> package provides a
+    <a href="https://www.jsonurl.org/">JSON&#x2192;URL</a> parser bound to
     <a href="https://javadoc.io/doc/org.json/json/">json.org</a>'s API types.
-    <p><a href="https://tools.ietf.org/html/rfc8259">RFC8259</a> describes the
-    JSON data model and interchange format, which is
-    widely used in
-    <a href="https://en.wikipedia.org/wiki/Application_layer">application-level</a>
-    protocols including
-    <a href="https://en.wikipedia.org/wiki/Representational_state_transfer">RESTful</a>
-    <a href="https://en.wikipedia.org/wiki/Web_API">API</a>s. It is
-    common for applications to request resources via the
-    <a href="https://en.wikipedia.org/wiki/POST_(HTTP)">HTTP POST</a> method,
-    with JSON
-    <a href="https://tools.ietf.org/html/rfc2068#section-7">entities</a>.
-    However, POST is suboptimal for requests which do not modify a 
-    <a href="https://tools.ietf.org/html/rfc7231#section-2">resource</a>'s
-    state. JSON&#x2192;URL defines a text format for the JSON
-    data model suitable for use within a
-    <a href="https://tools.ietf.org/html/rfc1738">URL</a>/<a
-    href="https://tools.ietf.org/html/rfc3986">URI</a>.</p>
 
     <h2><a id="usage" href="#usage">Usage</a></h2>
     <p>The <a href="org/jsonurl/jsonorg/JsonUrlParser.html">JsonUrlParser</a>
@@ -45,16 +29,16 @@ import org.json.JSONObject;
 import org.jsonurl.jsonorg.<a href="org/jsonurl/jsonorg/JsonUrlParser.html">JsonUrlParser</a>;
 
 JsonUrlParser p = new JsonUrlParser();
-JSONObject myObject = p.parseObject( "(Hello:World!)" );
-System.out.println(obj.get("Hello")) // World!
+JSONObject myObject = p.parseObject( "(Hello:World)" );
+System.out.println(obj.get("Hello")) // World
 </pre>
 
   
     <h2><a id="security" href="#security">Security</a></h2>
     <p>The parser is designed to parse untrusted input. It supports limits on
-    the number of parsed values and depth of nested arrays or objects. When the
-    limit is exceeded a LimitException is thrown. Sane limit values are set by
-    default.
+    the number of parsed values and depth of nested arrays or objects. When
+    the limit is exceeded a LimitException is thrown. Reasonable limit values
+    are set by default.
 
 </body>
 </html>

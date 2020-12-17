@@ -16,15 +16,8 @@
  */
 
 /**
- * This package provides an extensible JSON&#x2192;URL parser core and
- * static utility methods.
- *
- * <p>If you need a parser bound to your own JSON model API then
- * a {@link org.jsonurl.ValueFactory ValueFactory} may be created and
- * supplied to an instance of {@link org.jsonurl.Parser Parser}. Otherwise,
- * if a parser based on J2SE datatypes is sufficient then
- * take a look at {@link org.jsonurl.j2se.JsonUrlParser JsonUrlParser} which
- * does just that. 
+ * Provides the base interfaces, classes, and exceptions needed to parse the
+ * <a href="https://jsonurl.org/">JSON&#x2192;URL</a> grammar.
  * 
  * @author jsonurl.org
  * @author David MacCormack

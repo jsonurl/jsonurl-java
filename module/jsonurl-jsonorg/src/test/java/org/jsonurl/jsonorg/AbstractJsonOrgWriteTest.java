@@ -18,10 +18,14 @@
 package org.jsonurl.jsonorg;
 
 import java.io.IOException;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.jsonurl.AbstractWriteTest;
-import org.jsonurl.JsonTextBuilder;
+import org.jsonurl.CompositeType;
+import org.jsonurl.JsonUrlOption;
+import org.jsonurl.factory.AbstractWriteTest;
+import org.jsonurl.text.JsonStringBuilder;
+import org.jsonurl.text.JsonTextBuilder;
 
 /**
  * Abstract base class for JsonUrlStringBuilder + JsonOrgValueFactory unit tests.
@@ -40,10 +44,18 @@ abstract class AbstractJsonOrgWriteTest
             JSONObject> {
 
     @Override
-    protected <I,R> boolean write(
-            JsonTextBuilder<I, R> dest,
+    protected <R> boolean write(
+            JsonTextBuilder<R> dest,
             Object value) throws IOException {
 
         return JsonUrlWriter.write(dest, value);
+    }
+
+    @Override
+    protected JsonStringBuilder newJsonStringBuilder(
+            Set<JsonUrlOption> options,
+            CompositeType impliedType) {
+
+        return new JsonUrlStringBuilder(impliedType, options);
     }
 }

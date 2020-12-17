@@ -27,9 +27,8 @@ import javax.json.JsonReader;
 import javax.json.JsonStructure;
 import javax.json.JsonValue;
 import javax.json.stream.JsonGenerator;
-import org.jsonurl.AbstractJsonApiWriteTest;
-import org.jsonurl.JsonTextBuilder;
-import org.jsonurl.ValueFactoryParser;
+import org.jsonurl.factory.AbstractJsonApiWriteTest;
+import org.jsonurl.text.JsonTextBuilder;
 
 /**
  * Unit test for writing JSON&#x2192;URL text.
@@ -60,13 +59,7 @@ public class JsonpApiWriteTest extends AbstractJsonApiWriteTest<
     }
 
     @Override
-    public ValueFactoryParser<
-            JsonValue,
-            JsonStructure,
-            ?,
-            JsonArray,
-            ?,
-            JsonObject,?,?,?,?> newParser() {
+    public JsonUrlParser newParser() {
         return new JsonUrlParser();
     }
 
@@ -82,7 +75,7 @@ public class JsonpApiWriteTest extends AbstractJsonApiWriteTest<
     }
 
     @Override
-    public void write(JsonTextBuilder<?, ?> dest, JsonValue value)
+    public void write(JsonTextBuilder<?> dest, JsonValue value)
             throws IOException {
         JsonUrlWriter.write(dest, value);
     }

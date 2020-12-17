@@ -21,68 +21,51 @@ import java.util.Set;
 
 /**
  * An enumeration of JSON&#x2192;URL value types.
+ * 
+ * @author jsonurl.org
+ * @author David MacCormack
+ * @since 2020-07-05
  */
 public enum ValueType {
     /**
      * A {@code null} literal.
      */
-    NULL(true),
+    NULL(null),
     /**
      * A {@code true} or {@code false} literal.
      */
-    BOOLEAN(true),
+    BOOLEAN(null),
     /**
      * A number literal (e.g. 1, 1.2, 1e3, etc).
      */
-    NUMBER(true),
+    NUMBER(null),
     /**
      * A string literal.
      */
-    STRING(true),
+    STRING(null),
     /**
      * An array.
      */
-    ARRAY(false),
+    ARRAY(CompositeType.ARRAY),
     /**
      * An object.
      */
-    OBJECT(false);
+    OBJECT(CompositeType.OBJECT);
 
     /**
      * see {@link #isPrimitive()}.
      */
-    private final boolean isPrimitive;
+    private final CompositeType ctype;
 
-    ValueType(boolean isPrimitive) {
-        this.isPrimitive = isPrimitive;
+    ValueType(CompositeType ctype) {
+        this.ctype = ctype;
     }
 
     /**
-     * Test if this ValueType is a primitive type.
+     * Get the {@link CompositeType} for this ValueType.
      */
-    public boolean isPrimitive() {
-        return isPrimitive && this != NULL;
-    }
-
-    /**
-     * Test if this ValueType is a primitive type or NULL.
-     */
-    public boolean isPrimitiveOrNull() {
-        return isPrimitive;
-    }
-
-    /**
-     * Test if this ValueType is a composite type.
-     */
-    public boolean isComposite() {
-        return !isPrimitive;
-    }
-
-    /**
-     * Test if this ValueType is a composite type or NULL.
-     */
-    public boolean isCompositeOrNull() {
-        return !isPrimitive || this == NULL;
+    public CompositeType getCompositeType() {
+        return ctype;
     }
 
     /**
@@ -91,5 +74,12 @@ public enum ValueType {
      */
     public static final boolean containsComposite(Set<ValueType> set) {
         return set.contains(OBJECT) || set.contains(ARRAY); 
+    }
+
+    /**
+     * Get the ValueType for the given {@link CompositeType}. 
+     */
+    public static final ValueType forCompositeType(CompositeType type) {
+        return type == null ? null : type.getValueType();
     }
 }
