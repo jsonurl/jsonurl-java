@@ -30,7 +30,7 @@ import org.junit.jupiter.params.provider.EnumSource;
  * @author David MacCormack
  * @since 2019-09-01
  */
-public class SyntaxExceptionTest {
+class SyntaxExceptionTest {
 
     @ParameterizedTest
     @Tag("exception")
@@ -45,7 +45,7 @@ public class SyntaxExceptionTest {
 
         assertEquals(
             42,
-            new SyntaxException(msg, text, 42).getPosition(),
+            new SyntaxException(msg, text, 42).getOffset(),
             text);
 
         assertEquals(

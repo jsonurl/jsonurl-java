@@ -25,8 +25,9 @@ import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONString;
-import org.jsonurl.JsonTextBuilder;
-import org.jsonurl.JsonUrlStringBuilder;
+import org.jsonurl.JsonUrlOption;
+import org.jsonurl.text.JsonTextBuilder;
+import org.jsonurl.text.JsonUrlStringBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -47,9 +48,9 @@ class JsonUrlWriterTest {
 
     @Test
     void testNullJsonString() throws IOException {
-        JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
+        JsonUrlStringBuilder jup = new JsonUrlStringBuilder(
+            JsonUrlOption.SKIP_NULLS);
 
-        jup.setSkipNulls(true);
         assertFalse(write(
             jup,
             new JSONString() {
@@ -96,9 +97,9 @@ class JsonUrlWriterTest {
 
     @Test
     void testNullObject() throws IOException {
-        JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
+        JsonUrlStringBuilder jup = new JsonUrlStringBuilder(
+            JsonUrlOption.SKIP_NULLS);
 
-        jup.setSkipNulls(true);
         assertFalse(
             JsonUrlWriter.write(jup, (JSONObject)null),
             NULL);
@@ -114,8 +115,8 @@ class JsonUrlWriterTest {
 
     @Test
     void testNullArray() throws IOException {
-        JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
-        jup.setSkipNulls(true);
+        JsonUrlStringBuilder jup = new JsonUrlStringBuilder(
+            JsonUrlOption.SKIP_NULLS);
 
         assertFalse(
             JsonUrlWriter.write(
@@ -131,8 +132,8 @@ class JsonUrlWriterTest {
 
     }
     
-    static <I,R> boolean write(
-            JsonTextBuilder<I, R> dest,
+    static <R> boolean write(
+            JsonTextBuilder<R> dest,
             Object value) throws IOException {
 
         return JsonUrlWriter.write(dest, value);

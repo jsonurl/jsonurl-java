@@ -24,7 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
-import org.jsonurl.JsonUrlStringBuilder;
+import org.jsonurl.JsonUrlOption;
+import org.jsonurl.text.JsonUrlStringBuilder;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -43,9 +44,9 @@ class JsonUrlWriterTest {
 
     @Test
     void testNullObject() throws IOException {
-        JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
+        JsonUrlStringBuilder jup = new JsonUrlStringBuilder(
+            JsonUrlOption.SKIP_NULLS);
 
-        jup.setSkipNulls(true);
         assertFalse(
             JsonUrlWriter.write(jup, (JsonObject)null),
             NULL);
@@ -61,9 +62,9 @@ class JsonUrlWriterTest {
 
     @Test
     void testNullArray() throws IOException {
-        JsonUrlStringBuilder jup = new JsonUrlStringBuilder();
+        JsonUrlStringBuilder jup = new JsonUrlStringBuilder(
+            JsonUrlOption.SKIP_NULLS);
         
-        jup.setSkipNulls(true);
         assertFalse(
             JsonUrlWriter.write(jup, (JsonArray)null),
             NULL);

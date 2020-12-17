@@ -21,9 +21,9 @@ import java.math.MathContext;
 import java.util.Objects;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.jsonurl.AbstractParseTest;
 import org.jsonurl.BigMathProvider.BigIntegerOverflow;
-import org.jsonurl.ValueFactory;
+import org.jsonurl.factory.AbstractParseTest;
+import org.jsonurl.factory.ValueFactory;
 
 /**
  * Abstract base class for Parser + JsonOrgValueFactory unit tests.

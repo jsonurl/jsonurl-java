@@ -21,9 +21,8 @@ import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONWriter;
-import org.jsonurl.AbstractJsonApiWriteTest;
-import org.jsonurl.JsonTextBuilder;
-import org.jsonurl.ValueFactoryParser;
+import org.jsonurl.factory.AbstractJsonApiWriteTest;
+import org.jsonurl.text.JsonTextBuilder;
 
 /**
  * Unit test for writing JSON&#x2192;URL text via the JSON.org API.
@@ -39,7 +38,7 @@ public class JsonOrgApiWriteTest extends AbstractJsonApiWriteTest<
         JSONObject> {
 
     @Override
-    public void write(JsonTextBuilder<?, ?> dest, Object value)
+    public void write(JsonTextBuilder<?> dest, Object value)
             throws IOException {
         JsonUrlWriter.write(dest, value);
     }
@@ -55,14 +54,7 @@ public class JsonOrgApiWriteTest extends AbstractJsonApiWriteTest<
     }
 
     @Override
-    public ValueFactoryParser<
-            Object,
-            Object,
-            ?,
-            JSONArray,
-            ?,
-            JSONObject, ?, ?, ?, ?> newParser() {
-
+    public JsonUrlParser newParser() {
         return new JsonUrlParser(JsonOrgValueFactory.PRIMITIVE);
     }
 

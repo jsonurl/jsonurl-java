@@ -18,15 +18,13 @@
 package org.jsonurl.jsonorg;
 
 import java.math.MathContext;
-import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsonurl.BigMath;
-import org.jsonurl.NumberBuilder;
-import org.jsonurl.NumberText;
-import org.jsonurl.ValueFactory;
-import org.jsonurl.ValueType;
+import org.jsonurl.factory.ValueFactory;
 import org.jsonurl.j2se.JavaValueFactory;
+import org.jsonurl.text.NumberBuilder;
+import org.jsonurl.text.NumberText;
 
 
 /**
@@ -130,7 +128,7 @@ public interface JsonOrgValueFactory extends ValueFactory.TransparentBuilder<
      * A singleton instance of {@link JsonOrgValueFactory}.
      * 
      * <p>This factory uses
-     * {@link org.jsonurl.NumberBuilder#build(boolean)
+     * {@link org.jsonurl.text.NumberBuilder#build(boolean)
      * NumberBuilder.build(text,true)}
      * to parse JSON&#x2192;URL numbers.  
      */
@@ -200,32 +198,5 @@ public interface JsonOrgValueFactory extends ValueFactory.TransparentBuilder<
     @Override
     default String getString(CharSequence text, int start, int stop) {
         return JavaValueFactory.toJavaString(text, start, stop);
-    }
-    
-    @Override
-    default boolean isValid(Set<ValueType> types, Object value) {
-        if (value instanceof String) {
-            return types.contains(ValueType.STRING);
-        }
-        if (value instanceof Number) {
-            return types.contains(ValueType.NUMBER);
-        }
-        if (value instanceof Boolean) {
-            return types.contains(ValueType.BOOLEAN);
-        }
-        if (isEmptyComposite(value)) {
-            return types.contains(ValueType.OBJECT)
-                || types.contains(ValueType.ARRAY);
-        }
-        if (value instanceof JSONArray) {
-            return types.contains(ValueType.ARRAY);
-        }
-        if (value instanceof JSONObject) {
-            return types.contains(ValueType.OBJECT);
-        }
-        if (isNull(value)) {
-            return types.contains(ValueType.NULL);
-        }
-        return false;
     }
 }

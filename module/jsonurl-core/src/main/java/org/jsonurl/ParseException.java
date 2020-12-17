@@ -28,34 +28,83 @@ public class ParseException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     /**
-     * the position in the input text.
+     * the offset in the input text.
      */
-    private final int position;
+    private final long offset;
+
+    /**
+     * the line number.
+     */
+    private final int line;
+
+    /**
+     * the column number.
+     */
+    private final int column;
 
     /**
      * Create a new ParseException.
      * @param msg exception text
      */
     public ParseException(String msg) {
-        this(msg,-1);
+        this(msg, -1, -1, -1);
     }
 
     /**
      * Create a new ParseException.
      * @param msg exception text
-     * @param position the position in the input text
+     * @param offset the offset in the input text
      */
-    public ParseException(String msg, int position) {
-        super(msg);
-        this.position = position;
+    public ParseException(String msg, long offset) {
+        this(msg, offset, -1, -1);
     }
 
     /**
-     * Get the position in the text where the exception occurred.
-     * @return a valid position or 0.
+     * Create a new ParseException.
+     * @param msg exception text
+     * @param line the line in the input text
+     * @param column the column in the input text
      */
-    public int getPosition() {
-        return position;
+    public ParseException(String msg, int line, int column) {
+        this(msg, -1, line, column);
+    }
+
+    /**
+     * Create a new ParseException.
+     * @param msg exception text
+     * @param offset the offset in the input text
+     * @param line the line in the input text
+     * @param column the column in the input text
+     */
+    private ParseException(String msg, long offset, int line, int column) {
+        super(msg);
+        this.offset = offset;
+        this.line = line;
+        this.column = column;
+    }
+
+    /**
+     * Get the offset in the text where the exception occurred.
+     * @return a valid offset or -1.
+     */
+    public long getOffset() {
+        return offset;
+    }
+
+    /**
+     * Get the line in the text where the exception occurred.
+     * @return a valid line or -1.
+     */
+    public int getLineNumber() {
+        return line;
+    }
+
+    /**
+     * Get the column in the text where the exception occurred.
+     * @return a valid column or -1.
+     */
+    public int getColumn() {
+        return column;
     }
 
     /**
@@ -74,9 +123,19 @@ public class ParseException extends RuntimeException {
             .append(": ")
             .append(getMessage());
 
-        int pos = getPosition();
-        if (pos > -1) {
-            buf.append(" at ").append(pos);
+        int line = getLineNumber();
+        if (line > -1) {
+            buf.append(" at ").append(line);
+            
+            int col = getColumn();
+            if (col > -1) {
+                buf.append(':').append(col);
+            }
+        } else {
+            long off = getOffset();
+            if (off > -1) {
+                buf.append(" at ").append(off);
+            }            
         }
 
         return buf.toString();

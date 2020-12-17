@@ -20,7 +20,6 @@ package org.jsonurl.jsonp;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
-import java.util.Set;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonNumber;
@@ -31,10 +30,9 @@ import javax.json.JsonStructure;
 import javax.json.JsonValue;
 import javax.json.spi.JsonProvider;
 import org.jsonurl.BigMath;
-import org.jsonurl.NumberBuilder;
-import org.jsonurl.NumberText;
-import org.jsonurl.ValueFactory;
-import org.jsonurl.ValueType;
+import org.jsonurl.factory.ValueFactory;
+import org.jsonurl.text.NumberBuilder;
+import org.jsonurl.text.NumberText;
 
 /**
  * A JSON&#x2192;URL ValueFactory which uses the JSR-374 JSONP interface.
@@ -232,7 +230,7 @@ public interface JsonpValueFactory extends ValueFactory<
      * A singleton instance of {@link JsonpValueFactory}.
      * 
      * <p>This factory uses
-     * {@link org.jsonurl.NumberBuilder#build(boolean)
+     * {@link org.jsonurl.text.NumberBuilder#build(boolean)
      * NumberBuilder.build(text,true)}
      * to parse JSON&#x2192;URL numbers.
      */
@@ -345,32 +343,5 @@ public interface JsonpValueFactory extends ValueFactory<
     @Override
     default JsonObjectBuilder newObjectBuilder() {
         return getJsonProvider().createObjectBuilder();
-    }
-    
-    @Override
-    default boolean isValid(Set<ValueType> types, JsonValue value) {
-        if (value instanceof JsonString) {
-            return types.contains(ValueType.STRING);
-        }
-        if (value instanceof JsonNumber) {
-            return types.contains(ValueType.NUMBER);
-        }
-        if (value == JsonValue.FALSE || value == JsonValue.TRUE) {
-            return types.contains(ValueType.BOOLEAN);
-        }
-        if (isEmptyComposite(value)) {
-            return types.contains(ValueType.OBJECT)
-                || types.contains(ValueType.ARRAY);
-        }
-        if (value instanceof JsonArray) {
-            return types.contains(ValueType.ARRAY);
-        }
-        if (value instanceof JsonObject) {
-            return types.contains(ValueType.OBJECT);
-        }
-        if (JsonValue.NULL == value) {
-            return types.contains(ValueType.NULL);
-        }
-        return false;
     }
 }

@@ -17,8 +17,12 @@
 
 package org.jsonurl.jsonp;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
+import java.util.Set;
+import org.jsonurl.JsonUrlLimits;
+import org.jsonurl.JsonUrlOption;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -32,14 +36,85 @@ class JsonUrlParserTest {
 
     @Test
     void testConstruct() {
+        final String testName = "new JsonUrlParser";
+
         assertSame(
             JsonpValueFactory.BIGMATH64,
-            new JsonUrlParser().getFactory(),
-            "new JsonUrlParser");
+            new JsonUrlParser().factory(),
+            testName);
 
         assertSame(
             JsonpValueFactory.PRIMITIVE,
-            new JsonUrlParser(JsonpValueFactory.PRIMITIVE).getFactory(),
-            "new JsonUrlParser");
+            new JsonUrlParser(JsonpValueFactory.PRIMITIVE).factory(),
+            testName);
+        
+        Set<JsonUrlOption> options = JsonUrlOption.newSet(
+                JsonUrlOption.WFU_COMPOSITE);
+
+        assertEquals(
+            options,
+            new JsonUrlParser(options).options(),
+            testName);
+        
+        assertEquals(
+            options,
+            new JsonUrlParser(JsonUrlOption.WFU_COMPOSITE).options(),
+            testName);
+
+        JsonUrlLimits limits = JsonUrlLimits.builder()
+            .addMaxParseDepth(12)
+            .addMaxParseValues(1978)
+            .build();
+
+        assertEquals(
+            limits,
+            new JsonUrlParser(limits).limits(),
+            testName);
+
+        assertEquals(
+            limits,
+            new JsonUrlParser(limits, options).limits(),
+            testName);
+
+        assertEquals(
+            limits,
+            new JsonUrlParser(limits, JsonUrlOption.WFU_COMPOSITE).limits(),
+            testName);
+
+        assertEquals(
+            options,
+            new JsonUrlParser(limits, options).options(),
+            testName);
+
+        assertEquals(
+            options,
+            new JsonUrlParser(limits, JsonUrlOption.WFU_COMPOSITE).options(),
+            testName);
+
+        assertEquals(
+            limits,
+            new JsonUrlParser(
+                JsonpValueFactory.DOUBLE,
+                limits,
+                options).limits(),
+            testName);
+
+        assertEquals(
+            limits,
+            new JsonUrlParser(JsonpValueFactory.DOUBLE, limits).limits(),
+            testName);
+
+        assertEquals(
+            options,
+            new JsonUrlParser(JsonpValueFactory.DOUBLE, options).options(),
+            testName);
+
+        assertEquals(
+            options,
+            new JsonUrlParser(
+                    JsonpValueFactory.DOUBLE,
+                    JsonUrlOption.WFU_COMPOSITE)
+                .options(),
+            testName);
     }
 }

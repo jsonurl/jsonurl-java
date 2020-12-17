@@ -1,27 +1,3 @@
-/**
- * An implementation of the JSON&#x2192;URL interface based on the JSON-P
- * interface defined by JSR-374.
- * 
- * <p>The primary entry point for most use cases is
- * {@link org.jsonurl.jsonp.JsonUrlParser JsonUrlParser}, which parses
- * JSON&#x2192;URL text into instances of {@link javax.json.JsonObject
- * JsonObjectBuilder} and {@link javax.json.JsonArray JsonArrayBuilder}.
- *
- * <p>{@link org.jsonurl.jsonp.JsonUrlWriter JsonUrlWriter} has static methods
- * for creating JSON&#x2192;URL text from instances of
- * {@link javax.json.JsonObject JsonObjectBuilder} and
- * {@link javax.json.JsonArray JsonArrayBuilder}.
- *
- * @author jsonurl.org
- * @author David MacCormack
- * @since 2019-09-01
- * @see <a href="https://javaee.github.io/jsonp/">About</a>
- * @see <a href="https://github.com/javaee/jsonp/">GitHub</a>
- * @see <a href=
- * "https://mvnrepository.com/artifact/org.glassfish/javax.json">Maven</a>
- */
-package org.jsonurl.jsonp;
-
 /*
  * Copyright 2019 David MacCormack
  *
@@ -38,3 +14,30 @@ package org.jsonurl.jsonp;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+/**
+ * A <a href="https://jsonurl.org/">JSON&#x2192;URL</a> parser and
+ * text generator based on the JSON-P interface defined by JSR-374.
+ *
+ * <p>The primary entry point for most use cases is
+ * {@link org.jsonurl.jsonp.JsonUrlParser JsonUrlParser}, which parses
+ * JSON&#x2192;URL text as instances of
+ * {@link javax.json.JsonObject JsonObject} and
+ * {@link javax.json.JsonArray JsonArray}.
+ *
+ * <p>JSON&#x2192;URL text may be generated for
+ * {@link javax.json.JsonObject JsonObjects}
+ * and
+ * {@link javax.json.JsonArray JsonArrays}
+ * via
+ * {@link org.jsonurl.jsonp.JsonUrlStringBuilder JsonUrlStringBuilder}.
+ *
+ * @author jsonurl.org
+ * @author David MacCormack
+ * @since 2019-09-01
+ * @see <a href="https://javaee.github.io/jsonp/">About</a>
+ * @see <a href="https://github.com/javaee/jsonp/">GitHub</a>
+ * @see <a href=
+ * "https://mvnrepository.com/artifact/org.glassfish/javax.json">Maven</a>
+ */
+package org.jsonurl.jsonp;

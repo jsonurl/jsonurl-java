@@ -43,14 +43,12 @@ public class SyntaxException extends ParseException {
         MSG_NO_TEXT("text missing"),
         /** Expected literal value. */
         MSG_EXPECT_LITERAL("expected literal value"),
-        /** Expected array. */
-        MSG_EXPECT_ARRAY("expected array"),
-        /** Expected object. */
-        MSG_EXPECT_OBJECT("expected object"),
         /** Expected type. */
-        MSG_EXPECT_TYPE("expected type"),
+        MSG_EXPECT_TYPE("invalid type"),
         /** Expected structural character. */
         MSG_EXPECT_STRUCT_CHAR("expected structural character"),
+        /** Expected object key. */
+        MSG_EXPECT_OBJECT_KEY("expected object key"),
         /** Expected object value. */
         MSG_EXPECT_OBJECT_VALUE("expected object value"),
         /** Unexpected array. */
@@ -69,6 +67,8 @@ public class SyntaxException extends ParseException {
         MSG_UNEXPECTED_STRING("unexpected string"),
         /** Unexpected end-of-input inside composite. */
         MSG_STILL_OPEN("unexpected end-of-input inside composite"),
+        /** Unexpected end-of-input inside quoted string. */
+        MSG_QUOTE_STILL_OPEN("unexpected end-of-input inside quoted string"),
         /** Unexpected text after composite. */
         MSG_EXTRA_CHARS("unexpected text after composite");
 
@@ -103,21 +103,32 @@ public class SyntaxException extends ParseException {
     /**
      * Create a new SyntaxException.
      * @param msg exception message
-     * @param position position in input where the exception occurred.
+     * @param offset offset in input where the exception occurred.
      */
-    public SyntaxException(Message msg, int position) {
-        super(msg.getMessageText(), position);
+    public SyntaxException(Message msg, long offset) {
+        super(msg.getMessageText(), offset);
         this.message = msg;
     }
 
     /**
      * Create a new SyntaxException.
      * @param msg exception message
-     * @param position position in input where the exception occurred.
+     * @param line line in input where the exception occurred.
+     * @param column column in input where the exception occurred.
+     */
+    public SyntaxException(Message msg, int line, int column) {
+        super(msg.getMessageText(), line, column);
+        this.message = msg;
+    }
+
+    /**
+     * Create a new SyntaxException.
+     * @param msg exception message
+     * @param offset offset in input where the exception occurred.
      * @param text exception message text
      */
-    public SyntaxException(Message msg, String text, int position) {
-        super(text, position);
+    public SyntaxException(Message msg, String text, long offset) {
+        super(text, offset);
         this.message = msg;
     }
 

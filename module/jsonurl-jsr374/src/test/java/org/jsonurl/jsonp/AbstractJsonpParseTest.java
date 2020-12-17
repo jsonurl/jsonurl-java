@@ -26,9 +26,9 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonString;
 import javax.json.JsonStructure;
 import javax.json.JsonValue;
-import org.jsonurl.AbstractParseTest;
 import org.jsonurl.BigMathProvider.BigIntegerOverflow;
-import org.jsonurl.ValueFactory;
+import org.jsonurl.factory.AbstractParseTest;
+import org.jsonurl.factory.ValueFactory;
 
 
 /**

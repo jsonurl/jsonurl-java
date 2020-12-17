@@ -17,17 +17,23 @@
  */
 
 /**
- * An implementation of the JSON&#x2192;URL interface based on Douglas
- * Crockford's original Java implementation of JSON.
+ * A <a href="https://jsonurl.org/">JSON&#x2192;URL</a> parser and
+ * text generator based on Douglas Crockford's original Java implementation
+ * of JSON.
  *
  * <p>The primary entry point for most use cases is
  * {@link org.jsonurl.jsonorg.JsonUrlParser JsonUrlParser}, which parses
- * JSON&#x2192;URL text into instances of {@link org.json.JSONObject}
- * and {@link org.json.JSONArray}.
+ * JSON&#x2192;URL text as instances of
+ * {@link org.json.JSONObject JSONObject}
+ * and
+ * {@link org.json.JSONArray JSONArray}.
  *
- * <p>{@link org.jsonurl.jsonorg.JsonUrlWriter JsonUrlWriter} has static
- * methods for creating JSON&#x2192;URL text from instances of
- * {@link org.json.JSONObject} and {@link org.json.JSONArray}.
+ * <p>JSON&#x2192;URL text may be generated for instances of
+ * {@link org.json.JSONObject JSONObject}
+ * and
+ * {@link org.json.JSONArray JSONArray}
+ * via
+ * {@link org.jsonurl.jsonorg.JsonUrlStringBuilder JsonUrlStringBuilder}.
  * 
  * @author jsonurl.org
  * @author David MacCormack

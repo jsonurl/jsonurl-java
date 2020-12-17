@@ -1,0 +1,57 @@
+<html>
+<!--
+  Copyright 2019 David MacCormack
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  use this file except in compliance with the License. You may obtain a copy
+  of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+ -->
+<body>
+    The <code>jsonurl-factory</code> package provides an extensible
+    <a href="https://www.jsonurl.org/">JSON&#x2192;URL</a>
+    parser core and an implementation based on Java SE datatypes.
+
+    <h2><a id="usage" href="#usage">Usage</a></h2>
+    <p>The <a href="org/jsonurl/factory/Parser.html">Parser</a> interface
+    defines a
+    <a href="https://docs.oracle.com/javase/tutorial/java/generics/types.html">generic</a>
+    <a href="https://github.com/jsonurl/specification/">JSON&#x2192;URL</a>
+    object model parser and
+    <a href="org/jsonurl/j2se/JsonUrlParser.html">JsonUrlParser</a>
+    provides an implementation based Java SE data types (e.g.
+    <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Map.html">Map</a>,
+    <a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html">List</a>,
+    etc). There are additional modules, distributed as separate artifacts,
+    which implement JSON&#x2192;URL parsers based on other APIs
+    (<a href="https://javadoc.io/doc/org.json/json/latest/"
+        target="_top">json.org API</a>,
+    <a href="https://javadoc.io/doc/javax.json/javax.json-api/latest/"
+       target="_top">JSR-374 API</a>).
+    <p>Here's a simple example of parsing JSON&#x2192;URL text into a
+    Java Map. 
+<pre>
+import java.util.Map;
+import org.jsonurl.j2se.<a href="org/jsonurl/j2se/JsonUrlParser.html">JsonUrlParser</a>;
+
+JsonUrlParser p = new JsonUrlParser();
+Map myObject = p.parseObject( "(Hello:World)" );
+System.out.println(obj.get("Hello")) // World
+</pre>
+  
+    <h2><a id="security" href="#security">Security</a></h2>
+    <p>The parser is designed to parse untrusted input. It supports limits on
+    the number of parsed values and depth of nested arrays or objects. When
+    the limit is exceeded a LimitException is thrown. Reasonable limit values
+    are set by default.
+
+</body>
+</html>

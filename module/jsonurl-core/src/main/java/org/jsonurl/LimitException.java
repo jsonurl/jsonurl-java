@@ -37,7 +37,7 @@ public class LimitException extends ParseException { // NOPMD - not a bean
 
         /** Integer overflow. */
         MSG_LIMIT_INTEGER("integer overflow");
-        
+
         private final String text;
 
         Message(String text) {
@@ -74,10 +74,21 @@ public class LimitException extends ParseException { // NOPMD - not a bean
     /**
      * Create a new LimitException.
      * @param msg exception message
-     * @param position position in input where the exception occurred.
+     * @param line the line in the input text
+     * @param column the column in the input text
      */
-    public LimitException(Message msg, String text, int position) {
-        super(text, position);
+    public LimitException(Message msg, int line, int column) {
+        super(msg.getMessageText(), line, column);
+        this.message = msg;
+    }
+
+    /**
+     * Create a new LimitException.
+     * @param msg exception message
+     * @param offset the offset in the input text
+     */
+    public LimitException(Message msg, String text, long offset) {
+        super(text, offset);
         this.message = msg;
     }
     
@@ -93,10 +104,10 @@ public class LimitException extends ParseException { // NOPMD - not a bean
     /**
      * Create a new LimitException.
      * @param msg exception message
-     * @param position position in input where the exception occurred.
+     * @param offset the offset in the input text
      */
-    public LimitException(Message msg, int position) {
-        super(msg.getMessageText(), position);
+    public LimitException(Message msg, long offset) {
+        super(msg.getMessageText(), offset);
         this.message = msg;
     }
 
