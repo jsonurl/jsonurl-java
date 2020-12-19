@@ -69,7 +69,7 @@ class JsonUrlLimitsTest {
         assertEquals(expected, actual, "copy");
         assertEquals(expected.hashCode(), actual.hashCode(), "hashCode");
         
-        assertEquals(expected, expected, "equals");
+        assertEquals(expected, actual, "equals");
         assertNotEquals(expected, JsonUrlLimits.copy(null), "equals");
     }
 }
