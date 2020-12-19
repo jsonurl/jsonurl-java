@@ -1,4 +1,8 @@
 org.jsonurl
+org.jsonurl.factory
 org.jsonurl.j2se
 org.jsonurl.jsonorg
 org.jsonurl.jsonp
+org.jsonurl.stream
+org.jsonurl.text
+org.jsonurl.util
