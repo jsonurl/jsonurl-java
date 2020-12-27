@@ -68,6 +68,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  * @author David MacCormack
  * @since 2019-09-01
  */
+@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public abstract class AbstractParseTest<
         V,
         C extends V,
@@ -100,6 +101,9 @@ public abstract class AbstractParseTest<
 
     /** Nonsense suffix to test parse start/end support. */
     private static final String SUFFIX1 = "suffix 1";
+
+    /** left paren. */
+    private static final char LPAREN = '(';
 
     /** ValueFactory. */
     protected ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> factory;
@@ -180,6 +184,16 @@ public abstract class AbstractParseTest<
             assertThrows(
                 SyntaxException.class,
                 () -> parseFactoryArray(text));
+            assertThrows(
+                SyntaxException.class,
+                () -> parseFactoryObject(
+                        text,
+                        newOptions(JsonUrlOption.AQF)));
+            assertThrows(
+                SyntaxException.class,
+                () -> parseFactoryArray(
+                        text,
+                        newOptions(JsonUrlOption.AQF)));
         }
 
         @ParameterizedTest
@@ -195,6 +209,11 @@ public abstract class AbstractParseTest<
             assertThrows(
                 SyntaxException.class,
                 () -> parseFactoryObject(text, false));
+            assertThrows(
+                SyntaxException.class,
+                () -> parseFactoryObject(
+                        text,
+                        newOptions(JsonUrlOption.AQF)));
         }
 
         @ParameterizedTest
@@ -206,6 +225,9 @@ public abstract class AbstractParseTest<
             assertThrows(
                 SyntaxException.class,
                 () -> parseFactoryArray(text));
+            assertThrows(
+                SyntaxException.class,
+                () -> parseFactoryArray(text, newOptions(JsonUrlOption.AQF)));
         }
 
         @ParameterizedTest
@@ -256,9 +278,13 @@ public abstract class AbstractParseTest<
             // like testExceptionSyntax() but does not test implied values
             // (which would otherwise succeed).
             //
-            assertThrows(
-                SyntaxException.class,
-                () -> parse(text));
+            assertThrows(SyntaxException.class, () -> parse(text));
+
+            if (text.charAt(0) == LPAREN) {
+                assertThrows(
+                    SyntaxException.class,
+                    () -> parse(text, newOptions(JsonUrlOption.AQF)));
+            }
         }
 
         @ParameterizedTest
@@ -271,6 +297,10 @@ public abstract class AbstractParseTest<
             assertThrows(
                 SyntaxException.class,
                 () -> newParser().parse(text));
+
+            assertThrows(
+                SyntaxException.class,
+                () -> newParser(newOptions(JsonUrlOption.AQF)).parse(text));
         }
 
         @Test
@@ -391,9 +421,7 @@ public abstract class AbstractParseTest<
             "'\u0100'", //NOPMD
         })
         void testExceptionSyntax(String text) {
-            assertThrows(
-                SyntaxException.class,
-                () -> parse(text));
+            assertThrows(SyntaxException.class, () -> parse(text));
 
             if (text.length() > 2) { // NOPMD - AvoidLiteralsInIfCondition
                 assertThrows(
@@ -423,41 +451,52 @@ public abstract class AbstractParseTest<
     @Nested
     @SuppressWarnings("PMD.AccessorMethodGeneration")
     class LiteralTests {
+        void assertLong(
+                String text,
+                String expected,
+                Set<JsonUrlOption> options) throws IOException {
+
+            assertEquals(
+                expected,
+                new JsonUrlStringBuilder(options).add(
+                    Long.valueOf(expected)).build(),
+                expected);
+
+            assertEquals(
+                expected,
+                new JsonUrlStringBuilder(options).add(
+                    Long.parseLong(expected)).build(),
+                expected);
+
+            assertParse(text, options, getFactoryLong(expected));
+        }
 
         @ParameterizedTest
         @CsvSource({
             //
             // INPUT,OUTPUT
             //
-            "'1e2',100",
-            "'-2e1',-20",
-            "'-3e0',-3",
-            "'1e+2',100",
-            "'-2e+1',-20",
-            "'4e17',400000000000000000",
+            "'1e2',100,true",
+            "'-2e1',-20,true",
+            "'-3e0',-3,true",
+            "'1e+2',100,false",
+            "'-2e+1',-20,false",
+            "'4e17',400000000000000000,true",
         })
-        void testLong(String text, String expected) throws IOException {
-            assertEquals(
-                expected,
-                new JsonUrlStringBuilder().add(
-                    Long.valueOf(expected)).build(),
-                expected);
+        void testLong(
+                String text,
+                String expected,
+                boolean aqf) throws IOException {
             
-            assertEquals(
-                expected,
-                new JsonUrlStringBuilder().add(
-                    Long.parseLong(expected)).build(),
-                expected);
+            assertLong(text, expected, null);
             
-            assertParse(text, getFactoryLong(expected));
-
-            Set<JsonUrlOption> options =
-                JsonUrlOption.enableImpliedStringLiterals(
-                    JsonUrlOption.newSet());
+            if (aqf) {
+                assertLong(text, expected, newOptions(JsonUrlOption.AQF));
+            }
 
             assertEquals(
                 getFactoryString(urlDecode(text)),
-                newParser(options).parse(text),
+                newParser(newOptionsISL()).parse(text),
                 text);
         }
 
@@ -466,67 +505,54 @@ public abstract class AbstractParseTest<
             "0", "-1", "123456", "-123456", "12345678905432132",
         })
         void testLong(String text) throws IOException {
-            assertEquals(
-                text,
-                new JsonUrlStringBuilder().add(
-                    Long.parseLong(text)).build(),
-                text);
-            
-            assertEquals(
-                text,
-                new JsonUrlStringBuilder().add(
-                    Long.valueOf(text)).build(),
-                text);
-            
-            assertParse(text, getFactoryLong(text));
-
-            Set<JsonUrlOption> options =
-                JsonUrlOption.enableImpliedStringLiterals(
-                    JsonUrlOption.newSet());
+            assertLong(text, text, null);
 
             assertEquals(
                 getFactoryString(text),
-                newParser(options).parse(text),
+                newParser(newOptionsISL()).parse(text),
                 text);
         }
-
-        @ParameterizedTest
-        @ValueSource(strings = {
-            "0.1",
-            "-1.1",
-            "1e-2",
-            "-2e-1",
-            "1.9e2",
-            "-2.8e1",
-            "156.9e-2",
-            "-276.8e-1",
-            "156.911e+2",
-            "-276.833e+4",
-        })
-        void testDouble(String text) throws IOException {
-
+        
+        void assertDouble(String text, Set<JsonUrlOption> options) throws IOException {
             Number numberValue = Double.valueOf(text);
             assertEquals(
                 String.valueOf(numberValue),
-                new JsonUrlStringBuilder().add(numberValue).build(),
+                new JsonUrlStringBuilder(options).add(numberValue).build(),
                 text);
 
             double doubleValue = Double.parseDouble(text);
             assertEquals(
                 String.valueOf(doubleValue),
-                new JsonUrlStringBuilder().add(doubleValue).build(),
+                new JsonUrlStringBuilder(options).add(doubleValue).build(),
                 text);
 
-            assertParse(text, getFactoryDouble(text));
+            assertParse(text, options, getFactoryDouble(text));
+        }
 
-            Set<JsonUrlOption> options =
-                JsonUrlOption.enableImpliedStringLiterals(
-                    JsonUrlOption.newSet());
+        @ParameterizedTest
+        @CsvSource({
+            "0.1,true",
+            "-1.1,true",
+            "1e-2,true",
+            "-2e-1,true",
+            "1.9e2,true",
+            "-2.8e1,true",
+            "156.9e-2,true",
+            "-276.8e-1,true",
+            "156.911e+2,false",
+            "-276.833e+4,false",
+        })
+        void testDouble(String text, boolean aqf) throws IOException {
+            assertDouble(text, null);
+            
+            if (aqf) {
+                assertDouble(text, newOptions(JsonUrlOption.AQF));
+            }
 
             assertEquals(
-                    getFactoryString(urlDecode(text)),
-                    newParser(options).parse(text),
-                    text);
+                getFactoryString(urlDecode(text)),
+                newParser(newOptionsISL()).parse(text),
+                text);
         }
 
         @ParameterizedTest
@@ -539,13 +565,9 @@ public abstract class AbstractParseTest<
 
             assertParse(text, getFactoryBoolean(text));
 
-            Set<JsonUrlOption> options =
-                JsonUrlOption.enableImpliedStringLiterals(
-                    JsonUrlOption.newSet());
-
             assertEquals(
-                getFactoryString(text),
-                newParser(options).parse(text),
+                text,
+                getStringValue(newParser(newOptionsISL()).parse(text)),
                 text);
         }
 
@@ -556,23 +578,39 @@ public abstract class AbstractParseTest<
                 assertThrows(
                     SyntaxException.class,
                     () -> parse(text));
-            }
 
-            Set<JsonUrlOption> options = JsonUrlOption.newSet(
-                    JsonUrlOption.EMPTY_UNQUOTED_VALUE);
+                assertThrows(
+                    SyntaxException.class,
+                    () -> parse(text, newOptions(JsonUrlOption.AQF)));
+            }
 
             assertEquals(
                 factory.getString(EMPTY_STRING),
-                newParser(options).parse(text));
-
-            options = JsonUrlOption.newSet(
-                JsonUrlOption.IMPLIED_STRING_LITERALS,
-                JsonUrlOption.EMPTY_UNQUOTED_VALUE);
+                newParser(JsonUrlOption.EMPTY_UNQUOTED_VALUE).parse(text));
 
             assertEquals(
                 factory.getString(text),
-                newParser(options).parse(text),
+                newParser(newOptions(
+                        JsonUrlOption.IMPLIED_STRING_LITERALS,
+                        JsonUrlOption.EMPTY_UNQUOTED_VALUE))
+                    .parse(text),
                 text);
+        }
+        
+        void assertString2(
+                String text,
+                String nativeValue,
+                Set<JsonUrlOption> options) throws IOException {
+            assertEquals(
+                text,
+                new JsonUrlStringBuilder().add(nativeValue).build(),
+                text);
+
+            assertParse(text, getFactoryString(nativeValue));
+            assertParse(text,
+                newOptions(JsonUrlOption.AQF),
+                getFactoryString(nativeValue));
+
         }
 
         @ParameterizedTest
@@ -580,39 +618,34 @@ public abstract class AbstractParseTest<
             //
             // INPUT,OUTPUT
             //
-            "\'hello\',",
+            "hello,",
             "a,",
             "abc,",
             "1a,",
             "1e,",
             "1.,",
             "fals,",
-            "hello+world,'hello world'",
-            "hello%2Bworld,'hello+world'",
+            "hello+world,hello world",
+            "hello%2Bworld,hello+world",
             "y+%3D+mx+%2B+b,y = mx + b",
             "a%3Db%26c%3Dd,a=b&c=d",
             // CHECKSTYLE:OFF
-            "hello%F0%9F%8D%95world,'hello\uD83C\uDF55world'",
+            "hello%F0%9F%8D%95world,hello\uD83C\uDF55world",
             // CHECKSTYLE:ON
             "-,",
             "-e,",
             "-e+,'-e '",
-            "-e+1,'-e 1'",
+            "-e+1,-e 1",
             "-.,",
             "1e+,'1e '",
             "1e-,",
-            "'1.2.3',",
+            "1.2.3,",
             "Eddy\'s+in+the+space+time+continuum,Eddy\'s in the space time continuum",
         })
         void testString2(String text, String out) throws IOException {
             String nativeValue = out == null ? text : out;
-
-            assertEquals(
-                text,
-                new JsonUrlStringBuilder().add(nativeValue).build(),
-                text);
-
-            assertParse(text, getFactoryString(nativeValue));
+            assertString2(text, nativeValue, null);
+            assertString2(text, nativeValue, newOptions(JsonUrlOption.AQF));
         }
 
         @ParameterizedTest
@@ -632,6 +665,9 @@ public abstract class AbstractParseTest<
             // encoded
             //
             assertParse(urlEncodeAndEscapeStructChars(text), value);
+            assertParse(urlEncodeAndEscapeAQF(text),
+                    newOptions(JsonUrlOption.AQF),
+                    value);
 
             //
             // quoted
@@ -649,6 +685,9 @@ public abstract class AbstractParseTest<
         })
         void testString(String text) throws IOException {
             assertParse(text, getFactoryString(text));
+            assertParse(text,
+                newOptions(JsonUrlOption.AQF),
+                getFactoryString(text));
         }
 
         @ParameterizedTest
@@ -657,6 +696,8 @@ public abstract class AbstractParseTest<
             N factoryValue = factory.getNull();
 
             assertParse(text, factoryValue);
+
+            assertParse(text, newOptions(JsonUrlOption.AQF), factoryValue);
 
             assertEquals(
                 String.valueOf(text),
@@ -669,13 +710,9 @@ public abstract class AbstractParseTest<
                 newParser().parse(text, 0, text.length()),
                 text);
 
-            Set<JsonUrlOption> options =
-                JsonUrlOption.enableImpliedStringLiterals(
-                    JsonUrlOption.newSet());
-
             assertEquals(
                 getFactoryString(text),
-                newParser(options).parse(text),
+                newParser(newOptionsISL()).parse(text),
                 text);
         }
 
@@ -692,6 +729,9 @@ public abstract class AbstractParseTest<
         })
         void testUtf8(String text, String expected) throws IOException {
             assertEquals(expected, getStringValue(parse(text)), expected);
+
+            assertEquals(expected, getStringValue(
+                    parse(text, newOptions(JsonUrlOption.AQF))), expected);
         }
         
         @ParameterizedTest
@@ -1134,6 +1174,9 @@ public abstract class AbstractParseTest<
         @ValueSource(strings = { "()" })
         void testEmptyComposite(String text) throws IOException {
             assertParse(text, factory.getEmptyComposite());
+            assertParse(text,
+                newOptions(JsonUrlOption.AQF),
+                factory.getEmptyComposite());
 
             String txt = new JsonUrlStringBuilder().addEmptyComposite().build();
             assertEquals(text, txt, text);
@@ -1193,14 +1236,31 @@ public abstract class AbstractParseTest<
                     factory.newObjectBuilder()),
                 text);
 
-            Set<JsonUrlOption> options = JsonUrlOption.newSet(
-                    JsonUrlOption.WFU_COMPOSITE);
-
-            assertObjectWfu(text, newParser(options).parseObject(text));
+            assertObjectWfu(text,
+                newParser(newOptions(
+                    JsonUrlOption.WFU_COMPOSITE))
+                .parseObject(text));
+            
+            assertObjectWfu(text,
+                newParser(newOptions(
+                        JsonUrlOption.WFU_COMPOSITE,
+                        JsonUrlOption.AQF))
+                .parseObject(text));
 
             assertObjectWfu(
                 text,
-                newParser(options).parseObject(
+                newParser(newOptions(
+                    JsonUrlOption.WFU_COMPOSITE))
+                .parseObject(
+                    makeImplied(text),
+                    factory.newObjectBuilder()));
+
+            assertObjectWfu(
+                text,
+                newParser(newOptions(
+                    JsonUrlOption.WFU_COMPOSITE,
+                    JsonUrlOption.AQF))
+                .parseObject(
                     makeImplied(text),
                     factory.newObjectBuilder()));
         }
@@ -1269,16 +1329,31 @@ public abstract class AbstractParseTest<
                     factory.newArrayBuilder()),
                 text);
 
-            Set<JsonUrlOption> options = JsonUrlOption.newSet(
-                JsonUrlOption.WFU_COMPOSITE);
-
-            assertArrayWfu(text, newParser(options).parseArray(text));
+            assertArrayWfu(
+                text,
+                newParser(newOptions(
+                    JsonUrlOption.WFU_COMPOSITE))
+                .parseArray(text));
 
             assertArrayWfu(
                 text,
-                newParser(options).parseArray(
-                    makeImplied(text),
-                    factory.newArrayBuilder()));
+                newParser(newOptions(
+                    JsonUrlOption.WFU_COMPOSITE,
+                    JsonUrlOption.AQF))
+                .parseArray(text));
+
+            assertArrayWfu(
+                text,
+                newParser(newOptions(
+                    JsonUrlOption.WFU_COMPOSITE))
+                .parseArray(makeImplied(text), factory.newArrayBuilder()));
+
+            assertArrayWfu(
+                text,
+                newParser(newOptions(
+                    JsonUrlOption.WFU_COMPOSITE,
+                    JsonUrlOption.AQF))
+                .parseArray(makeImplied(text), factory.newArrayBuilder()));
         }
 
         @ParameterizedTest
@@ -1517,18 +1592,31 @@ public abstract class AbstractParseTest<
                 () -> newParser().parse(text),
                 text);
 
-            Set<JsonUrlOption> options = JsonUrlOption.newSet(
-                    JsonUrlOption.EMPTY_UNQUOTED_VALUE);
+            assertAllowEmptyUnquotedObjectValue(
+                    text,
+                    newParser(newOptions(
+                        JsonUrlOption.EMPTY_UNQUOTED_VALUE))
+                    .parseObject(text));
 
             assertAllowEmptyUnquotedObjectValue(
                     text,
-                    newParser(options).parseObject(text));
+                    newParser(newOptions(
+                        JsonUrlOption.AQF,
+                        JsonUrlOption.EMPTY_UNQUOTED_VALUE))
+                    .parseObject(text));
                 
             assertAllowEmptyUnquotedObjectValue(
                 text,
-                newParser(options).parseObject(
-                    makeImplied(text),
-                    factory.newObjectBuilder()));
+                newParser(newOptions(
+                    JsonUrlOption.EMPTY_UNQUOTED_VALUE))
+                .parseObject(makeImplied(text), factory.newObjectBuilder()));
+            
+            assertAllowEmptyUnquotedObjectValue(
+                text,
+                newParser(newOptions(
+                    JsonUrlOption.AQF,
+                    JsonUrlOption.EMPTY_UNQUOTED_VALUE))
+                .parseObject(makeImplied(text), factory.newObjectBuilder()));
         }
 
         private void assertSkipNullObjectValue(String text, J actual) {
@@ -1565,9 +1653,6 @@ public abstract class AbstractParseTest<
             "(:false)"
         })
         void testAllowEmptyUnquotedKey(String text) throws IOException {
-            Set<JsonUrlOption> options = JsonUrlOption.newSet(
-                JsonUrlOption.EMPTY_UNQUOTED_KEY);
-
             assertThrows(
                 SyntaxException.class,
                 () -> newParser().parse(text),
@@ -1575,13 +1660,34 @@ public abstract class AbstractParseTest<
 
             assertAllowEmptyUnquotedKey(
                 text,
-                newParser(options).parseObject(text));
+                newParser(newOptions(
+                    JsonUrlOption.EMPTY_UNQUOTED_KEY))
+                .parseObject(text));
 
             assertAllowEmptyUnquotedKey(
                 text,
-                newParser(options).parseObject(
+                newParser(newOptions(
+                    JsonUrlOption.AQF,
+                    JsonUrlOption.EMPTY_UNQUOTED_KEY))
+                .parseObject(text));
+
+            assertAllowEmptyUnquotedKey(
+                text,
+                newParser(newOptions(
+                    JsonUrlOption.EMPTY_UNQUOTED_KEY))
+                .parseObject(
                     makeImplied(text),
                     factory.newObjectBuilder()));
+
+            assertAllowEmptyUnquotedKey(
+                text,
+                newParser(newOptions(
+                    JsonUrlOption.AQF,
+                    JsonUrlOption.EMPTY_UNQUOTED_KEY))
+                .parseObject(
+                    makeImplied(text),
+                    factory.newObjectBuilder()));
+
         }
         
         @ParameterizedTest
@@ -1698,7 +1804,11 @@ public abstract class AbstractParseTest<
         this.factory = factory;
     }
     
-    private void assertParse(String text,Object expect) throws IOException {
+    private void assertParse(
+            String text,
+            Set<JsonUrlOption> options,
+            Object expect) throws IOException {
+        
         StringBuilder buf = new StringBuilder(1 << 10);
 
         //
@@ -1706,7 +1816,7 @@ public abstract class AbstractParseTest<
         //
         buf.append(PREFIX1).append(text).append(SUFFIX1);
 
-        V parseResult = newParser().parse(
+        V parseResult = newParser(options).parse(
             buf.toString(),
             PREFIX1.length(),
             text.length());
@@ -1715,7 +1825,7 @@ public abstract class AbstractParseTest<
         // just test that prefix and non/prefix are the same by default
         //
         final Object expectValue = expect == null
-                ? newParser().parse(text) : expect;
+            ? newParser(options).parse(text) : expect;
 
         //
         // I should just use assertEquals() here but the json.org
@@ -1724,7 +1834,10 @@ public abstract class AbstractParseTest<
         // assertEquals(expect, parseResult, in)
         assertTrue(isEqual(expectValue, parseResult), text);
     }
-
+    
+    private void assertParse(String text, Object expect) throws IOException {
+        assertParse(text, null, expect);
+    }
 
     private V parse(String text) throws IOException {
         return parse(text, null);
@@ -1760,6 +1873,11 @@ public abstract class AbstractParseTest<
         return newParser().parseArray(text);
     }
 
+    private A parseFactoryArray(String text, Set<JsonUrlOption> options)
+            throws IOException {
+        return newParser(options).parseArray(text);
+    }
+
     private A parseImpliedFactoryArray(String text) throws IOException {
         return newParser().parseArray(
                 makeImplied(text),
@@ -1786,6 +1904,12 @@ public abstract class AbstractParseTest<
             options.add(JsonUrlOption.IMPLIED_STRING_LITERALS);
         }
 
+        return parseFactoryObject(text, options);
+    }
+    
+    private J parseFactoryObject(
+            String text,
+            Set<JsonUrlOption> options) throws IOException {
         return newParser(options).parseObject(text);
     }
 
@@ -1860,7 +1984,25 @@ public abstract class AbstractParseTest<
             .replace(":", "%3A");
     }
 
-    
+    private static String urlEncodeAndEscapeAQF(String text)
+            throws UnsupportedEncodingException {
+
+        return text
+            .replaceAll("([(),:!])", "!$1")
+            .replace(' ', '+');
+    }
+
+    private static Set<JsonUrlOption> newOptionsISL() {
+        return JsonUrlOption.enableImpliedStringLiterals(
+            JsonUrlOption.newSet());
+    }
+
+    private static Set<JsonUrlOption> newOptions(
+            JsonUrlOption first,
+            JsonUrlOption... rest) {
+        return JsonUrlOption.newSet(first, rest);
+    }
+
     /** Get the boolean from the given object for the given key. */
     protected abstract boolean getBoolean(String key, J value);
 

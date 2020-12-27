@@ -80,7 +80,7 @@ class NumberBuilderTest { // NOPMD
                 PREFIX + text + SUFFIX,
                 PREFIX.length(),
                 PREFIX.length() + text.length(),
-                mcp);
+                mcp, null);
     }
     
     private void assertEqualsIsNumber(boolean expect, String text) {

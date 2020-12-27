@@ -28,8 +28,8 @@ final class CharUtil {
     /** bit for letters. */
     static final int IS_LETTER = 1 << 0;
 
-    /** bit for digits. */
-    static final int IS_DIGIT = 1 << 1;
+    /** bit for CGI name/value separators . */
+    static final int IS_CGICHAR = 1 << 1;
 
     /** bit for literal characters. */
     static final int IS_LITCHAR = 1 << 2;
@@ -43,15 +43,11 @@ final class CharUtil {
     /** bit for structural characters. */
     static final int IS_STRUCTCHAR = 1 << 5;
 
-    /** bit for space characters. */
-    static final int IS_SPACE = 1 << 6;
+    /** bit for exclamation point. */
+    static final int IS_BANG = 1 << 6;
 
     /** bit for percent characters. */
-    static final int IS_PERCENT = 1 << 7;
-
-    /** bit for percent characters. */
-    static final int IS_PLUS = 1 << 8;
-
+    static final int IS_SPACE = 1 << 7;
 
     /**
      * bits for US-ASCII characters.
@@ -67,7 +63,7 @@ final class CharUtil {
         IS_SPACE,
 
         // ASCII 33 (!)
-        IS_LITCHAR | IS_QSCHAR,
+        IS_BANG | IS_LITCHAR | IS_QSCHAR,
 
         // ASCII 34 (")
         0,
@@ -79,10 +75,10 @@ final class CharUtil {
         IS_LITCHAR | IS_QSCHAR,
 
         // ASCII 37 (%)
-        IS_PERCENT | IS_LITCHAR | IS_QSCHAR,
+        IS_LITCHAR | IS_QSCHAR,
 
         // ASCII 38 (&)
-        IS_STRUCTCHAR,
+        IS_STRUCTCHAR | IS_CGICHAR,
 
         // ASCII 39 (')
         IS_LITCHAR | IS_QUOTE,
@@ -97,7 +93,7 @@ final class CharUtil {
         IS_LITCHAR | IS_QSCHAR,
 
         // ASCII 43 (+)
-        IS_PLUS | IS_LITCHAR | IS_QSCHAR,
+        IS_LITCHAR | IS_QSCHAR,
 
         // ASCII 44 (,)
         IS_STRUCTCHAR | IS_QSCHAR,
@@ -112,34 +108,34 @@ final class CharUtil {
         IS_LITCHAR | IS_QSCHAR,
 
         // ASCII 48 (0)
-        IS_DIGIT | IS_LITCHAR | IS_QSCHAR,
+        IS_LITCHAR | IS_QSCHAR,
 
         // ASCII 49 (1)
-        IS_DIGIT | IS_LITCHAR | IS_QSCHAR,
+        IS_LITCHAR | IS_QSCHAR,
 
         // ASCII 50 (2)
-        IS_DIGIT | IS_LITCHAR | IS_QSCHAR,
+        IS_LITCHAR | IS_QSCHAR,
 
         // ASCII 51 (3)
-        IS_DIGIT | IS_LITCHAR | IS_QSCHAR,
+        IS_LITCHAR | IS_QSCHAR,
 
         // ASCII 52 (4)
-        IS_DIGIT | IS_LITCHAR | IS_QSCHAR,
+        IS_LITCHAR | IS_QSCHAR,
 
         // ASCII 53 (5)
-        IS_DIGIT | IS_LITCHAR | IS_QSCHAR,
+        IS_LITCHAR | IS_QSCHAR,
 
         // ASCII 54 (6)
-        IS_DIGIT | IS_LITCHAR | IS_QSCHAR,
+        IS_LITCHAR | IS_QSCHAR,
 
         // ASCII 55 (7)
-        IS_DIGIT | IS_LITCHAR | IS_QSCHAR,
+        IS_LITCHAR | IS_QSCHAR,
 
         // ASCII 56 (8)
-        IS_DIGIT | IS_LITCHAR | IS_QSCHAR,
+        IS_LITCHAR | IS_QSCHAR,
 
         // ASCII 57 (9)
-        IS_DIGIT | IS_LITCHAR | IS_QSCHAR,
+        IS_LITCHAR | IS_QSCHAR,
 
         // ASCII 58 (:)
         IS_STRUCTCHAR | IS_QSCHAR,
@@ -151,7 +147,7 @@ final class CharUtil {
         0,
 
         // ASCII 61 (=)
-        IS_STRUCTCHAR,
+        IS_STRUCTCHAR | IS_CGICHAR,
 
         // ASCII 62 (>)
         0,

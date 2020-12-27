@@ -19,6 +19,10 @@ package org.jsonurl.stream;
 
 /**
  * Enumeration of JSON&#x2192;URL events.
+ *
+ * @author jsonurl.org
+ * @author David MacCormack
+ * @since 2020-10-21
  */
 public enum JsonUrlEvent {
     /**

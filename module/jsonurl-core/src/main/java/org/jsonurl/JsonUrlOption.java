@@ -43,6 +43,7 @@ public enum JsonUrlOption {
     /**
      * The implied-string-literals option.
      * If this option is enabled then all literals are assumed to be strings.
+     * @see #enableImpliedStringLiterals(Set)
      * @see <a href="https://github.com/jsonurl/specification/#292-implied-objects"
      * >JSON&#x2192;URL specification, section 2.9.2</a>
      */
@@ -76,7 +77,12 @@ public enum JsonUrlOption {
      * If this option is enabled then {@code null} values in the
      * input or output will be replaced with an empty string.
      */
-    COERCE_NULL_TO_EMPTY_STRING;
+    COERCE_NULL_TO_EMPTY_STRING,
+
+    /**
+     * Address bar query string friendly.
+     */
+    AQF;
 
     /**
      * Create an empty set of options. This is just a convenience wrapper
@@ -93,7 +99,7 @@ public enum JsonUrlOption {
     public static final Set<JsonUrlOption> newSet(
             JsonUrlOption first,
             JsonUrlOption...rest) {
-        return EnumSet.of(first, rest);
+        return first == null ? null : EnumSet.of(first, rest);
     }
 
     /**
@@ -218,4 +224,16 @@ public enum JsonUrlOption {
         return options != null
                 && options.contains(COERCE_NULL_TO_EMPTY_STRING);
     }
+
+    /**
+     * Test if the {@link #AQF} option is enabled,
+     * supplying the default value if necessary.
+     * @param options a valid Set or {@code null}.
+     */
+    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
+    public static final boolean optionAQF(
+            Set<JsonUrlOption> options) {
+        return options != null && options.contains(AQF);
+    }
+
 }

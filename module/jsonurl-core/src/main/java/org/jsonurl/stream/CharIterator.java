@@ -60,7 +60,7 @@ public interface CharIterator extends Resource {
     int peekChar() throws IOException;
 
     /**
-     * Pushback a single {@code char}.
+     * Pushback a single {@code char} or UNICODE codepoint.
      * @see #nextChar()
      */
     void pushbackChar(int chr);

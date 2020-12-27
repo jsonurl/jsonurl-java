@@ -17,6 +17,8 @@
 
 package org.jsonurl.stream;
 
+import static org.jsonurl.JsonUrlOption.optionAQF;
+
 import java.util.EnumSet;
 import java.util.Set;
 import org.jsonurl.CompositeType;
@@ -30,6 +32,24 @@ import org.jsonurl.text.NumberText;
  * An JSON&#x2192;URL iterator provides streaming (e.g. forward,
  * read-only) access to parsed JSON&#x2192;URL text as a sequence of one or
  * more {@link org.jsonurl.stream.JsonUrlEvent events}.
+ *
+ * <p>{@link org.jsonurl.JsonUrlOption Options} will affect what events are
+ * returned. In some cases combinations of options could reasonably result
+ * in more than one event. The table below addresses these ambiguities.
+ * <table border=1>
+ * <tr><th>Options</th><th>Notes</th></tr>
+ *
+ * <tr>
+ * <td>{@link org.jsonurl.JsonUrlOption#IMPLIED_STRING_LITERALS IMPLIED_STRING_LITERALS}
+ *   + {@link org.jsonurl.JsonUrlOption#EMPTY_UNQUOTED_VALUE EMPTY_UNQUOTED_VALUE}</td>
+ * <td>When both flags are present then the grammar allows for either
+ * {@link JsonUrlEvent#VALUE_STRING VALUE_STRING} or
+ * {@link JsonUrlEvent#VALUE_EMPTY_LITERAL VALUE_EMPTY_LITERAL}.
+ * In this case the implied string option takes precedence and
+ * {@code VALUE_STRING} is returned.</td>
+ * </tr>
+ *
+ * </table>
  *
  * @author jsonurl.org
  * @author David MacCormack
@@ -113,6 +133,8 @@ public interface JsonUrlIterator extends ExceptionProvider {
             CharIterator text,
             JsonUrlLimits limits,
             Set<JsonUrlOption> options) {
-        return new JsonUrlGrammar(text, limits, options);
+        return optionAQF(options)
+                ? new JsonUrlGrammarAQF(text, limits, options)
+                : new JsonUrlGrammar(text, limits, options);
     }
 }
