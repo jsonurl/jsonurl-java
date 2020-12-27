@@ -17,13 +17,10 @@
 
 package org.jsonurl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.EnumSet;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -34,32 +31,20 @@ class ValueTypeTest {
 
     @ParameterizedTest
     @EnumSource(ValueType.class)
-    @Disabled
     void test(ValueType type) {
         if (type == ValueType.ARRAY) {
-            assertEquals(
-                CompositeType.ARRAY,
-                type.getCompositeType(),
-                type.name());
 
             assertTrue(
                 ValueType.containsComposite(EnumSet.of(type)),
                 type.name());
 
         } else if (type == ValueType.OBJECT) {
-            assertEquals(
-                CompositeType.OBJECT,
-                type.getCompositeType(),
-                type.name());
 
             assertTrue(
                 ValueType.containsComposite(EnumSet.of(type)),
                 type.name());
 
         } else {
-            assertNull(
-                type.getCompositeType(),
-                type.name());
 
             assertFalse(
                 ValueType.containsComposite(EnumSet.of(type)),

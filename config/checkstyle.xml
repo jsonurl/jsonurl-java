@@ -216,6 +216,7 @@ Checkstyle configuration that checks the Google coding conventions from Google J
       <property name="tokens" value="SINGLE_LINE_COMMENT, BLOCK_COMMENT_BEGIN"/>
     </module>
     <module name="SuppressionCommentFilter"/>
+    <module name="SuppressWarningsHolder" />
   </module>
   <module name="BeforeExecutionExclusionFileFilter">
     <property name="fileNamePattern" value="module\-info\.java$"/>
@@ -228,4 +229,5 @@ Checkstyle configuration that checks the Google coding conventions from Google J
     <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
     <property name="max" value="100"/>
   </module>
+  <module name="SuppressWarningsFilter" />
 </module>

@@ -39,6 +39,8 @@ public class SyntaxException extends ParseException {
         MSG_BAD_PCT_ENC("invalid percent-encoded sequence"),
         /** Invalid encoded UTF-8 sequence. */
         MSG_BAD_UTF8("invalid encoded UTF-8 sequence"),
+        /** Invalid escape sequence. */
+        MSG_BAD_ESCAPE("invalid escape sequence"),
         /** Text missing. */
         MSG_NO_TEXT("text missing"),
         /** Expected literal value. */

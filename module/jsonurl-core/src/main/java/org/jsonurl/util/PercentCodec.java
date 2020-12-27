@@ -19,6 +19,7 @@ package org.jsonurl.util;
 
 import java.io.IOException;
 import java.nio.charset.MalformedInputException;
+import java.util.BitSet;
 import org.jsonurl.stream.CharIterator;
 
 /**
@@ -29,35 +30,70 @@ import org.jsonurl.stream.CharIterator;
  * @since 2020-11-01
  */
 public final class PercentCodec { // NOPMD - ClassNamingConventions
+
+    /**
+     * BitSet of literal characters that are valid in a URL. 
+     */
+    private static final BitSet URL_QUERY_SAFE = new BitSet(128);
+
+    static {
+        URL_QUERY_SAFE.set(33);
+        URL_QUERY_SAFE.set(36, 60);
+        URL_QUERY_SAFE.set(61);
+        URL_QUERY_SAFE.set(63, 91);
+        URL_QUERY_SAFE.set(95);
+        URL_QUERY_SAFE.set(97, 123);
+        URL_QUERY_SAFE.set(126);
+    }
     
     private PercentCodec() {
         // Utility class
     }
 
     /**
-     * Get the next codepoint, percent decoding if necessary. 
+     * Get the next codepoint, percent decoding if necessary. This will
+     * validate the literal character (not the decoded character) as
+     * {@code valid[CHAR] & mask}.
+     * @param text a valid CharIterator 
+     * @return a UNICODE codepoint
+     */
+    public static int decode(CharIterator text) throws IOException {
+        return decode(text, true);
+    }
+
+    /**
+     * Get the next codepoint, percent decoding if necessary. This will
+     * validate the literal character (not the decoded character) as
+     * {@code valid[CHAR] & mask}.
      * @param text a valid CharIterator 
      * @return a UNICODE codepoint
      */
     @SuppressWarnings({
         "PMD.CyclomaticComplexity",
         "PMD.AvoidLiteralsInIfCondition"})
-    public static int decode(CharIterator text) throws IOException {
+    public static int decode(
+            CharIterator text,
+            boolean decodePlus) throws IOException {
         
         final int chr = text.nextChar();
-        
+
         switch (chr) {
+        case CharIterator.EOF:
+            return CharIterator.EOF;
         case '+':
-            return ' ';
+            return decodePlus ? ' ' : '+';
         case '%':
             break;
         default:
             //
-            // Note, I am not doing any UTF-16 decoding here. That's
-            // intentional. I'm iterating the contents of a URL query
-            // string so surrogate pairs must not be present.
+            // Validate that the literal character (not the decoded value)
+            // is allowed in a query string.
             //
-            return chr;
+            if (URL_QUERY_SAFE.get(chr)) {
+                return chr;
+            }
+
+            throw new IOException("unexpected character");
         }
 
         int sum = 0;
@@ -75,7 +111,7 @@ public final class PercentCodec { // NOPMD - ClassNamingConventions
                     return sum;                       // return
                 }
             } else if ((octet & 0x80) == 0x00) {      // 0xxxxxxx (yields 7 bits)
-                return octet;                           // return
+                return octet;                         // return
             } else if ((octet & 0xe0) == 0xc0) {      // 110xxxxx (yields 5 bits)
                 sum = octet & 0x1f;
                 more = 1;                             // Expect 1 more byte

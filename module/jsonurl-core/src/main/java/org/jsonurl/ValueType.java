@@ -30,43 +30,27 @@ public enum ValueType {
     /**
      * A {@code null} literal.
      */
-    NULL(null),
+    NULL,
     /**
      * A {@code true} or {@code false} literal.
      */
-    BOOLEAN(null),
+    BOOLEAN,
     /**
      * A number literal (e.g. 1, 1.2, 1e3, etc).
      */
-    NUMBER(null),
+    NUMBER,
     /**
      * A string literal.
      */
-    STRING(null),
+    STRING,
     /**
      * An array.
      */
-    ARRAY(CompositeType.ARRAY),
+    ARRAY,
     /**
      * An object.
      */
-    OBJECT(CompositeType.OBJECT);
-
-    /**
-     * see {@link #isPrimitive()}.
-     */
-    private final CompositeType ctype;
-
-    ValueType(CompositeType ctype) {
-        this.ctype = ctype;
-    }
-
-    /**
-     * Get the {@link CompositeType} for this ValueType.
-     */
-    public CompositeType getCompositeType() {
-        return ctype;
-    }
+    OBJECT;
 
     /**
      * Test if the given EnumSet contains a composite value.

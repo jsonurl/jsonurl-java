@@ -96,6 +96,7 @@ enum StringStrategy {
             return StringStrategy.QUOTE_WITH_SPACE;
 
         default:
+            // as currently written this will never happen
             return StringStrategy.FULL_ENCODING;
         }
     }

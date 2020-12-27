@@ -17,11 +17,13 @@
 
 package org.jsonurl.text;
 
+import static org.jsonurl.JsonUrlOption.optionAQF;
 import static org.jsonurl.JsonUrlOption.optionCoerceNullToEmptyString;
 import static org.jsonurl.JsonUrlOption.optionEmptyUnquoted;
 import static org.jsonurl.JsonUrlOption.optionImpliedStringLiterals;
 import static org.jsonurl.JsonUrlOption.optionWfuComposite;
 import static org.jsonurl.text.CharUtil.APOS;
+import static org.jsonurl.text.CharUtil.HEXENCODE_AQF;
 import static org.jsonurl.text.CharUtil.HEXENCODE_QUOTED;
 import static org.jsonurl.text.CharUtil.HEXENCODE_UNQUOTED;
 
@@ -312,14 +314,16 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
             return false;
         }
 
-        if (optionImpliedStringLiterals(options)) {
+        if (optionAQF(options)) {
+            dest.append("!e");
+
+        } else if (optionImpliedStringLiterals(options)) {
             throw new IOException("implied strings: unexpected empty string");
+
+        } else {
+            dest.append("''");
         }
 
-        //
-        // quoted empty string
-        //
-        dest.append("''");
         return true;
     }
 
@@ -426,7 +430,7 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
      * @param options a valid JsonUrlOptions or null
      * @return true if dest was modified
      */
-    @SuppressWarnings("PMD.CyclomaticComplexity")
+    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NPathComplexity"})
     private static <T extends Appendable> boolean appendLiteral(
             T dest,
             CharSequence text,
@@ -448,7 +452,7 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
         // true, false, null, and number literals must be quoted
         //
         boolean isLiteral = isTrueFalseNull(text, start, end)
-                || NumberBuilder.isNumber(text, start, end);
+                || NumberBuilder.isNumber(text, start, end, options);
 
         if (isLiteral) {
             if (isKey) {
@@ -456,6 +460,9 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
                 // keys are always assumed to be strings
                 //
                 dest.append(text, start, end);
+
+            } else if (optionAQF(options)) {
+                dest.append('!').append(text, start, end);
 
             } else if (contains(text, start, end, '+')) {
                 encode(dest, text, start, end, false, false);
@@ -467,6 +474,11 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
                 //
                 dest.append('\'').append(text, start, end).append('\'');
             }
+            return true;
+        }
+
+        if (optionAQF(options)) {
+            encodeAqf(dest, text, start, end);
             return true;
         }
 
@@ -497,16 +509,21 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
         return true;
     }
 
-    
     /**
-     * Hex encode as UTF-8 .
+     * Hex encode as UTF-8.
      */
-    @SuppressWarnings({
-        "PMD.CyclomaticComplexity", // yup, encoding UTF-8 branches a lot
-        "PMD.ModifiedCyclomaticComplexity",
-        "PMD.NPathComplexity",
-        "PMD.ShortVariable",
-        "PMD.StdCyclomaticComplexity"})
+    private static void encodeAqf(
+            Appendable dest,
+            CharSequence text,
+            int start,
+            int end) throws IOException {
+
+        PercentCodec.encode(dest, HEXENCODE_AQF, text, start, end);
+    }
+
+    /**
+     * Hex encode as UTF-8.
+     */
     private static void encode(
             Appendable dest,
             CharSequence text,

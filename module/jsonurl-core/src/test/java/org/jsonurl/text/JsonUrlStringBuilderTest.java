@@ -46,16 +46,38 @@ class JsonUrlStringBuilderTest {
      */
     private static final String TEST_STRING = "bcde";
 
+    /**
+     * The empty string.
+     */
+    private static final String EMPTY_QSTRING = "''";
+
+    /**
+     * The empty string.
+     */
+    private static final String EMPTY_STRING = "";
+
     @Test
-    void testIsImpliedComposite() {
+    void testImpliedComposite() throws IOException {
+        String testName = "ImpliedComposite";
         assertFalse(
             new JsonUrlStringBuilder().isImpliedComposite(),
-            "ImpliedComposite");
+            testName);
 
         assertTrue(
             new JsonUrlStringBuilder(
                 CompositeType.OBJECT).isImpliedComposite(),
-            "ImpliedComposite");
+            testName);
+
+        assertEquals(
+            "true,1",
+            new JsonUrlStringBuilder(CompositeType.OBJECT)
+                .beginArray()
+                .add(true)
+                .valueSeparator()
+                .add(1)
+                .endArray()
+                .build(),
+            testName);
     }
 
     @ParameterizedTest
@@ -129,8 +151,68 @@ class JsonUrlStringBuilderTest {
         assertCodePoint(expected, codePoint);
     }
 
+
     @Test
-    void testAddNull() throws IOException {
+    void testEmptyString() throws IOException {
+        final String testName = "empty string";
+
+        assertEquals(
+            "%27'",
+            new JsonUrlStringBuilder().add(EMPTY_QSTRING).build(),
+            testName);
+
+        assertEquals(
+            EMPTY_QSTRING,
+            new JsonUrlStringBuilder().add(EMPTY_STRING).build(),
+            testName);
+
+        assertEquals(
+            EMPTY_QSTRING,
+            new JsonUrlStringBuilder(
+                    JsonUrlOption.IMPLIED_STRING_LITERALS)
+                .add(EMPTY_QSTRING).build(),
+            testName);
+
+        assertEquals(
+            EMPTY_STRING,
+            new JsonUrlStringBuilder(
+                    JsonUrlOption.EMPTY_UNQUOTED_VALUE)
+                .add(EMPTY_STRING).build(),
+            testName);
+
+        assertEquals(
+            EMPTY_STRING,
+            new JsonUrlStringBuilder(
+                    JsonUrlOption.EMPTY_UNQUOTED_KEY)
+                .addKey(EMPTY_STRING).build(),
+            testName);
+
+        assertEquals(
+            "!e",
+            new JsonUrlStringBuilder(
+                    JsonUrlOption.AQF)
+                .add(EMPTY_STRING).build(),
+            testName);
+
+        assertEquals(
+            "",
+            new JsonUrlStringBuilder(
+                    JsonUrlOption.AQF,
+                    JsonUrlOption.EMPTY_UNQUOTED_VALUE)
+                .add(EMPTY_STRING).build(),
+            testName);
+
+        assertThrows(
+            IOException.class,
+            () -> new JsonUrlStringBuilder(
+                    JsonUrlOption.IMPLIED_STRING_LITERALS)
+                .add(EMPTY_STRING).build(),
+            testName);
+
+    }
+
+    @Test
+    void testNull() throws IOException {
         final String nullText = "null";
 
         assertEquals(
@@ -147,6 +229,41 @@ class JsonUrlStringBuilderTest {
             nullText,
             new JsonUrlStringBuilder().add(null, 0, 0).build(),
             nullText);
+
+        assertEquals(
+            nullText,
+            new JsonUrlStringBuilder().add((Object)null).build(),
+            nullText);
+
+        assertEquals(
+            EMPTY_QSTRING,
+            new JsonUrlStringBuilder(
+                    JsonUrlOption.COERCE_NULL_TO_EMPTY_STRING)
+                .add(null, 0, 0).build(),
+            nullText);
+
+        assertEquals(
+            EMPTY_STRING,
+            new JsonUrlStringBuilder(
+                    JsonUrlOption.COERCE_NULL_TO_EMPTY_STRING,
+                    JsonUrlOption.EMPTY_UNQUOTED_VALUE)
+                .add(null, 0, 0).build(),
+            nullText);
+
+        assertThrows(
+            IOException.class,
+            () -> new JsonUrlStringBuilder(
+                    JsonUrlOption.IMPLIED_STRING_LITERALS)
+                .addNull(),
+            nullText);
+
+        assertThrows(
+            IOException.class,
+            () -> new JsonUrlStringBuilder(
+                    JsonUrlOption.IMPLIED_STRING_LITERALS)
+                .addKey(null, 0, 0),
+            nullText);
+
     }
 
     @ParameterizedTest
@@ -375,17 +492,9 @@ class JsonUrlStringBuilderTest {
     @Test
     @Tag("exception")
     void testException() {
-
-        JsonUrlStringBuilder jup = new JsonUrlStringBuilder(
-            JsonUrlOption.IMPLIED_STRING_LITERALS);
-
         assertThrows(
             IOException.class,
-            () -> jup.addNull());
-
-        assertThrows(
-            IOException.class,
-            () -> new JsonUrlStringBuilder().addKey(null, 0, 0));
+            () -> new JsonUrlStringBuilder().add(new Object()));
     }
 
     @ParameterizedTest
@@ -396,7 +505,7 @@ class JsonUrlStringBuilderTest {
         "n", "nu", "nul", "Null", "nUll", "nuLl", "nulL",
     })
     void testNonQuotedString(String text) throws IOException {
-        testValue(text, text, text, text);
+        testValue(text, text, text, text, text);
     }
 
     @ParameterizedTest
@@ -404,25 +513,49 @@ class JsonUrlStringBuilderTest {
         "true", "false", "null", "1", "1.0", "1e3", "1e-3",
     })
     void testQuotedString(String text) throws IOException {
-        testValue(text, text, '\'' + text + '\'', text);
+        testValue(text, text, '\'' + text + '\'', text, '!' + text);
     }
 
     @ParameterizedTest
     @CsvSource({
-        "1e+3,1e%2B3,1e%2B3",
+        //
+        // text - a string literal
+        // expected - with no options it determines that the plus needs to
+        //     be encoded so that it doesn't look like a number
+        // expectedISL - Plus needs to be encoded so it isn't decoded as a
+        //     space
+        // expectedAqf - this is NOT a valid literal in the AQF syntax so
+        //     the plus is simply escaped.
+        //
+        "1e+3,1e%2B3,1e%2B3,1e!+3",
     })
     void testEncodedString(
             String text,
             String expected,
-            String expectedImpliedStringLiteral) throws IOException {
-        testValue(text, text, expected, expectedImpliedStringLiteral);
+            String expectedImpliedStringLiteral,
+            String expectedAqf) throws IOException {
+
+        testValue(
+                text,
+                text,
+                expected,
+                expectedImpliedStringLiteral,
+                expectedAqf);
     }
 
     @Test
+    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
     void testEncodedString() throws IOException { // NOPMD - JUnitTestsShouldIncludeAssert
-        testValue("'hello", "%27hello", "%27hello", "'hello");
-        testValue("hello,", "'hello,'", "'hello,'", "hello%2C");
-        testValue("hello, ", "'hello,+'", "'hello,+'", "hello%2C+");
+        testValue("'hello", "%27hello", "%27hello", "'hello", "'hello");
+        testValue("hello,", "'hello,'", "'hello,'", "hello%2C", "hello!,");
+        testValue("hello, ", "'hello,+'", "'hello,+'", "hello%2C+", "hello!,+");
+        testValue("a b", "a+b", "a+b", "a+b", "a+b");
+        testValue("a(", "'a('", "'a('", "a%28", "a!(");
+        testValue("bob's burgers", 
+                "bob's+burgers",
+                "bob's+burgers",
+                "bob's+burgers",
+                "bob's+burgers");
     }
 
     @ParameterizedTest
@@ -435,15 +568,34 @@ class JsonUrlStringBuilderTest {
         // CHECKSTYLE:ON
     })
     void testUtf8(String text, String expected) throws IOException {
-        String actual = new JsonUrlStringBuilder().addKey(text).build();
-        assertEquals(expected, actual, text);
+        assertEquals(
+            expected,
+            new JsonUrlStringBuilder().addKey(text).build(),
+            text);
+
+        assertEquals(
+            expected,
+            new JsonUrlStringBuilder().add(text).build(),
+            text);
+
+        assertEquals(
+            expected,
+            new JsonUrlStringBuilder(JsonUrlOption.AQF).addKey(text).build(),
+            text);
+
+        assertEquals(
+            expected,
+            new JsonUrlStringBuilder(JsonUrlOption.AQF).add(text).build(),
+            text);
+
     }
     
     private void testValue(
             String text,
             String keyOutput,
             String nonKeyOutput,
-            String nonKeyImpliedStringLiteralOutput) throws IOException {
+            String nonKeyImpliedStringLiteralOutput,
+            String nonKeyAqfOutput) throws IOException {
         
         assertEquals(
             keyOutput,
@@ -460,13 +612,20 @@ class JsonUrlStringBuilderTest {
             new JsonUrlStringBuilder().add(text, 0, text.length()).build(),
             nonKeyOutput);
 
-        JsonUrlStringBuilder jup = new JsonUrlStringBuilder(
-            JsonUrlOption.IMPLIED_STRING_LITERALS);
-
         assertEquals(
             nonKeyImpliedStringLiteralOutput,
-            jup.add(text, 0, text.length())
+            new JsonUrlStringBuilder(
+                    JsonUrlOption.IMPLIED_STRING_LITERALS)
+               .add(text, 0, text.length())
                .build(),
             nonKeyImpliedStringLiteralOutput);
+
+        assertEquals(
+            nonKeyAqfOutput,
+            new JsonUrlStringBuilder(JsonUrlOption.AQF)
+               .add(text, 0, text.length())
+               .build(),
+            nonKeyAqfOutput);
+
     }
 }

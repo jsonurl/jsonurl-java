@@ -19,13 +19,16 @@ package org.jsonurl.text;
 
 import static org.jsonurl.BigMathProvider.NEGATIVE_INFINITY;
 import static org.jsonurl.BigMathProvider.POSITIVE_INFINITY;
+import static org.jsonurl.JsonUrlOption.optionAQF;
 import static org.jsonurl.LimitException.Message.MSG_LIMIT_INTEGER;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
+import java.util.Set;
 import org.jsonurl.BigMathProvider;
 import org.jsonurl.BigMathProvider.BigIntegerOverflow;
+import org.jsonurl.JsonUrlOption;
 import org.jsonurl.LimitException;
 
 /**
@@ -248,7 +251,7 @@ public class NumberBuilder implements NumberText { // NOPMD
      * NumberBuilder(s, 0, s.length())}.
      */
     public NumberBuilder(CharSequence text, BigMathProvider mcp) {
-        this(text, 0, text.length(), mcp);
+        this(text, 0, text.length(), mcp, null);
     }
 
     /**
@@ -266,15 +269,31 @@ public class NumberBuilder implements NumberText { // NOPMD
      * @param text text
      * @param start start index
      * @param stop stop index
-     * @param mcp a valid BigMathProvider or {@code null}
      */
     public NumberBuilder(
             CharSequence text,
             int start,
             int stop,
-            BigMathProvider mcp) {
+            Set<JsonUrlOption> options) {
+        this(text, start, stop, null, options);
+    }
+
+    /**
+     * Create a new NumberBuilder with the given text.
+     * @param text text
+     * @param start start index
+     * @param stop stop index
+     * @param mcp a valid BigMathProvider or {@code null}
+     * @param options a valid set of options or {@code null}
+     */
+    public NumberBuilder(
+            CharSequence text,
+            int start,
+            int stop,
+            BigMathProvider mcp,
+            Set<JsonUrlOption> options) {
         this.mcp = mcp;
-        parse(text, start, stop);
+        parse(text, start, stop, options);
     }
 
     /**
@@ -361,7 +380,8 @@ public class NumberBuilder implements NumberText { // NOPMD
     private static NumberText.Exponent getExponentType(//NOPMD
             CharSequence text,
             int start,
-            int stop) {
+            int stop,
+            Set<JsonUrlOption> options) {
 
         if (stop <= start) {
             return NumberText.Exponent.NONE;
@@ -387,7 +407,7 @@ public class NumberBuilder implements NumberText { // NOPMD
         switch (c) {
         case PLUS:
             i++;
-            if (i == stop) {
+            if (i == stop || optionAQF(options)) {
                 return NumberText.Exponent.NONE;
             }
             c = text.charAt(i);
@@ -411,7 +431,7 @@ public class NumberBuilder implements NumberText { // NOPMD
 
         return ret;
     }
-    
+
     /**
      * Parse the given character sequence.
      * This is a convenience for {@link #parse(CharSequence, int, int)
@@ -420,7 +440,18 @@ public class NumberBuilder implements NumberText { // NOPMD
      * @param text a valid CharSequence
      */
     public boolean parse(CharSequence text) {
-        return parse(text, 0, text.length());
+        return parse(text, 0, text.length(), null);
+    }
+
+    /**
+     * Parse the given character sequence.
+     * This is a convenience for {@link #parse(CharSequence, int, int)
+     * parse(text, 0, text.length)}.
+     *
+     * @param text a valid CharSequence
+     */
+    public boolean parse(CharSequence text, Set<JsonUrlOption> options) {
+        return parse(text, 0, text.length(), options);
     }
 
     /**
@@ -436,7 +467,11 @@ public class NumberBuilder implements NumberText { // NOPMD
      * @param stop an index
      * @return true if the CharSequence was successfully parsed
      */
-    public boolean parse(CharSequence text, int start, int stop) { //NOPMD
+    public boolean parse(//NOPMD
+            CharSequence text,
+            int start,
+            int stop,
+            Set<JsonUrlOption> options) {
         int pos = this.start = start; //NOPMD
 
         char c = text.charAt(start); //NOPMD
@@ -479,7 +514,7 @@ public class NumberBuilder implements NumberText { // NOPMD
             fractIndexStop = pos = digits(text, pos + 1, stop);
         }
 
-        exponentType = getExponentType(text, pos, stop);
+        exponentType = getExponentType(text, pos, stop, options);
 
         switch (exponentType) { // NOPMD - SwitchStmtsShouldHaveDefault
         case JUST_VALUE:
@@ -514,7 +549,7 @@ public class NumberBuilder implements NumberText { // NOPMD
      * isNumber(s, 0, s.length(), false)}.
      */
     public static boolean isNumber(CharSequence text) {
-        return isNumber(text, 0, text.length(), false);
+        return isNumber(text, 0, text.length(), false, null);
     }
     
     /**
@@ -524,9 +559,9 @@ public class NumberBuilder implements NumberText { // NOPMD
      * isNumber(s, 0, s.length(), isInteger)}.
      */
     public static boolean isNumber(CharSequence text, boolean isNonFractional) {
-        return isNumber(text, 0, text.length(), isNonFractional);
+        return isNumber(text, 0, text.length(), isNonFractional, null);
     }
-    
+
     /**
      * Determine if the given CharSequence is a valid JSON&#x2192;URL number literal.
      *
@@ -537,8 +572,30 @@ public class NumberBuilder implements NumberText { // NOPMD
      * @param stop an index
      * @return true if the CharSequence is a JSON&#x2192;URL number
      */
-    public static boolean isNumber(CharSequence text, int start, int stop) {
-        return isNumber(text, start, stop, false);
+    public static boolean isNumber(
+            CharSequence text,
+            int start,
+            int stop) {
+        return isNumber(text, start, stop, false, null);
+    }
+
+    /**
+     * Determine if the given CharSequence is a valid JSON&#x2192;URL number literal.
+     *
+     * <p>Convenience for {@link #isNumber(CharSequence, int, int, boolean)}
+     * isNumber(s, 0, stop, false)}.
+     * @param text a valid CharSequence
+     * @param start an index
+     * @param stop an index
+     * @param options a valid set of options or {@code null}
+     * @return true if the CharSequence is a JSON&#x2192;URL number
+     */
+    public static boolean isNumber(
+            CharSequence text,
+            int start,
+            int stop,
+            Set<JsonUrlOption> options) {
+        return isNumber(text, start, stop, false, options);
     }
 
     /**
@@ -547,13 +604,15 @@ public class NumberBuilder implements NumberText { // NOPMD
      * @param text a valid CharSequence
      * @param start an index
      * @param stop an index
+     * @param options a valid set of options or {@code null}
      * @return true if the CharSequence is a JSON&#x2192;URL number
      */
     public static boolean isNumber(//NOPMD
             CharSequence text,
             int start,
             int stop,
-            boolean isNonFractional) {
+            boolean isNonFractional,
+            Set<JsonUrlOption> options) {
 
         int pos = start; //NOPMD - DataflowAnomalyAnalysis
 
@@ -595,20 +654,28 @@ public class NumberBuilder implements NumberText { // NOPMD
             pos = digits(text, pos + 1, stop);
         }
 
-        switch (getExponentType(text, pos, stop)) { // NOPMD - fall-through
+        final int expDigitSkip;
+
+        switch (getExponentType(text, pos, stop, options)) {
         case JUST_VALUE:
+            expDigitSkip = 1;
             pos = digits(text, pos + 1, stop);
             break;
         case NEGATIVE_VALUE:
             if (isNonFractional) {
                 return false;
             }
-            // fall-through
+            // fall through
         case POSITIVE_VALUE:
-            pos = digits(text, pos + 2, stop);
+            expDigitSkip = 2;
             break;
-        case NONE:
+        default:
+            expDigitSkip = 0;
             break;
+        }
+        
+        if (expDigitSkip > 0) {
+            pos = digits(text, pos + expDigitSkip, stop);
         }
 
         return pos == stop; 
@@ -631,7 +698,7 @@ public class NumberBuilder implements NumberText { // NOPMD
      * isNumber(s, 0, s.length(), true)}.
      */
     public static boolean isNonFractional(CharSequence text) {
-        return isNumber(text, 0, text.length(), true);
+        return isNumber(text, 0, text.length(), true, null);
     }
 
     /**
@@ -640,8 +707,11 @@ public class NumberBuilder implements NumberText { // NOPMD
      *<p>Convenience for {@link #isNumber(CharSequence, int, int, boolean)
      * isNumber(s, start, stop, true)}.
      */
-    public static boolean isNonFractional(CharSequence text, int start, int stop) {
-        return isNumber(text, start, stop, true);
+    public static boolean isNonFractional(
+            CharSequence text,
+            int start,
+            int stop) {
+        return isNumber(text, start, stop, true, null);
     }
 
     /**
