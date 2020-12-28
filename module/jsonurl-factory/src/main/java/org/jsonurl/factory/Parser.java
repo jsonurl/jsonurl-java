@@ -96,6 +96,7 @@ public interface Parser<
 
     /**
      * Parse the given JSON&#x2192;URL text.
+     * @see #parseObject(CharSequence, int, int, Object, MissingValueProvider)
      */
     default J parseObject(CharSequence text) {
         return parseObject(text, 0, text.length(), null);
@@ -103,6 +104,7 @@ public interface Parser<
 
     /**
      * Parse the given JSON&#x2192;URL text.
+     * @see #parseObject(CharSequence, int, int, Object, MissingValueProvider)
      */
     default J parseObject(
             CharSequence text,
@@ -113,6 +115,7 @@ public interface Parser<
 
     /**
      * Parse the given JSON&#x2192;URL text.
+     * @see #parseObject(CharSequence, int, int, Object, MissingValueProvider)
      */
     default J parseObject(
             CharSequence text,
@@ -122,6 +125,7 @@ public interface Parser<
 
     /**
      * Parse the given JSON&#x2192;URL text.
+     * @see #parseObject(CharSequence, int, int, Object, MissingValueProvider)
      */
     default J parseObject(
             CharSequence text,
@@ -132,6 +136,7 @@ public interface Parser<
 
     /**
      * Parse the given JSON&#x2192;URL text.
+     * @see #parseObject(CharSequence, int, int, Object, MissingValueProvider)
      */
     default J parseObject(
             CharSequence text,
@@ -148,6 +153,7 @@ public interface Parser<
      * @param length number of characters in {@code text} to parse
      * @param impliedObject a valid factory object or {@code null}
      * @param mvp a valid MissingValueProvider or {@code null}
+     * @see #parseObject(JsonUrlIterator, Object, MissingValueProvider)
      */
     default J parseObject(
             CharSequence text,
@@ -173,6 +179,7 @@ public interface Parser<
      * @param iter a valid CharIterator
      * @param impliedObject a valid factory object or {@code null}
      * @param mvp a valid MissingValueProvider or {@code null}
+     * @see #parseObject(JsonUrlIterator, Object, MissingValueProvider)
      */
     default J parseObject(
             CharIterator iter,
@@ -190,6 +197,10 @@ public interface Parser<
      * @param iter a valid JsonUrlIterator
      * @param impliedObject a valid factory object or {@code null}
      * @param mvp a valid MissingValueProvider or {@code null}
+     * @see <a href="https://github.com/jsonurl/specification/#292-implied-objects"
+     * >JSON&#x2192;URL specification, section 2.9.2</a>
+     * @see <a href="https://github.com/jsonurl/specification/#294-implied-object-missing-values"
+     * >JSON&#x2192;URL specification, section 2.9.4</a>
      */
     J parseObject(
         JsonUrlIterator iter,
@@ -198,6 +209,7 @@ public interface Parser<
 
     /**
      * Parse the given JSON&#x2192;URL text.
+     * @see #parseArray(CharSequence, int, int, Object, MissingValueProvider)
      */
     default A parseArray(CharSequence text) {
         return parseArray(text, 0, text.length(), null);
@@ -205,6 +217,7 @@ public interface Parser<
 
     /**
      * Parse the given JSON&#x2192;URL text.
+     * @see #parseArray(CharSequence, int, int, Object, MissingValueProvider)
      */
     default A parseArray(
             CharSequence text,
@@ -215,6 +228,7 @@ public interface Parser<
 
     /**
      * Parse the given JSON&#x2192;URL text.
+     * @see #parseArray(CharSequence, int, int, Object, MissingValueProvider)
      */
     default A parseArray(
             CharSequence text,
@@ -224,6 +238,7 @@ public interface Parser<
 
     /**
      * Parse the given JSON&#x2192;URL text.
+     * @see #parseArray(CharSequence, int, int, Object, MissingValueProvider)
      */
     default A parseArray(
             CharSequence text,
@@ -234,6 +249,7 @@ public interface Parser<
 
     /**
      * Parse the given JSON&#x2192;URL text.
+     * @see #parseArray(CharSequence, int, int, Object, MissingValueProvider)
      */
     default A parseArray(
             CharSequence text,
@@ -250,6 +266,7 @@ public interface Parser<
      * @param length number of characters in {@code text} to parse
      * @param impliedArray a valid factory array or {@code null}
      * @param mvp a valid MissingValueProvider or {@code null}
+     * @see #parseArray(JsonUrlIterator, Object, MissingValueProvider)
      */
     default A parseArray(
             CharSequence text,
@@ -276,6 +293,7 @@ public interface Parser<
      * @param iter a valid CharIterator
      * @param impliedArray a valid factory array or {@code null}
      * @param mvp a valid MissingValueProvider or {@code null}
+     * @see #parseArray(JsonUrlIterator, Object, MissingValueProvider)
      */
     default A parseArray(
             CharIterator iter,
@@ -293,6 +311,8 @@ public interface Parser<
      * @param iter a valid JsonUrlIterator
      * @param impliedArray a valid factory array or {@code null}
      * @param mvp a valid MissingValueProvider or {@code null}
+     * @see <a href="https://github.com/jsonurl/specification/#291-implied-arrays"
+     * >JSON&#x2192;URL specification, section 2.9.1</a>
      */
     A parseArray(
         JsonUrlIterator iter,

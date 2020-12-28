@@ -59,7 +59,7 @@ import org.jsonurl.LimitException;
  * {@link #reset()} method.
  * <pre>
  * NumberBuilder nb = new NumberBuilder();
- * if (!nb.{@link #parse(CharSequence, int, int) parse("1.234")}) {
+ * if (!nb.{@link #parse(CharSequence) parse("1.234")}) {
  *     // handle the error
  * }
  *
@@ -84,9 +84,12 @@ import org.jsonurl.LimitException;
  * allocating an instance. They're useful if you want test validity but
  * don't need access to the parsed value.
  * <pre>
- * boolean b = NumberBuilder.{@link #isNumber() isNumber("1234")};
- * boolean b = NumberBuilder.{@link #isNumber() isNumber("abcd")};
- * boolean b = NumberBuilder.{@link #isNonFractional() isInteger("1234.5")};
+ * boolean b = NumberBuilder.{@link #isNumber(CharSequence)
+ *     isNumber("1234")};
+ * boolean b = NumberBuilder.{@link #isNumber(CharSequence)
+ *     isNumber("abcd")};
+ * boolean b = NumberBuilder.{@link #isNonFractional(CharSequence)
+ *     isNonFractional("1234.5")};
  * </pre>
  *
  * @author jsonurl.org
@@ -216,7 +219,7 @@ public class NumberBuilder implements NumberText { // NOPMD
      * Create a new NumberBuilder.
      *
      * <p>This NumberBuilder will not have any text. You'll need to call
-     * {@link #parse(CharSequence, int, int)}.
+     * {@link #parse(CharSequence)}.
      */
     public NumberBuilder() {
         mcp = null;
@@ -226,7 +229,7 @@ public class NumberBuilder implements NumberText { // NOPMD
      * Create a new NumberBuilder.
      *
      * <p>This NumberBuilder will not have any text. You'll need to call
-     * {@link #parse(CharSequence, int, int)}.
+     * {@link #parse(CharSequence)}.
      */
     public NumberBuilder(BigMathProvider mcp) {
         this.mcp = mcp;
@@ -323,7 +326,7 @@ public class NumberBuilder implements NumberText { // NOPMD
 
     /**
      * Reset the instance for reuse. You may reliably call
-     * {@link #parse(CharSequence, int, int)} again after calling this
+     * {@link #parse(CharSequence, int, int, Set)} again after calling this
      * method.
      */
     public NumberBuilder reset() {
@@ -333,8 +336,8 @@ public class NumberBuilder implements NumberText { // NOPMD
 
     /**
      * Reset internal state.
-     * @param leaveText if true then do not touch {@link #start}, {@link #stop},
-     *      or {@link #text}.
+     * @param leaveText if true then do not touch
+     *     {@link #start}, {@link #stop}, or {@link #text}.
      */
     private void reset(boolean leaveText) {
         if (!leaveText) {
@@ -434,8 +437,8 @@ public class NumberBuilder implements NumberText { // NOPMD
 
     /**
      * Parse the given character sequence.
-     * This is a convenience for {@link #parse(CharSequence, int, int)
-     * parse(text, 0, text.length)}.
+     * This is a convenience for {@link #parse(CharSequence, int, int, Set)
+     * parse(text, 0, text.length, null)}.
      *
      * @param text a valid CharSequence
      */
@@ -445,8 +448,8 @@ public class NumberBuilder implements NumberText { // NOPMD
 
     /**
      * Parse the given character sequence.
-     * This is a convenience for {@link #parse(CharSequence, int, int)
-     * parse(text, 0, text.length)}.
+     * This is a convenience for {@link #parse(CharSequence, int, int, Set)
+     * parse(text, 0, text.length, options)}.
      *
      * @param text a valid CharSequence
      */
@@ -545,8 +548,9 @@ public class NumberBuilder implements NumberText { // NOPMD
     /**
      * Determine if the given CharSequence is a valid JSON&#x2192;URL number literal.
      *
-     * <p>Convenience for {@link #isNumber(CharSequence, int, int, boolean)
-     * isNumber(s, 0, s.length(), false)}.
+     * <p>Convenience for {@link
+     * #isNumber(CharSequence, int, int, boolean, Set)
+     * isNumber(s, 0, s.length(), false, null)}.
      */
     public static boolean isNumber(CharSequence text) {
         return isNumber(text, 0, text.length(), false, null);
@@ -555,8 +559,9 @@ public class NumberBuilder implements NumberText { // NOPMD
     /**
      * Determine if the given CharSequence is a valid JSON&#x2192;URL number literal.
      *
-     * <p>Convenience for {@link #isNumber(CharSequence, int, int, boolean)
-     * isNumber(s, 0, s.length(), isInteger)}.
+     * <p>Convenience for {@link
+     * #isNumber(CharSequence, int, int, boolean, Set)
+     * isNumber(s, 0, s.length(), isInteger, null)}.
      */
     public static boolean isNumber(CharSequence text, boolean isNonFractional) {
         return isNumber(text, 0, text.length(), isNonFractional, null);
@@ -565,8 +570,9 @@ public class NumberBuilder implements NumberText { // NOPMD
     /**
      * Determine if the given CharSequence is a valid JSON&#x2192;URL number literal.
      *
-     * <p>Convenience for {@link #isNumber(CharSequence, int, int, boolean)}
-     * isNumber(s, 0, stop, false)}.
+     * <p>Convenience for {@link
+     * #isNumber(CharSequence, int, int, boolean, Set)
+     * isNumber(s, 0, stop, false, null)}.
      * @param text a valid CharSequence
      * @param start an index
      * @param stop an index
@@ -582,8 +588,9 @@ public class NumberBuilder implements NumberText { // NOPMD
     /**
      * Determine if the given CharSequence is a valid JSON&#x2192;URL number literal.
      *
-     * <p>Convenience for {@link #isNumber(CharSequence, int, int, boolean)}
-     * isNumber(s, 0, stop, false)}.
+     * <p>Convenience for {@link
+     * #isNumber(CharSequence, int, int, boolean, Set)
+     * isNumber(s, 0, stop, false, options)}.
      * @param text a valid CharSequence
      * @param start an index
      * @param stop an index
@@ -684,7 +691,8 @@ public class NumberBuilder implements NumberText { // NOPMD
     /**
      * Determine if this text represents a valid JSON&#x2192;URL number literal.
      *
-     * <p>This is the result of calling {@link #parse(CharSequence, int, int)}.
+     * <p>This is the result of calling
+     * {@link #parse(CharSequence, int, int, Set)}.
      * @return true if this text represents is a JSON&#x2192;URL number literal
      */
     public boolean isNumber() {
@@ -694,8 +702,9 @@ public class NumberBuilder implements NumberText { // NOPMD
     /**
      * Determine if the given CharSequence is a valid JSON&#x2192;URL number literal.
      *
-     *<p>Convenience for {@link #isNumber(CharSequence, int, int, boolean)
-     * isNumber(s, 0, s.length(), true)}.
+     *<p>Convenience for {@link
+     *#isNumber(CharSequence, int, int, boolean, Set)
+     * isNumber(s, 0, s.length(), true, null)}.
      */
     public static boolean isNonFractional(CharSequence text) {
         return isNumber(text, 0, text.length(), true, null);
@@ -704,8 +713,9 @@ public class NumberBuilder implements NumberText { // NOPMD
     /**
      * Determine if the given CharSequence is a valid JSON&#x2192;URL number literal.
      *
-     *<p>Convenience for {@link #isNumber(CharSequence, int, int, boolean)
-     * isNumber(s, start, stop, true)}.
+     *<p>Convenience for {@link
+     *#isNumber(CharSequence, int, int, boolean, Set)
+     * isNumber(s, start, stop, true, null)}.
      */
     public static boolean isNonFractional(
             CharSequence text,

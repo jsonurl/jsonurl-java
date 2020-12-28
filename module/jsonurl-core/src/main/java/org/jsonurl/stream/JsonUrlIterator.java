@@ -49,6 +49,16 @@ import org.jsonurl.text.NumberText;
  * {@code VALUE_STRING} is returned.</td>
  * </tr>
  *
+ * <tr>
+ * <td>{@link org.jsonurl.JsonUrlOption#IMPLIED_STRING_LITERALS IMPLIED_STRING_LITERALS}
+ *   + {@link org.jsonurl.JsonUrlOption#AQF AQF}</td>
+ * <td>When both flags are present then the grammar allows for either
+ * {@link JsonUrlEvent#VALUE_STRING VALUE_STRING} or
+ * {@link JsonUrlEvent#VALUE_EMPTY_LITERAL VALUE_EMPTY_LITERAL}.
+ * In this case the implied string option takes precedence and
+ * {@code VALUE_STRING} is returned.</td>
+ * </tr>
+ *
  * </table>
  *
  * @author jsonurl.org

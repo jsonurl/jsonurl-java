@@ -44,8 +44,6 @@ public enum JsonUrlOption {
      * The implied-string-literals option.
      * If this option is enabled then all literals are assumed to be strings.
      * @see #enableImpliedStringLiterals(Set)
-     * @see <a href="https://github.com/jsonurl/specification/#292-implied-objects"
-     * >JSON&#x2192;URL specification, section 2.9.2</a>
      */
     IMPLIED_STRING_LITERALS,
 
