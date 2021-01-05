@@ -51,9 +51,7 @@ public final class PercentCodec { // NOPMD - ClassNamingConventions
     }
 
     /**
-     * Get the next codepoint, percent decoding if necessary. This will
-     * validate the literal character (not the decoded character) as
-     * {@code valid[CHAR] & mask}.
+     * Get the next codepoint, percent decoding if necessary.
      * @param text a valid CharIterator 
      * @return a UNICODE codepoint
      */
@@ -62,10 +60,10 @@ public final class PercentCodec { // NOPMD - ClassNamingConventions
     }
 
     /**
-     * Get the next codepoint, percent decoding if necessary. This will
-     * validate the literal character (not the decoded character) as
-     * {@code valid[CHAR] & mask}.
+     * Get the next codepoint, percent decoding if necessary.
      * @param text a valid CharIterator 
+     * @param decodePlus if true, decode {@code +} as though it
+     *     was {@code %20}
      * @return a UNICODE codepoint
      */
     @SuppressWarnings({
