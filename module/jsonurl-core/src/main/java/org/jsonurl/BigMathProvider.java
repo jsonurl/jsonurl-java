@@ -115,14 +115,4 @@ public interface BigMathProvider {
      * @return a valid BigIntegerOverflow or null
      */
     BigIntegerOverflow getBigIntegerOverflow();
-
-    /**
-     * Cast the given object to a valid BigMathProvider or {@code null}.  
-     * @param obj any object or {@code null}
-     * @return a valid BigMathProvider or {@code null}
-     */
-    static BigMathProvider forObject(Object obj) {
-        return obj instanceof BigMathProvider
-                ? (BigMathProvider)obj : null;
-    }
 }
