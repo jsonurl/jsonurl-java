@@ -524,10 +524,10 @@ class JsonUrlStringBuilderTest {
         //     be encoded so that it doesn't look like a number
         // expectedISL - Plus needs to be encoded so it isn't decoded as a
         //     space
-        // expectedAqf - this is NOT a valid literal in the AQF syntax so
-        //     the plus is simply escaped.
+        // expectedAqf - this is a valid literal in the AQF syntax so
+        //     the first character must be escaped.
         //
-        "1e+3,1e%2B3,1e%2B3,1e!+3",
+        "1e+3,1e%2B3,1e%2B3,!1e+3",
     })
     void testEncodedString(
             String text,

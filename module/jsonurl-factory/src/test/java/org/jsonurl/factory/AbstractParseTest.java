@@ -50,6 +50,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /**
@@ -68,7 +70,15 @@ import org.junit.jupiter.params.provider.ValueSource;
  * @author David MacCormack
  * @since 2019-09-01
  */
-@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
+@SuppressWarnings({
+    "checkstyle:AbbreviationAsWordInName",
+
+    //
+    // though it is generally good to avoid duplicate literals,
+    // inline literals in unit tests often makes them much easier to read
+    //
+    "PMD.AvoidDuplicateLiterals"
+})
 public abstract class AbstractParseTest<
         V,
         C extends V,
@@ -597,6 +607,120 @@ public abstract class AbstractParseTest<
                 text);
         }
         
+        @ParameterizedTest
+        @NullSource
+        @EnumSource(names = "AQF")
+        @DisplayName("testLiteral1: 1e+1")
+        void testLiteral1(JsonUrlOption option) throws IOException {
+            final String desc = "1e%2B1";
+
+            // parse("1e+1") -> number(10)
+            assertEquals(
+                getFactoryLong("10"),
+                newParser(newOptions(option)).parse("1e+1"),
+                desc);
+            
+            // stringify("1e 1") -> string("1e+1")
+            assertEquals(
+                "1e+1",
+                new JsonUrlStringBuilder(
+                    newOptions(option)).add("1e 1").build(),
+                desc);
+
+            // parse("1e+1") -> implied-string("1e 1")
+            assertEquals(
+                getFactoryString("1e 1"),
+                newParser(newOptions(
+                        JsonUrlOption.IMPLIED_STRING_LITERALS,
+                        option))
+                    .parse("1e+1"),
+                desc);
+        }
+
+        @ParameterizedTest
+        @NullSource
+        @EnumSource(names = "AQF")
+        @DisplayName("testLiteral2: 1e%2B1")
+        void testLiteral2(JsonUrlOption option) throws IOException {
+            final String desc = "1e%2B1";
+
+            if (option == JsonUrlOption.AQF) {
+                // parse("1e%2B1") -> number(10)
+                assertEquals(
+                    factory.getNumber(new NumberBuilder("10")),
+                    newParser(newOptions(option)).parse("1e%2B1"),
+                    desc);
+
+                // stringify("1e+1") -> string("1e%2B1")
+                assertEquals(
+                    "!1e+1",
+                    new JsonUrlStringBuilder(
+                        newOptions(option)).add("1e+1").build(),
+                    desc);
+            } else {
+                // parse("1e%2B1") -> string("1e+1")
+                assertEquals(
+                    getFactoryString("1e+1"),
+                    newParser().parse("1e%2B1"),
+                    desc);
+
+                // stringify("1e+1") -> string("1e%2B1")
+                assertEquals(
+                    "1e%2B1",
+                    new JsonUrlStringBuilder().add("1e+1").build(),
+                    desc);
+            }
+
+            // parse("1e%2B1") -> implied-string("1e+1")
+            assertEquals(
+                getFactoryString("1e+1"),
+                newParser(newOptions(JsonUrlOption.IMPLIED_STRING_LITERALS, option))
+                    .parse("1e%2B1"),
+                desc);
+        }
+
+        @ParameterizedTest
+        @NullSource
+        @EnumSource(names = "AQF")
+        @DisplayName("testImpliedStringLiteral3: 1e!%2B1")
+        @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+        void testImpliedStringLiteral3(JsonUrlOption option) throws IOException {
+            final String desc = "1e!%2B1";
+
+            Set<JsonUrlOption> options = newOptions(option);
+
+            for (int i = 0; i < 2; i++) {
+                if (option == JsonUrlOption.AQF) {
+                    assertEquals(
+                        getFactoryString("1e+1"),
+                        newParser(options).parse("1e!%2B1"),
+                        desc);
+
+                    assertEquals(
+                        "1e!!!+1",
+                        new JsonUrlStringBuilder(options).add("1e!+1").build(),
+                        desc);
+
+                } else {
+                    assertEquals(
+                        getFactoryString("1e!+1"),
+                        newParser(options).parse("1e!%2B1"),
+                        desc);
+
+                    assertEquals(
+                        "1e!%2B1",
+                        new JsonUrlStringBuilder(options).add("1e!+1").build(),
+                        desc);
+                }
+
+                //
+                // Run the same test again.
+                // IMPLIED_STRING_LITERALS should have no effect.
+                //
+                options.add(JsonUrlOption.IMPLIED_STRING_LITERALS);
+            }
+        }
+        
         void assertString2(
                 String text,
                 String nativeValue,
@@ -751,8 +875,8 @@ public abstract class AbstractParseTest<
         })
         void testMathContext(String text) throws IOException {
             if (factory instanceof BigMathProvider) {
-                MathContext mctx = BigMathProvider.forObject(
-                    factory).getMathContext();
+                MathContext mctx =
+                    ((BigMathProvider)factory).getMathContext();
 
                 if (mctx == null) {
                     mctx = MathContext.UNLIMITED;
@@ -2000,6 +2124,12 @@ public abstract class AbstractParseTest<
     private static Set<JsonUrlOption> newOptions(
             JsonUrlOption first,
             JsonUrlOption... rest) {
+        if (first == null) {
+            return JsonUrlOption.newSet();
+        }
+        if (rest == null || rest.length == 0 || rest[0] == null) {
+            return JsonUrlOption.newSet(first);
+        }
         return JsonUrlOption.newSet(first, rest);
     }
 

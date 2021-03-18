@@ -251,10 +251,22 @@ class JsonUrlIteratorTest {
         return Stream.concat(COMMON_TESTS.parallelStream(),
             Arrays.stream(new EventTest[] {
                 new EventTest(
-                    "1e+2",
+                    "1e!+2",
                     new Object[] {
                         JsonUrlEvent.VALUE_STRING,
-                        "1e 2",
+                        "1e+2",
+                        JsonUrlEvent.END_STREAM}),
+                new EventTest(
+                    "1e%2B1",
+                    new Object[] {
+                        JsonUrlEvent.VALUE_NUMBER,
+                        "1e+1",
+                        JsonUrlEvent.END_STREAM}),
+                new EventTest(
+                    "1e!-2",
+                    new Object[] {
+                        JsonUrlEvent.VALUE_STRING,
+                        "1e-2",
                         JsonUrlEvent.END_STREAM}),
                 new EventTest(
                     "('')",
@@ -305,6 +317,11 @@ class JsonUrlIteratorTest {
                     new Object[] {
                         JsonUrlEvent.VALUE_EMPTY_LITERAL,
                         JsonUrlEvent.END_STREAM}),
+
+                new EventTest(
+                        "!e!e",
+                        SyntaxException.class),
+
                 new EventTest(
                     "!3",
                     new Object[] {
@@ -324,6 +341,12 @@ class JsonUrlIteratorTest {
                         "a b",
                         JsonUrlEvent.END_STREAM}),
                 new EventTest(
+                    "a%2Bb",
+                    new Object[] {
+                        JsonUrlEvent.VALUE_STRING,
+                        "a+b",
+                        JsonUrlEvent.END_STREAM}),
+                new EventTest(
                     "(!e:a)",
                     new Object[] {
                         JsonUrlEvent.START_OBJECT,
@@ -334,8 +357,22 @@ class JsonUrlIteratorTest {
                         JsonUrlEvent.END_OBJECT,
                         JsonUrlEvent.END_STREAM}),
                 new EventTest(
-                    "!e!e",
-                    SyntaxException.class),
+                    "%21e",
+                    new Object[] {
+                        JsonUrlEvent.VALUE_EMPTY_LITERAL,
+                        JsonUrlEvent.END_STREAM}),
+                new EventTest(
+                    "%21%65",
+                    new Object[] {
+                        JsonUrlEvent.VALUE_EMPTY_LITERAL,
+                        JsonUrlEvent.END_STREAM}),
+                new EventTest(
+                    "%21+",
+                    new Object[] {
+                        JsonUrlEvent.VALUE_STRING,
+                        "+",
+                        JsonUrlEvent.END_STREAM}),
+
             }));
     }
 
@@ -361,10 +398,22 @@ class JsonUrlIteratorTest {
         return Stream.concat(COMMON_TESTS.parallelStream(),
             Arrays.stream(new EventTest[] {
                 new EventTest(
-                    "1e+2",
+                    "1e!+2",
                     new Object[] {
-                        JsonUrlEvent.VALUE_NUMBER,
-                        "1e+2",
+                        JsonUrlEvent.VALUE_STRING,
+                        "1e! 2",
+                        JsonUrlEvent.END_STREAM}),
+                new EventTest(
+                    "1e%2B1",
+                    new Object[] {
+                        JsonUrlEvent.VALUE_STRING,
+                        "1e+1",
+                        JsonUrlEvent.END_STREAM}),
+                new EventTest(
+                    "1e!-2",
+                    new Object[] {
+                        JsonUrlEvent.VALUE_STRING,
+                        "1e!-2",
                         JsonUrlEvent.END_STREAM}),
                 new EventTest(
                     "('')",
@@ -416,6 +465,13 @@ class JsonUrlIteratorTest {
                         JsonUrlEvent.END_STREAM}),
 
                 new EventTest(
+                    "!e!e",
+                    new Object[] {
+                        JsonUrlEvent.VALUE_STRING,
+                        "!e!e",
+                        JsonUrlEvent.END_STREAM}),
+
+                new EventTest(
                     "!3",
                     new Object[] {
                         JsonUrlEvent.VALUE_STRING,
@@ -441,6 +497,13 @@ class JsonUrlIteratorTest {
                         JsonUrlEvent.END_STREAM}),
 
                 new EventTest(
+                        "a%2Bb",
+                        new Object[] {
+                            JsonUrlEvent.VALUE_STRING,
+                            "a+b",
+                            JsonUrlEvent.END_STREAM}),
+
+                new EventTest(
                     "(!e:a)",
                     new Object[] {
                         JsonUrlEvent.START_OBJECT,
@@ -452,10 +515,23 @@ class JsonUrlIteratorTest {
                         JsonUrlEvent.END_STREAM}),
 
                 new EventTest(
-                    "!e!e",
+                    "%21e",
                     new Object[] {
                         JsonUrlEvent.VALUE_STRING,
-                        "!e!e",
+                        "!e",
+                        JsonUrlEvent.END_STREAM}),
+                new EventTest(
+                    "%21%65",
+                    new Object[] {
+                        JsonUrlEvent.VALUE_STRING,
+                        "!e",
+                        JsonUrlEvent.END_STREAM}),
+
+                new EventTest(
+                    "%21+",
+                    new Object[] {
+                        JsonUrlEvent.VALUE_STRING,
+                        "! ",
                         JsonUrlEvent.END_STREAM}),
 
             }));
@@ -539,6 +615,34 @@ class JsonUrlIteratorTest {
                     JsonUrlEvent.VALUE_NUMBER,
                     "1e-2",
                     JsonUrlEvent.END_STREAM}),
+            new EventTest(
+                "1e+2",
+                new Object[] {
+                    JsonUrlEvent.VALUE_NUMBER,
+                    "1e+2",
+                    JsonUrlEvent.END_STREAM}),
+            new EventTest(
+                "1e+2",
+                new Object[] {
+                    JsonUrlEvent.VALUE_NUMBER,
+                    "1e+2",
+                    JsonUrlEvent.END_STREAM}),
+
+            new EventTest(
+                JsonUrlOption.IMPLIED_STRING_LITERALS,
+                "1e%2B1",
+                new Object[] {
+                    JsonUrlEvent.VALUE_STRING,
+                    "1e+1",
+                    JsonUrlEvent.END_STREAM}),
+
+            new EventTest(
+                    JsonUrlOption.IMPLIED_STRING_LITERALS,
+                    "1e+2",
+                    new Object[] {
+                        JsonUrlEvent.VALUE_STRING,
+                        "1e 2",
+                        JsonUrlEvent.END_STREAM}),
 
             new EventTest(
                 JsonUrlOption.EMPTY_UNQUOTED_VALUE,
