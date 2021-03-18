@@ -49,6 +49,11 @@ public abstract class AbstractEventIterator
     public static final char WFU_VALUE_SEPARATOR = '&';
 
     /**
+     * x-www-form-urlencoded space (plus).
+     */
+    public static final char WFU_SPACE = '+';
+
+    /**
      * JsonUrlOptions.
      */
     private final Set<JsonUrlOption> options; // NOPMD - final field

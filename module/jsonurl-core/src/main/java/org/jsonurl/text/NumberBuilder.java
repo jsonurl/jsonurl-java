@@ -19,7 +19,6 @@ package org.jsonurl.text;
 
 import static org.jsonurl.BigMathProvider.NEGATIVE_INFINITY;
 import static org.jsonurl.BigMathProvider.POSITIVE_INFINITY;
-import static org.jsonurl.JsonUrlOption.optionAQF;
 import static org.jsonurl.LimitException.Message.MSG_LIMIT_INTEGER;
 
 import java.math.BigDecimal;
@@ -383,8 +382,7 @@ public class NumberBuilder implements NumberText { // NOPMD
     private static NumberText.Exponent getExponentType(//NOPMD
             CharSequence text,
             int start,
-            int stop,
-            Set<JsonUrlOption> options) {
+            int stop) {
 
         if (stop <= start) {
             return NumberText.Exponent.NONE;
@@ -410,7 +408,7 @@ public class NumberBuilder implements NumberText { // NOPMD
         switch (c) {
         case PLUS:
             i++;
-            if (i == stop || optionAQF(options)) {
+            if (i == stop) {
                 return NumberText.Exponent.NONE;
             }
             c = text.charAt(i);
@@ -517,7 +515,7 @@ public class NumberBuilder implements NumberText { // NOPMD
             fractIndexStop = pos = digits(text, pos + 1, stop);
         }
 
-        exponentType = getExponentType(text, pos, stop, options);
+        exponentType = getExponentType(text, pos, stop);
 
         switch (exponentType) { // NOPMD - SwitchStmtsShouldHaveDefault
         case JUST_VALUE:
@@ -663,7 +661,7 @@ public class NumberBuilder implements NumberText { // NOPMD
 
         final int expDigitSkip;
 
-        switch (getExponentType(text, pos, stop, options)) {
+        switch (getExponentType(text, pos, stop)) {
         case JUST_VALUE:
             expDigitSkip = 1;
             pos = digits(text, pos + 1, stop);

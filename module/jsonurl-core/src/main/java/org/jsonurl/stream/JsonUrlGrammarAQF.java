@@ -53,10 +53,22 @@ class JsonUrlGrammarAQF extends AbstractGrammar {
     private static final char ESCAPE = '!';
 
     /**
-     * Buffer for decoded literal text.
+     * Buffer for decoded/unescaped literal text.
      */
     @SuppressWarnings("PMD.AvoidStringBufferField") // reused
     private final StringBuilder decodedTextBuffer = new StringBuilder(512);
+
+    /**
+     * Buffer for non-decoded/escaped literal text.
+     */
+    @SuppressWarnings("PMD.AvoidStringBufferField") // reused
+    private final StringBuilder numTextBuffer = new StringBuilder(512);
+    
+    /**
+     * Reference to either {@link #decodedTextBuffer} or
+     * {@link #numTextBuffer}.
+     */
+    private CharSequence literalText;
 
     /**
      * Construct a new JsonUrlGrammar.
@@ -77,7 +89,7 @@ class JsonUrlGrammarAQF extends AbstractGrammar {
      */
     @SuppressWarnings("PMD.CyclomaticComplexity")
     private void decodeBang(StringBuilder decodedText, boolean isFirst) {
-        int cur = nextCodePoint();
+        int cur = nextCodePoint(false);
 
         switch (cur) {
         case '0':
@@ -91,6 +103,7 @@ class JsonUrlGrammarAQF extends AbstractGrammar {
         case '8':
         case '9':
         case '-':
+        case '+':
         case ESCAPE:
         case 't':
         case 'f':
@@ -103,7 +116,7 @@ class JsonUrlGrammarAQF extends AbstractGrammar {
             break;
 
         case 'e':
-            if (isFirst && decodedText.length() == 0) {
+            if (isFirst) {
                 break;
             }
             // fall through
@@ -118,31 +131,43 @@ class JsonUrlGrammarAQF extends AbstractGrammar {
         final StringBuilder decodedText = this.decodedTextBuffer;
         decodedText.setLength(0);
         
+        final StringBuilder numText = this.numTextBuffer;
+        numText.setLength(0);
+        
         //
         // return true if this has an escape sequence and therefore
         // must be parsed as a string value; otherwise, return false.
         //
         boolean ret = false;
 
-        for (;;) {
+        for (boolean isFirst = true;; isFirst = false) {
+            final char rawPlus;
+
             //
             // The browser address bar *does* recognize a difference between
-            // percent encoded vs. literal ampersand and equals, unlike other
-            // sub-delims. So I have to check for those specifically, here,
-            // because the call to nextCodePoint() will decode them and I can't
-            // tell the difference at that point.
+            // percent encoded vs. literal ampersand, equals, and plus, unlike
+            // other sub-delims. So I have to check for those specifically,
+            // here, because the call to nextCodePoint() will decode them and
+            // I can't tell the difference at that point.
             //
             switch (peekAscii()) { // NOPMD - no default
             case EOF:
             case WFU_VALUE_SEPARATOR:
             case WFU_NAME_SEPARATOR:
                 return ret;
+            case WFU_SPACE:
+                rawPlus = '+';
+                break;
+            default:
+                rawPlus = ' ';
+                break;
             }
 
-            int ucp = nextCodePoint();
+            final int ucp = nextCodePoint();
 
             if (ucp >= CHARBITS_LENGTH) {
                 decodedText.appendCodePoint(ucp);
+                numText.appendCodePoint(ucp);
                 continue;
             }
 
@@ -150,13 +175,18 @@ class JsonUrlGrammarAQF extends AbstractGrammar {
                     | IS_BANG | IS_LITCHAR | IS_STRUCTCHAR | IS_CGICHAR)) {
 
             case IS_BANG | IS_LITCHAR:
-                decodeBang(decodedText, !ret);
+                decodeBang(decodedText, isFirst);
+                numText.appendCodePoint(ucp);
                 ret = true;
                 continue;
-            case IS_LITCHAR:
             case IS_SPACE:
+                decodedText.appendCodePoint(ucp);
+                numText.append(rawPlus);
+                break;
+            case IS_LITCHAR:
             case IS_STRUCTCHAR | IS_CGICHAR:
                 decodedText.appendCodePoint(ucp);
+                numText.appendCodePoint(ucp);
                 continue;
             case IS_STRUCTCHAR:
                 text.pushbackChar(ucp);
@@ -170,8 +200,11 @@ class JsonUrlGrammarAQF extends AbstractGrammar {
 
     @Override
     protected JsonUrlEvent readBufferedLiteral(
-            boolean wasEscapedString,
+            boolean isEscaped,
             boolean isKey) {
+
+        final StringBuilder decodedText = this.decodedTextBuffer;
+        literalText = decodedText;
 
         if (optionImpliedStringLiterals(options())) {
             //
@@ -181,9 +214,7 @@ class JsonUrlGrammarAQF extends AbstractGrammar {
             return keyEvent(isKey, JsonUrlEvent.VALUE_STRING); 
         }
 
-        final StringBuilder decodedText = this.decodedTextBuffer;
-
-        if (wasEscapedString) {
+        if (isEscaped) {
             if (decodedText.length() == 0) {
                 return keyEvent(isKey, JsonUrlEvent.VALUE_EMPTY_LITERAL);
             }
@@ -208,7 +239,10 @@ class JsonUrlGrammarAQF extends AbstractGrammar {
             return keyEvent(isKey, ret);
         }
 
-        if (numberBuilder.reset().parse(decodedText)) {
+        final StringBuilder numText = this.numTextBuffer;
+
+        if (numberBuilder.reset().parse(numText, options())) {
+            literalText = numText;
             return keyEvent(isKey, JsonUrlEvent.VALUE_NUMBER);
         }
 
@@ -222,7 +256,7 @@ class JsonUrlGrammarAQF extends AbstractGrammar {
 
     @Override
     public String getString() {
-        return decodedTextBuffer.toString();
+        return literalText.toString();
     }
 
     @Override
@@ -236,13 +270,20 @@ class JsonUrlGrammarAQF extends AbstractGrammar {
         text.pushbackChar(codePoint);
         return codePoint;
     }
-
+    
     /**
      * Read and decode the next codepoint.
      */
     private int nextCodePoint() {
+        return nextCodePoint(true);
+    }
+
+    /**
+     * Read and decode the next codepoint.
+     */
+    private int nextCodePoint(boolean decodePlus) {
         try {
-            return PercentCodec.decode(text);
+            return PercentCodec.decode(text, decodePlus);
 
         } catch (IOException e) {
             SyntaxException tex = newSyntaxException(MSG_BAD_CHAR);

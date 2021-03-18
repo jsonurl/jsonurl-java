@@ -444,6 +444,11 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
         }
 
         if (optionImpliedStringLiterals(options)) {
+            if (optionAQF(options)) {
+                encodeAqf(dest, text, start, end);
+                return true;
+            }
+
             encode(dest, text, start, end, false, true);
             return true;
         }
