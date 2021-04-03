@@ -9,7 +9,7 @@ import javax.json.JsonException;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 import javax.json.JsonWriter;
-import org.jsonurl.JsonUrlStringBuilder;
+import org.jsonurl.jsonp.JsonUrlStringBuilder;
 import org.jsonurl.jsonp.JsonUrlParser;
 import org.jsonurl.jsonp.JsonUrlWriter;
 
