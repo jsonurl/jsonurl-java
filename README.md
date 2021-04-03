@@ -41,16 +41,16 @@ implement a parser based on JSR-374 and Douglas Crockford's Java API.
 <dependencies>
   <dependency>
     <groupId>org.jsonurl</groupId>
-    <artifactId>jsonurl-core</artifactId>
+    <artifactId>jsonurl-factory</artifactId>
     <version>${jsonurl.version}</version>
   </dependency>
 </dependencies>
 ```
 ```java
 import java.util.Map;
-import org.jsonurl.JavaValueParser;
+import org.jsonurl.j2se.JsonUrlParser;
 
-JavaValueParser p = new JavaValueParser();
+JsonUrlParser p = new JsonUrlParser();
 Map obj = p.parseObject( "(Hello:World!)" );
 System.out.println(obj.get("Hello")) // World!
 ```
