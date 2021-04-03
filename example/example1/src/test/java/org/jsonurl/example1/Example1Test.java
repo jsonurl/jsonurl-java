@@ -6,7 +6,7 @@ import java.io.IOException;
 import javax.json.JsonArray;
 import javax.json.JsonException;
 import javax.json.JsonValue;
-import org.jsonurl.JsonUrlStringBuilder;
+import org.jsonurl.jsonp.JsonUrlStringBuilder;
 import org.jsonurl.example1.Main;
 import org.jsonurl.jsonp.JsonUrlParser;
 import org.jsonurl.jsonp.JsonUrlWriter;

@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import org.json.JSONArray;
-import org.jsonurl.JsonUrlStringBuilder;
 import org.jsonurl.example2.Main;
+import org.jsonurl.jsonorg.JsonUrlStringBuilder;
 import org.jsonurl.jsonorg.JsonUrlParser;
 import org.jsonurl.jsonorg.JsonUrlWriter;
 import org.junit.jupiter.api.Test;

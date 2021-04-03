@@ -3,7 +3,7 @@ package org.jsonurl.example2;
 import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.jsonurl.JsonUrlStringBuilder;
+import org.jsonurl.jsonorg.JsonUrlStringBuilder;
 import org.jsonurl.jsonorg.JsonUrlParser;
 import org.jsonurl.jsonorg.JsonUrlWriter;
 
