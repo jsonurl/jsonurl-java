@@ -29,7 +29,7 @@ state. JSON&#x2192;URL defines a text format for the JSON data model suitable
 for use within a [URL][RFC1738]/[URI][RFC3986].
 
 ## Usage
-The core library defines a [generic][java-generic]
+The factory artifact defines a [generic][java-generic]
 [JSON->URL parser][parser] and includes an implementation based Java SE
 data types (e.g. [java.util.Map][java-map], [java.util.List][java-list], etc).
 There are two additional modules, distributed as separate artifacts, which
@@ -104,6 +104,7 @@ System.out.println(obj.get("Hello")) // World!
 All artifacts published to Maven Central include `sources` and `javadoc` JARs.
 You can browse the current, and all previous revisions, via Javadoc.io:
   + [jsonurl-core](https://javadoc.io/doc/org.jsonurl/jsonurl-core)
+  + [jsonurl-factory](https://javadoc.io/doc/org.jsonurl/jsonurl-factory)
   + [jsonurl-jsonorg](https://javadoc.io/doc/org.jsonurl/jsonurl-jsonorg)
   + [jsonurl-jsr374](https://javadoc.io/doc/org.jsonurl/jsonurl-jsr374)
 
