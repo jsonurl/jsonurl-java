@@ -49,7 +49,7 @@
     <maven.surefire.plugin>2.22.2</maven.surefire.plugin>
     <maven.jar.plugin>3.2.0</maven.jar.plugin>
 
-    <jsonurl.version>1.0.0-SNAPSHOT</jsonurl.version>
+    <jsonurl.version>1.2.0</jsonurl.version>
     <junit.version>[5.4,)</junit.version>
 
     <jsonurl.scm.path>jsonurl/jsonurl-java</jsonurl.scm.path>
@@ -61,7 +61,7 @@
 
   <name>${project.groupId}:${project.artifactId}</name>
   <description>
-    The parent POM for JSON-&gt;URL examples.
+    The parent POM for JSON->URL examples.
   </description>
   <licenses>
     <license>
