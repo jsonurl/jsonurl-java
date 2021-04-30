@@ -2,7 +2,6 @@
 [![Apache License, Version 2.0, January 2004](https://img.shields.io/github/license/jsonurl/jsonurl-java.svg?label=License)](https://www.apache.org/licenses/LICENSE-2.0)
 [![Release](https://img.shields.io/github/release/jsonurl/jsonurl-java.svg?label=Release)](https://search.maven.org/search?q=g:org.jsonurl)
 [![javadoc](https://javadoc.io/badge2/org.jsonurl/jsonurl-core/javadoc.svg)](https://javadoc.io/doc/org.jsonurl/jsonurl-core)
-[![TravisCI Build Status](https://travis-ci.com/jsonurl/jsonurl-java.svg?branch=master)](https://travis-ci.com/jsonurl/jsonurl-java)
 [![GitHub Build Status](https://github.com/jsonurl/jsonurl-java/workflows/ci/badge.svg)](https://github.com/jsonurl/jsonurl-java/actions?query=workflow%3Aci)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=jsonurl-java&metric=alert_status)](https://sonarcloud.io/dashboard?id=jsonurl-java)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=jsonurl-java&metric=coverage)](https://sonarcloud.io/dashboard?id=jsonurl-java)
@@ -109,7 +108,7 @@ You can browse the current, and all previous revisions, via Javadoc.io:
   + [jsonurl-jsr374](https://javadoc.io/doc/org.jsonurl/jsonurl-jsr374)
 
 Additionally, Javadocs are also generated automatically on pushes to
-[master](https://jsonurl.github.io/jsonurl-java/). 
+[main](https://jsonurl.github.io/jsonurl-java/). 
   
 
 ## Security
