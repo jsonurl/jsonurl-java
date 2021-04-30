@@ -39,7 +39,7 @@ jobs:
       if: |
           success()
             && github.repository_owner == 'jsonurl'
-            && github.ref == 'refs/heads/master'
+            && github.ref == 'refs/heads/main'
       run: >
            script/deploy_ghpages.sh
            'doc: Update by action ${{ github.workflow }}.${{ github.job }}/${{ github.run_id }} on behalf of ${{ github.actor }} for ${{ github.event_name }} ${{ github.sha }}'
