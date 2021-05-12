@@ -71,6 +71,18 @@ class JsonUrlGrammarAQF extends AbstractGrammar {
     private CharSequence literalText;
 
     /**
+     * I have to track the peek character here so that I don't double
+     * decode anything. 
+     */
+    private int nextChar = EOF;
+
+    /**
+     * I have to track the peek character here so that I don't double
+     * decode anything. 
+     */
+    private int nextCharDecoded = EOF;
+
+    /**
      * Construct a new JsonUrlGrammar.
      * @param text input text
      * @param limits a valid JsonUrlLimits or null
@@ -124,7 +136,7 @@ class JsonUrlGrammarAQF extends AbstractGrammar {
             throw newSyntaxException(MSG_BAD_ESCAPE);
         }
     }
-    
+
     @Override
     @SuppressWarnings("PMD.CyclomaticComplexity")
     protected boolean readAndBufferLiteral() {
@@ -141,6 +153,15 @@ class JsonUrlGrammarAQF extends AbstractGrammar {
         boolean ret = false;
 
         for (boolean isFirst = true;; isFirst = false) {
+            final int ascii;
+
+            if (nextChar == EOF) {
+                ascii = peekAscii();
+            } else {
+                ascii = nextChar;
+                nextChar = EOF;
+            }
+
             final char rawPlus;
 
             //
@@ -150,7 +171,7 @@ class JsonUrlGrammarAQF extends AbstractGrammar {
             // here, because the call to nextCodePoint() will decode them and
             // I can't tell the difference at that point.
             //
-            switch (peekAscii()) { // NOPMD - no default
+            switch (ascii) { // NOPMD - no default
             case EOF:
             case WFU_VALUE_SEPARATOR:
             case WFU_NAME_SEPARATOR:
@@ -163,7 +184,7 @@ class JsonUrlGrammarAQF extends AbstractGrammar {
                 break;
             }
 
-            final int ucp = nextCodePoint();
+            final int ucp = nextCodePointBuffered(false);
 
             if (ucp >= CHARBITS_LENGTH) {
                 decodedText.appendCodePoint(ucp);
@@ -260,15 +281,46 @@ class JsonUrlGrammarAQF extends AbstractGrammar {
     }
 
     @Override
-    protected int nextChar() {
-        return nextCodePoint();
-    }
-
-    @Override
-    protected int peekChar() {
-        int codePoint = nextCodePoint();
-        text.pushbackChar(codePoint);
-        return codePoint;
+    protected int nextStructChar(boolean peek) {
+        int ret = nextChar == EOF ? peekAscii() : nextChar;
+        
+        switch (ret) {
+        case WFU_NAME_SEPARATOR:
+        case WFU_VALUE_SEPARATOR:
+        case NAME_SEPARATOR:
+        case VALUE_SEPARATOR:
+        case BEGIN_COMPOSITE:
+        case END_COMPOSITE:
+        case EOF:
+            if (peek) {
+                nextChar = ret;
+                return ret;
+            }
+            nextChar = EOF;
+            nextCodePoint(true);
+            return ret;
+        case PERCENT:
+            ret = nextCodePointBuffered(peek);
+            if (peek) {
+                nextChar = PERCENT;
+            } else {
+                nextChar = EOF;
+            }
+            switch (ret) {
+            case NAME_SEPARATOR:
+            case VALUE_SEPARATOR:
+            case BEGIN_COMPOSITE:
+            case END_COMPOSITE:
+                return ret;
+            default:
+                return 0;
+            }
+        default:
+            if (!peek) {
+                nextChar = EOF;
+            }
+            return 0;
+        }
     }
     
     /**
@@ -290,6 +342,25 @@ class JsonUrlGrammarAQF extends AbstractGrammar {
             tex.initCause(e);
             throw tex;
         }
+    }
+
+    /**
+     * Read and decode the next codepoint, buffering it locally.
+     */
+    private int nextCodePointBuffered(boolean peek) {
+        if (nextCharDecoded == EOF) {
+            final int ret = nextCodePoint();
+            if (peek) {
+                nextCharDecoded = ret;
+            }
+            return ret;
+        }
+
+        int ret = nextCharDecoded;
+        if (!peek) {
+            nextCharDecoded = EOF;
+        }
+        return ret;
     }
 
     /**

@@ -54,6 +54,11 @@ public abstract class AbstractEventIterator
     public static final char WFU_SPACE = '+';
 
     /**
+     * Percent character {@code (%)}.
+     */
+    public static final char PERCENT = '%';
+
+    /**
      * JsonUrlOptions.
      */
     private final Set<JsonUrlOption> options; // NOPMD - final field

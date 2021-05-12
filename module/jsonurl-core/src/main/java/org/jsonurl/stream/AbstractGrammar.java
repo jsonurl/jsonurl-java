@@ -26,6 +26,7 @@ import static org.jsonurl.LimitException.Message.MSG_LIMIT_MAX_PARSE_VALUES;
 import static org.jsonurl.SyntaxException.Message.MSG_BAD_CHAR;
 import static org.jsonurl.SyntaxException.Message.MSG_EXPECT_LITERAL;
 import static org.jsonurl.SyntaxException.Message.MSG_EXPECT_OBJECT_VALUE;
+import static org.jsonurl.SyntaxException.Message.MSG_EXPECT_PAREN;
 import static org.jsonurl.SyntaxException.Message.MSG_EXPECT_STRUCT_CHAR;
 import static org.jsonurl.SyntaxException.Message.MSG_EXTRA_CHARS;
 import static org.jsonurl.SyntaxException.Message.MSG_NO_TEXT;
@@ -202,23 +203,26 @@ abstract class AbstractGrammar extends AbstractEventIterator {
 
     @SuppressWarnings("PMD.CyclomaticComplexity")
     private JsonUrlEvent stateStart() {
-        final int cval = nextChar();
+        final int cval = nextStructChar(true);
 
         switch (cval) {
         case BEGIN_COMPOSITE:
+            skipChar();
             stateStack.set(0, State.PAREN);
             return null;
         case EOF:
             if (!optionEmptyUnquotedValue(options())) {
-                throw this.newSyntaxException(MSG_NO_TEXT);
+                throw newSyntaxException(MSG_NO_TEXT);
             }
             break;
-        default:
+        case 0:
+            // non-structural character
             break;
+        default:
+            throw newSyntaxException(MSG_EXPECT_PAREN);
         }
 
         stateStack.set(0, State.END_STREAM);
-        text.pushbackChar(cval);
         incrementParseValueCount();
         JsonUrlEvent ret = readLiteral(false);
 
@@ -249,10 +253,11 @@ abstract class AbstractGrammar extends AbstractEventIterator {
     }
 
     private JsonUrlEvent stateParenStructChar() {
-        final int cval = nextChar();
+        final int cval = nextStructChar(true);
 
         switch (cval) {
         case BEGIN_COMPOSITE:
+            skipChar();
             incrementParseValueCount();
 
             parseDepth = incrementLimit(
@@ -273,6 +278,7 @@ abstract class AbstractGrammar extends AbstractEventIterator {
             //
             // open paren followed by close paren -- empty composite
             //
+            skipChar();
             incrementParseValueCount();
 
             parseDepth--;
@@ -291,7 +297,6 @@ abstract class AbstractGrammar extends AbstractEventIterator {
             return JsonUrlEvent.VALUE_EMPTY_COMPOSITE;
 
         default:
-            text.pushbackChar(cval);
             return null;
         }
     }
@@ -312,7 +317,7 @@ abstract class AbstractGrammar extends AbstractEventIterator {
         //
         boolean bufLitFlag = readAndBufferLiteral();
 
-        int sep = peekChar();
+        int sep = nextStructChar(true);
 
         switch (sep) { // NOPMD - false positive
         case EOF:
@@ -340,10 +345,10 @@ abstract class AbstractGrammar extends AbstractEventIterator {
             //
             // key name for object
             //
-            savedEventValue = readBufferedLiteral(bufLitFlag, true);
+            readBufferedLiteral(bufLitFlag, true);
             checkResultType(ValueType.OBJECT);
             stateStack.set(0, State.OBJECT_HAVE_KEY);
-            this.savedEventValue = JsonUrlEvent.KEY_NAME;
+            savedEventValue = JsonUrlEvent.KEY_NAME;
             stateStack.push(State.SAVED_EVENT);
             return JsonUrlEvent.START_OBJECT;
 
@@ -372,7 +377,7 @@ abstract class AbstractGrammar extends AbstractEventIterator {
         //
         // look for a key or value separator
         //
-        final int sep = nextChar();
+        final int sep = nextStructChar(false);
 
         switch (sep) { // NOPMD - false positive
         case EOF:
@@ -409,9 +414,11 @@ abstract class AbstractGrammar extends AbstractEventIterator {
             }
         }
 
-        final int cval = nextChar();
+        final int cval = nextStructChar(true);
 
         if (cval == BEGIN_COMPOSITE) {
+            skipChar();
+
             //
             // nested composite
             //
@@ -430,7 +437,6 @@ abstract class AbstractGrammar extends AbstractEventIterator {
         // literal
         //
         stateStack.set(0, state);
-        text.pushbackChar(cval);
         incrementParseValueCount();
         return readLiteral(false);
     }
@@ -441,7 +447,7 @@ abstract class AbstractGrammar extends AbstractEventIterator {
             JsonUrlEvent event,
             CompositeType type) {
 
-        final int cval = nextChar();
+        final int cval = nextStructChar(false);
 
         switch (cval) {
         case WFU_VALUE_SEPARATOR:
@@ -487,14 +493,13 @@ abstract class AbstractGrammar extends AbstractEventIterator {
     }
 
     private JsonUrlEvent stateImplied(State next) {
-        final int cval = nextChar();
+        final int cval = nextStructChar(true);
 
         if (cval == EOF) {
             stateStack.set(0, State.END_STREAM);
             return JsonUrlEvent.END_STREAM;
         }
 
-        text.pushbackChar(cval);
         stateStack.set(0, next);
         return null;
     }
@@ -646,12 +651,13 @@ abstract class AbstractGrammar extends AbstractEventIterator {
 
         if (optionWfuComposite(options()) && impliedType != null) {
             for (;;) {
-                final int cur = nextChar();
+                final int cur = nextStructChar(true);
     
                 if (cur != WFU_VALUE_SEPARATOR) {
-                    text.pushbackChar(cur);
                     break;
                 }
+
+                skipChar();
 
                 ret = true;
             }
@@ -697,14 +703,20 @@ abstract class AbstractGrammar extends AbstractEventIterator {
     }
 
     /**
-     * Get the next character from {@link text} and consume it.
+     * Get the next character from {@link text}, and optionally consume it.
+     * If it's a structural character or EOF then return it; otherwise, return
+     * {@code 0}.
      */
-    protected abstract int nextChar();
+    protected abstract int nextStructChar(boolean peek);
 
     /**
-     * Peek at the next character from {@link text}, but done consume it.
+     * Skip a single character. This is often called after a call to
+     * {@link #nextStructChar(boolean) nextStructChar(false)} in order to
+     * consume the struct char.
      */
-    protected abstract int peekChar();
+    private void skipChar() {
+        nextStructChar(false);
+    }
 
     /**
      * Increment the count of parsed values, throwing an exception

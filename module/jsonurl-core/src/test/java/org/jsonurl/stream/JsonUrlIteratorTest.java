@@ -89,7 +89,7 @@ class JsonUrlIteratorTest {
         final Class<? extends Exception> exceptionClass;
 
         EventTest(String text, Object... expected) {
-            this(null, null, text, expected);
+            this((Set<JsonUrlOption>)null, null, text, expected);
         }
 
         EventTest(Set<JsonUrlOption> options,
@@ -102,6 +102,13 @@ class JsonUrlIteratorTest {
                 String text,
                 Object... expected) {
             this(EnumSet.of(option), text, expected);
+        }
+
+        EventTest(JsonUrlOption option,
+                CompositeType impliedType,
+                String text,
+                Object... expected) {
+            this(EnumSet.of(option), impliedType, text, expected);
         }
 
         @SuppressWarnings("PMD.ArrayIsStoredDirectly")
@@ -637,18 +644,32 @@ class JsonUrlIteratorTest {
                     JsonUrlEvent.END_STREAM}),
 
             new EventTest(
-                    JsonUrlOption.IMPLIED_STRING_LITERALS,
-                    "1e+2",
-                    new Object[] {
-                        JsonUrlEvent.VALUE_STRING,
-                        "1e 2",
-                        JsonUrlEvent.END_STREAM}),
+                JsonUrlOption.IMPLIED_STRING_LITERALS,
+                "1e+2",
+                new Object[] {
+                    JsonUrlEvent.VALUE_STRING,
+                    "1e 2",
+                    JsonUrlEvent.END_STREAM}),
 
             new EventTest(
                 JsonUrlOption.EMPTY_UNQUOTED_VALUE,
                 EMPTY_STRING,
                 new Object[] {
                     JsonUrlEvent.VALUE_EMPTY_LITERAL,
+                    JsonUrlEvent.END_STREAM}),
+
+            new EventTest(
+                "true%26",
+                new Object[] {
+                    JsonUrlEvent.VALUE_STRING,
+                    "true&",
+                    JsonUrlEvent.END_STREAM}),
+
+            new EventTest(
+                "%26true",
+                new Object[] {
+                    JsonUrlEvent.VALUE_STRING,
+                    "&true",
                     JsonUrlEvent.END_STREAM}),
 
             // Array
@@ -771,6 +792,57 @@ class JsonUrlIteratorTest {
                 "",
                 new Object[] {JsonUrlEvent.END_STREAM}),
 
+            new EventTest(
+                "(%26true)",
+                new Object[] {
+                    JsonUrlEvent.START_ARRAY,
+                    JsonUrlEvent.VALUE_STRING,
+                    "&true",
+                    JsonUrlEvent.END_ARRAY,
+                    JsonUrlEvent.END_STREAM}),
+
+            new EventTest(
+                EnumSet.of(JsonUrlOption.WFU_COMPOSITE, JsonUrlOption.EMPTY_UNQUOTED_VALUE),
+                "(&true)",
+                new Object[] {
+                    JsonUrlEvent.START_ARRAY,
+                    JsonUrlEvent.VALUE_EMPTY_LITERAL,
+                    JsonUrlEvent.VALUE_TRUE,
+                    JsonUrlEvent.END_ARRAY,
+                    JsonUrlEvent.END_STREAM}),
+
+            new EventTest(
+                "(true%26true)",
+                new Object[] {
+                    JsonUrlEvent.START_ARRAY,
+                    JsonUrlEvent.VALUE_STRING,
+                    "true&true",
+                    JsonUrlEvent.END_ARRAY,
+                    JsonUrlEvent.END_STREAM}),
+
+            new EventTest(
+                EnumSet.of(JsonUrlOption.WFU_COMPOSITE, JsonUrlOption.IMPLIED_STRING_LITERALS),
+                "(true&true)",
+                new Object[] {
+                    JsonUrlEvent.START_ARRAY,
+                    JsonUrlEvent.VALUE_STRING,
+                    "true",
+                    JsonUrlEvent.VALUE_STRING,
+                    "true",
+                    JsonUrlEvent.END_ARRAY,
+                    JsonUrlEvent.END_STREAM}),
+
+            new EventTest(
+                "((%26true))",
+                new Object[] {
+                    JsonUrlEvent.START_ARRAY,
+                    JsonUrlEvent.START_ARRAY,
+                    JsonUrlEvent.VALUE_STRING,
+                    "&true",
+                    JsonUrlEvent.END_ARRAY,
+                    JsonUrlEvent.END_ARRAY,
+                    JsonUrlEvent.END_STREAM}),
+
             // Object
             new EventTest(
                 JsonUrlOption.EMPTY_UNQUOTED_KEY,
@@ -810,7 +882,7 @@ class JsonUrlIteratorTest {
                     JsonUrlEvent.END_OBJECT,
                     JsonUrlEvent.END_STREAM}),
             new EventTest(
-                EnumSet.of(JsonUrlOption.WFU_COMPOSITE),
+                JsonUrlOption.WFU_COMPOSITE,
                 CompositeType.OBJECT,
                 "a=b",
                 new Object[] {
@@ -820,7 +892,7 @@ class JsonUrlIteratorTest {
                     "b",
                     JsonUrlEvent.END_STREAM}),
             new EventTest(
-                EnumSet.of(JsonUrlOption.WFU_COMPOSITE),
+                JsonUrlOption.WFU_COMPOSITE,
                 CompositeType.OBJECT,
                 "a=b&c=d",
                 new Object[] {
@@ -834,7 +906,7 @@ class JsonUrlIteratorTest {
                     "d",
                     JsonUrlEvent.END_STREAM}),
             new EventTest(
-                EnumSet.of(JsonUrlOption.EMPTY_UNQUOTED_VALUE),
+                JsonUrlOption.EMPTY_UNQUOTED_VALUE,
                 CompositeType.OBJECT,
                 "a:",
                 new Object[] {
@@ -843,7 +915,7 @@ class JsonUrlIteratorTest {
                     JsonUrlEvent.VALUE_EMPTY_LITERAL,
                     JsonUrlEvent.END_STREAM}),
             new EventTest(
-                EnumSet.of(JsonUrlOption.EMPTY_UNQUOTED_KEY),
+                JsonUrlOption.EMPTY_UNQUOTED_KEY,
                 CompositeType.OBJECT,
                 ":b",
                 new Object[] {
@@ -853,7 +925,7 @@ class JsonUrlIteratorTest {
                     "b",
                     JsonUrlEvent.END_STREAM}),
             new EventTest(
-                EnumSet.of(JsonUrlOption.WFU_COMPOSITE),
+                JsonUrlOption.WFU_COMPOSITE,
                 CompositeType.OBJECT,
                 "a&c=d",
                 new Object[] {
@@ -866,7 +938,7 @@ class JsonUrlIteratorTest {
                     "d",
                     JsonUrlEvent.END_STREAM}),
             new EventTest(
-                EnumSet.of(JsonUrlOption.WFU_COMPOSITE),
+                JsonUrlOption.WFU_COMPOSITE,
                 CompositeType.OBJECT,
                 "a=b&c",
                 new Object[] {
@@ -879,12 +951,12 @@ class JsonUrlIteratorTest {
                     JsonUrlEvent.VALUE_MISSING,
                     JsonUrlEvent.END_STREAM}),
             new EventTest(
-                EnumSet.of(JsonUrlOption.WFU_COMPOSITE),
+                JsonUrlOption.WFU_COMPOSITE,
                 CompositeType.OBJECT,
                 EMPTY_STRING,
                 new Object[] {JsonUrlEvent.END_STREAM}),
             new EventTest(
-                EnumSet.of(JsonUrlOption.WFU_COMPOSITE),
+                JsonUrlOption.WFU_COMPOSITE,
                 CompositeType.OBJECT,
                 "a=(c:d)",
                 new Object[] {
@@ -898,7 +970,7 @@ class JsonUrlIteratorTest {
                     JsonUrlEvent.END_OBJECT,
                     JsonUrlEvent.END_STREAM}),
             new EventTest(
-                EnumSet.of(JsonUrlOption.WFU_COMPOSITE),
+                JsonUrlOption.WFU_COMPOSITE,
                 CompositeType.OBJECT,
                 "a=(b:(c:d))",
                 new Object[] {
@@ -916,7 +988,7 @@ class JsonUrlIteratorTest {
                     JsonUrlEvent.END_OBJECT,
                     JsonUrlEvent.END_STREAM}),
             new EventTest(
-                EnumSet.of(JsonUrlOption.WFU_COMPOSITE),
+                JsonUrlOption.WFU_COMPOSITE,
                 CompositeType.ARRAY,
                 "a&(b,(c,(d)))",
                 new Object[] {
@@ -982,6 +1054,29 @@ class JsonUrlIteratorTest {
                     "a",
                     JsonUrlEvent.VALUE_STRING,
                     "ABCDEFGHIJKLMNOP",
+                    JsonUrlEvent.END_OBJECT,
+                    JsonUrlEvent.END_STREAM}),
+
+            new EventTest(
+                "(a:%26true)",
+                new Object[] {
+                    JsonUrlEvent.START_OBJECT,
+                    JsonUrlEvent.KEY_NAME,
+                    "a",
+                    JsonUrlEvent.VALUE_STRING,
+                    "&true",
+                    JsonUrlEvent.END_OBJECT,
+                    JsonUrlEvent.END_STREAM}),
+
+            new EventTest(
+                JsonUrlOption.WFU_COMPOSITE,
+                "(a:%26true)",
+                new Object[] {
+                    JsonUrlEvent.START_OBJECT,
+                    JsonUrlEvent.KEY_NAME,
+                    "a",
+                    JsonUrlEvent.VALUE_STRING,
+                    "&true",
                     JsonUrlEvent.END_OBJECT,
                     JsonUrlEvent.END_STREAM}),
 

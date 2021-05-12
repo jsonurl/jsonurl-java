@@ -254,8 +254,7 @@ class JsonUrlGrammar extends AbstractGrammar {
         return literalText.toString();
     }
 
-    @Override
-    protected int nextChar() {
+    private int nextChar() {
         try {
             return text.nextChar();
 
@@ -266,8 +265,7 @@ class JsonUrlGrammar extends AbstractGrammar {
         }
     }
 
-    @Override
-    protected int peekChar() {
+    private int peekChar() {
         try {
             return text.peekChar();
 
@@ -276,6 +274,25 @@ class JsonUrlGrammar extends AbstractGrammar {
             tex.initCause(e);
             throw tex;
         }
+    }
+
+    @Override
+    protected int nextStructChar(boolean peek) {
+        int cur = peek ? peekChar() : nextChar();
+
+        if (cur == EOF) {
+            return EOF;
+        }
+
+        if (cur >= CharUtil.CHARBITS_LENGTH) {
+            throw newSyntaxException(MSG_BAD_CHAR);
+        }
+
+        if ((CHARBITS[cur] & IS_STRUCTCHAR) == IS_STRUCTCHAR) {
+            return cur;
+        }
+
+        return 0;
     }
 
     /**
