@@ -11,7 +11,7 @@
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=jsonurl-java&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=jsonurl-java)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fjsonurl%2Fjsonurl-java.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fjsonurl%2Fjsonurl-java?ref=badge_shield)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
-[![project chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://jsonurl.zulipchat.com/)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-green)](CONTRIBUTING.md)
 
 [json.org module][jsonorg-module]: [![Known Vulnerabilities](https://snyk.io/test/github/jsonurl/jsonurl-java/badge.svg?targetFile=module/jsonurl-jsonorg/pom.xml)](https://snyk.io/test/github/jsonurl/jsonurl-java?targetFile=module/jsonurl-jsonorg/pom.xml)
 [![javadoc](https://javadoc.io/badge2/org.jsonurl/jsonurl-jsonorg/javadoc.svg)](https://javadoc.io/doc/org.jsonurl/jsonurl-jsonorg)
