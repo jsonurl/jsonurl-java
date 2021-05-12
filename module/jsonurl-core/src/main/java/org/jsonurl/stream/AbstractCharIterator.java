@@ -150,7 +150,6 @@ public abstract class AbstractCharIterator implements CharIterator {
 
     /**
      * Read a single character and update the current position information.
-     * @return
      */
     private int readUpdatePosition() throws IOException {
         int ret = read();

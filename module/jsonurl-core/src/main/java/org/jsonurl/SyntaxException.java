@@ -53,6 +53,8 @@ public class SyntaxException extends ParseException {
         MSG_EXPECT_OBJECT_KEY("expected object key"),
         /** Expected object value. */
         MSG_EXPECT_OBJECT_VALUE("expected object value"),
+        /** Expected structural character. */
+        MSG_EXPECT_PAREN("expected open paren"),
         /** Unexpected array. */
         MSG_UNEXPECTED_ARRAY("unexpected array"),
         /** Unexpected boolean. */
