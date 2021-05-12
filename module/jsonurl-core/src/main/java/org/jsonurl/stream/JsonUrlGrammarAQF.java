@@ -281,6 +281,7 @@ class JsonUrlGrammarAQF extends AbstractGrammar {
     }
 
     @Override
+    @SuppressWarnings("PMD.CyclomaticComplexity")
     protected int nextStructChar(boolean peek) {
         int ret = nextChar == EOF ? peekAscii() : nextChar;
         
