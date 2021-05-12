@@ -4,10 +4,10 @@
 
 The following versions are actively supported, including security updates.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.2.x   | :white_check_mark: |
-| < 1.2   | :x:                |
+| Version   | Supported          |
+| --------- | ------------------ |
+| 2.0.1     | :white_check_mark: |
+| < 2.0.1   | :x:                |
 
 ## Reporting a Vulnerability
 
@@ -16,7 +16,7 @@ First: thank you for engaging in responsible disclosure!
 If you beleive you've found a vulnerability or other security related issue
 please email a complete description to jsonurl.org ``at'' gmail.com.
 If the issue is accepted a discussion will begin on a private
-[Zulip][zulip] channel, and you mabe be invited to participate. Once a fix
+[Zulip][zulip] channel, and you may be be invited to participate. Once a fix
 is in place, and a new release is made, a GitHub security  advisory  will be
 created to make the information public.
 
