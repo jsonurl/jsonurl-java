@@ -80,7 +80,23 @@ public enum JsonUrlOption {
     /**
      * Address bar query string friendly.
      */
-    AQF;
+    AQF,
+    
+    /**
+     * Distinguish between an empty object and empty array, and never
+     * recognize the empty composite.
+     *
+     * <p>Empty array is back-to-back parens, i.e. {@code ()}. Empty object
+     * is two parens with a single colon inside, i.e. {@code (:)}. Note that
+     * this prevents the parser from recognizing {@code (:)} as an object with
+     * a single member whose key and value is the unquoted empty string when
+     * {@link #EMPTY_UNQUOTED_KEY} and {@link #EMPTY_UNQUOTED_VALUE} are also
+     * both enabled.
+     *
+     * @see <a href="https://github.com/jsonurl/specification#295-empty-objects-and-arrays"
+     * >JSON&#x2192;URL specification, section 2.9.5</a>
+     */
+    NO_EMPTY_COMPOSITE;
 
     /**
      * Create an empty set of options. This is just a convenience wrapper
@@ -234,4 +250,26 @@ public enum JsonUrlOption {
         return options != null && options.contains(AQF);
     }
 
+    /**
+     * Test if the {@link #NO_EMPTY_COMPOSITE} option is enabled,
+     * supplying the default value if necessary.
+     * @param options a valid Set or {@code null}.
+     */
+    public static final boolean optionNoEmptyComposite(
+            Set<JsonUrlOption> options) {
+        return options != null && options.contains(NO_EMPTY_COMPOSITE);
+    }
+
+    /**
+     * Test if the given options could result in ambigous input/output.
+     * @param options a valid Set or {@code null}
+     */
+    public static final boolean isAmbiguous(
+            Set<JsonUrlOption> options) {
+
+        return options != null
+            && options.contains(NO_EMPTY_COMPOSITE)
+            && options.contains(EMPTY_UNQUOTED_KEY)
+            && options.contains(EMPTY_UNQUOTED_VALUE);
+    }
 }

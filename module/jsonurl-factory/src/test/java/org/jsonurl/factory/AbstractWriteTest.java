@@ -366,6 +366,56 @@ public abstract class AbstractWriteTest<
             false);
     }
 
+    @Test
+    void testEmptyObject() throws IOException {
+        String text = "(:)";
+
+        V value = newParser(JsonUrlOption.NO_EMPTY_COMPOSITE)
+            .parseObject(text);
+
+        String actual = newJsonStringBuilder(
+                EnumSet.of(JsonUrlOption.NO_EMPTY_COMPOSITE))
+            .add(value)
+            .build();
+
+        assertEquals(text, actual, text);
+    }
+
+    @Test
+    void testEmptyObjectNested() throws IOException {
+        String text = "a:(:)";
+
+        V value = newParser(JsonUrlOption.NO_EMPTY_COMPOSITE)
+            .parseObject(text, factory.newObjectBuilder());
+
+        String actual = newJsonStringBuilder(
+                EnumSet.of(JsonUrlOption.NO_EMPTY_COMPOSITE),
+                CompositeType.OBJECT)
+            .add(value)
+            .build();
+
+        assertEquals(text, actual, text);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "(:)",
+        "((:))",
+        "(((:)))",
+    })
+    void testEmptyObjectInImpliedArray(String text) throws IOException {
+        V value = newParser(JsonUrlOption.NO_EMPTY_COMPOSITE)
+            .parseArray(text, factory.newArrayBuilder());
+
+        String actual = newJsonStringBuilder(
+                EnumSet.of(JsonUrlOption.NO_EMPTY_COMPOSITE),
+                CompositeType.ARRAY)
+            .add(value)
+            .build();
+
+        assertEquals(text, actual, text);
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {
         "1.234",

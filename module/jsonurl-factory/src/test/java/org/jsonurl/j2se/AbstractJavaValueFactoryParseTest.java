@@ -136,6 +136,11 @@ abstract class AbstractJavaValueFactoryParseTest extends AbstractParseTest<
     }
 
     @Override
+    protected boolean isEmptyObject(Map<String,Object> value) {
+        return !factory.isNull(value) && value.isEmpty();
+    }
+
+    @Override
     protected JavaValueFactory newBigMathFactory(
                 MathContext mctxt,
                 String boundNeg,

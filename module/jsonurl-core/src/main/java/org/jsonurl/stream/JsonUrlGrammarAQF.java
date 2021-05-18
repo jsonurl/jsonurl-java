@@ -271,6 +271,11 @@ class JsonUrlGrammarAQF extends AbstractGrammar {
     }
 
     @Override
+    protected boolean isEmptyBufferedLiteral(boolean flag) {
+        return decodedTextBuffer.length() == 0;
+    }
+
+    @Override
     protected JsonUrlEvent readLiteral(boolean isKey) {
         return readBufferedLiteral(readAndBufferLiteral(), isKey);
     }

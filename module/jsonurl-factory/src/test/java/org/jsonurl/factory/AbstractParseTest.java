@@ -1285,6 +1285,23 @@ public abstract class AbstractParseTest<
             assertJsonUrlText8(text, parseImpliedFactoryObject(text, 0, text.length(), false));
         }
 
+        @ParameterizedTest
+        @ValueSource(strings = {"(:)"})
+        void testJsonUrlText9(String text) throws IOException {
+            assertTrue(isEmptyObject(parseFactoryObject(text,
+                EnumSet.of(JsonUrlOption.NO_EMPTY_COMPOSITE))), text);
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"%28%3a%29"})
+        void testJsonUrlText10(String text) throws IOException {
+            assertTrue(
+                isEmptyObject(parseFactoryObject(text,
+                    EnumSet.of(JsonUrlOption.AQF,
+                        JsonUrlOption.NO_EMPTY_COMPOSITE))),
+                text);
+        }
+
     }
 
     /**
@@ -1306,6 +1323,34 @@ public abstract class AbstractParseTest<
             assertEquals(text, txt, text);
             assertTrue(factory.isEmptyComposite(
                 newParser().parse(text)), text);
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = { "(:)" })
+        void testNoEmptyCompositeObject(String text) throws IOException {
+            J expected = factory.newObject(factory.newObjectBuilder());
+
+            assertParse(text,
+                newOptions(JsonUrlOption.NO_EMPTY_COMPOSITE),
+                expected);
+
+            assertParse(text,
+                newOptions(JsonUrlOption.AQF, JsonUrlOption.NO_EMPTY_COMPOSITE),
+                expected);
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = { "()" })
+        void testNoEmptyCompositeArray(String text) throws IOException {
+            A expected = factory.newArray(factory.newArrayBuilder());
+
+            assertParse(text,
+                newOptions(JsonUrlOption.NO_EMPTY_COMPOSITE),
+                expected);
+
+            assertParse(text,
+                newOptions(JsonUrlOption.AQF, JsonUrlOption.NO_EMPTY_COMPOSITE),
+                expected);
         }
         
         @ParameterizedTest
@@ -2177,6 +2222,9 @@ public abstract class AbstractParseTest<
 
     /** Get the size of the given array. */
     protected abstract int getSize(A value);
+
+    /** Test if the given object is empty. */
+    protected abstract boolean isEmptyObject(J value);
 
     /** Create a new bing math factory. */
     protected abstract ValueFactory<V,C,ABT,A,JBT,J,B,M,N,S> newBigMathFactory(

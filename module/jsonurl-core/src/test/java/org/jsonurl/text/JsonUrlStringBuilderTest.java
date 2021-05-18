@@ -129,7 +129,7 @@ class JsonUrlStringBuilderTest {
         'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
         'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-        '!', '-', '.', '_', '~', '!', '$', '*', '/', ';', '?', '@',
+        '!', '-', '.', '_', '~', '$', '*', '/', ';', '?', '@',
     })
     void testAddCodePointLiteral(char codePoint) throws IOException {
         String expected = String.valueOf(codePoint);
@@ -139,7 +139,7 @@ class JsonUrlStringBuilderTest {
 
         assertEquals(expected, actual, expected);
     }
-    
+
     @ParameterizedTest
     @ValueSource(chars = {
         '+', '\'', '(', ')', ',', ':'
@@ -151,6 +151,41 @@ class JsonUrlStringBuilderTest {
         assertCodePoint(expected, codePoint);
     }
 
+    @Test
+    void testEmptyObject() throws IOException {
+        final String testName = "empty object";
+
+        assertEquals(
+            "()",
+            new JsonUrlStringBuilder().beginObject().endObject().build(),
+            testName);
+
+        assertEquals(
+            "()",
+            new JsonUrlStringBuilder(JsonUrlOption.AQF)
+                .beginObject()
+                .endObject()
+                .build(),
+            testName);
+
+        assertEquals(
+            "(:)",
+            new JsonUrlStringBuilder(JsonUrlOption.NO_EMPTY_COMPOSITE)
+                .beginObject()
+                .endObject()
+                .build(),
+            testName);
+
+        assertEquals(
+            "(:)",
+            new JsonUrlStringBuilder(
+                    JsonUrlOption.AQF,
+                    JsonUrlOption.NO_EMPTY_COMPOSITE)
+                .beginObject()
+                .endObject()
+                .build(),
+            testName);
+    }
 
     @Test
     void testEmptyString() throws IOException {
@@ -164,6 +199,11 @@ class JsonUrlStringBuilderTest {
         assertEquals(
             EMPTY_QSTRING,
             new JsonUrlStringBuilder().add(EMPTY_STRING).build(),
+            testName);
+
+        assertEquals(
+            EMPTY_QSTRING,
+            new JsonUrlStringBuilder().addKey(EMPTY_STRING).build(),
             testName);
 
         assertEquals(
@@ -435,10 +475,17 @@ class JsonUrlStringBuilderTest {
 
     @Test
     void testText5() throws IOException {
-        String expected = "''";
+        String expected = "(a:(:))";
         assertEquals(
             expected,
-            new JsonUrlStringBuilder().addKey("").build(),
+            new JsonUrlStringBuilder(JsonUrlOption.NO_EMPTY_COMPOSITE)
+            .beginObject()
+            .addKey("a")
+            .nameSeparator()
+            .beginObject()
+            .endObject()
+            .endObject()
+            .build(),
             expected);
     }
     

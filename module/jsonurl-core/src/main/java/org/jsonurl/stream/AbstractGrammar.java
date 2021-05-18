@@ -19,6 +19,7 @@ package org.jsonurl.stream;
 
 import static org.jsonurl.JsonUrlOption.optionEmptyUnquotedKey;
 import static org.jsonurl.JsonUrlOption.optionEmptyUnquotedValue;
+import static org.jsonurl.JsonUrlOption.optionNoEmptyComposite;
 import static org.jsonurl.JsonUrlOption.optionSkipNulls;
 import static org.jsonurl.JsonUrlOption.optionWfuComposite;
 import static org.jsonurl.LimitException.Message.MSG_LIMIT_MAX_PARSE_DEPTH;
@@ -26,7 +27,6 @@ import static org.jsonurl.LimitException.Message.MSG_LIMIT_MAX_PARSE_VALUES;
 import static org.jsonurl.SyntaxException.Message.MSG_BAD_CHAR;
 import static org.jsonurl.SyntaxException.Message.MSG_EXPECT_LITERAL;
 import static org.jsonurl.SyntaxException.Message.MSG_EXPECT_OBJECT_VALUE;
-import static org.jsonurl.SyntaxException.Message.MSG_EXPECT_PAREN;
 import static org.jsonurl.SyntaxException.Message.MSG_EXPECT_STRUCT_CHAR;
 import static org.jsonurl.SyntaxException.Message.MSG_EXTRA_CHARS;
 import static org.jsonurl.SyntaxException.Message.MSG_NO_TEXT;
@@ -70,6 +70,7 @@ abstract class AbstractGrammar extends AbstractEventIterator {
         IMPLIED_OBJECT,
         IN_OBJECT,
         OBJECT_HAVE_KEY,
+        OBJECT_HAVE_KEY_SEPARATOR,
         OBJECT_AFTER_ELEMENT,
         END_STREAM,
     }
@@ -104,6 +105,11 @@ abstract class AbstractGrammar extends AbstractEventIterator {
      */
     protected static final char VALUE_SEPARATOR = ',';
 
+    /**
+     * Generic internal parse error message.
+     */
+    private static final String INTERNAL_PARSE_ERROR = "internal parse error";
+
     /*
      * empty string.
      *
@@ -129,6 +135,7 @@ abstract class AbstractGrammar extends AbstractEventIterator {
      * Buffered "next" event value.
      */
     private JsonUrlEvent savedEventValue;
+    //private Deque<JsonUrlEvent> savedEventStack = new LinkedList<>();
 
     /**
      * Current parse/nesting depth.
@@ -190,14 +197,19 @@ abstract class AbstractGrammar extends AbstractEventIterator {
             boolean isKey);
 
     /**
+     * Test if the current buffered literal is empty.
+     */
+    protected abstract boolean isEmptyBufferedLiteral(boolean flag);
+
+    /**
      * Read a literal and return its event.
      */
     protected abstract JsonUrlEvent readLiteral(boolean isKey);
 
     private JsonUrlEvent stateSavedEvent() {
         stateStack.pop();
-        JsonUrlEvent ret = this.savedEventValue;
-        this.savedEventValue = null; // NOPMD
+        final JsonUrlEvent ret = savedEventValue;
+        savedEventValue = null; // NOPMD
         return ret;
     }
 
@@ -219,7 +231,8 @@ abstract class AbstractGrammar extends AbstractEventIterator {
             // non-structural character
             break;
         default:
-            throw newSyntaxException(MSG_EXPECT_PAREN);
+            // can't happen
+            throw newParseException(INTERNAL_PARSE_ERROR);
         }
 
         stateStack.set(0, State.END_STREAM);
@@ -242,7 +255,8 @@ abstract class AbstractGrammar extends AbstractEventIterator {
             checkResultType(ValueType.NUMBER);
             break;
         default:
-            throw newParseException("interal parse error");
+            // can't happen
+            throw newParseException(INTERNAL_PARSE_ERROR);
         }
 
         if (!eof()) {
@@ -251,9 +265,9 @@ abstract class AbstractGrammar extends AbstractEventIterator {
 
         return ret;
     }
-
-    private JsonUrlEvent stateParenStructChar() {
-        final int cval = nextStructChar(true);
+    
+    private JsonUrlEvent stateParenParen() {
+        int cval = nextStructChar(true);
 
         switch (cval) {
         case BEGIN_COMPOSITE:
@@ -284,8 +298,6 @@ abstract class AbstractGrammar extends AbstractEventIterator {
             parseDepth--;
             stateStack.pop();
 
-            checkResultTypeIsComposite();
-
             if (parseDepth == PARSE_DEPTH_DONE) {
                 if (eof()) {
                     stateStack.push(State.END_STREAM);
@@ -294,8 +306,16 @@ abstract class AbstractGrammar extends AbstractEventIterator {
                     throw newSyntaxException(MSG_EXTRA_CHARS);
                 }
             }
-            return JsonUrlEvent.VALUE_EMPTY_COMPOSITE;
+            
+            if (optionNoEmptyComposite(options())) {
+                checkResultType(ValueType.ARRAY);
+                savedEventValue = JsonUrlEvent.END_ARRAY;
+                stateStack.push(State.SAVED_EVENT);
+                return JsonUrlEvent.START_ARRAY;
+            }
 
+            checkResultTypeIsComposite();
+            return JsonUrlEvent.VALUE_EMPTY_COMPOSITE;
         default:
             return null;
         }
@@ -303,11 +323,11 @@ abstract class AbstractGrammar extends AbstractEventIterator {
 
     @SuppressWarnings("PMD.CyclomaticComplexity")
     private JsonUrlEvent stateParen() {
-        //
-        // look for a structural character
-        //
-        JsonUrlEvent ret = stateParenStructChar();
+        JsonUrlEvent ret = stateParenParen();
         if (ret != null) {
+            //
+            // found an open or close paren
+            //
             return ret;
         }
 
@@ -317,7 +337,7 @@ abstract class AbstractGrammar extends AbstractEventIterator {
         //
         boolean bufLitFlag = readAndBufferLiteral();
 
-        int sep = nextStructChar(true);
+        final int sep = nextStructChar(true);
 
         switch (sep) { // NOPMD - false positive
         case EOF:
@@ -345,10 +365,26 @@ abstract class AbstractGrammar extends AbstractEventIterator {
             //
             // key name for object
             //
-            readBufferedLiteral(bufLitFlag, true);
             checkResultType(ValueType.OBJECT);
-            stateStack.set(0, State.OBJECT_HAVE_KEY);
+            skipChar();
+
+            if (isEmptyObject(sep, bufLitFlag)) {
+                //
+                // the empty object sequence (:)
+                //
+                // I'm not consuming the close paren because I don't have
+                // enough context to manage `parseDepth`. But, I can set
+                // my state to OBJECT_AFTER_ELEMENT in order to produce the
+                // expected END_OBJECT event. This also handles eof(),
+                // errors due to extra text, etc.
+                //
+                stateStack.set(0, State.OBJECT_AFTER_ELEMENT);
+                return JsonUrlEvent.START_OBJECT;
+            }
+
+            readBufferedLiteral(bufLitFlag, true);
             savedEventValue = JsonUrlEvent.KEY_NAME;
+            stateStack.set(0, State.OBJECT_HAVE_KEY_SEPARATOR);
             stateStack.push(State.SAVED_EVENT);
             return JsonUrlEvent.START_OBJECT;
 
@@ -406,8 +442,8 @@ abstract class AbstractGrammar extends AbstractEventIterator {
         }
     }
 
-    private JsonUrlEvent stateNextValue(boolean isObject, State state) {
-        if (isObject) {
+    private JsonUrlEvent stateNextValue(boolean needKeySep, State state) {
+        if (needKeySep) {
             JsonUrlEvent ret = stateObjectKeySeparator();
             if (ret != null) {
                 return ret;
@@ -565,6 +601,11 @@ abstract class AbstractGrammar extends AbstractEventIterator {
                     true, State.OBJECT_AFTER_ELEMENT));
                 break;
 
+            case OBJECT_HAVE_KEY_SEPARATOR:
+                ret = filterLiteral(stateNextValue(
+                    false, State.OBJECT_AFTER_ELEMENT));
+                break;
+
             case OBJECT_AFTER_ELEMENT: 
                 ret = stateAfterValue(
                     State.IN_OBJECT,
@@ -692,6 +733,15 @@ abstract class AbstractGrammar extends AbstractEventIterator {
             //
             consumeAmps();
         }
+    }
+    
+    private boolean isEmptyObject(int sep, boolean bufLitFlag) {
+        final int end = nextStructChar(true);
+
+        return sep == NAME_SEPARATOR
+            && end == END_COMPOSITE
+            && isEmptyBufferedLiteral(bufLitFlag)
+            && optionNoEmptyComposite(options());
     }
 
     /**

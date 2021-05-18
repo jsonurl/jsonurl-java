@@ -144,6 +144,11 @@ abstract class AbstractJsonpParseTest extends AbstractParseTest<
     }
 
     @Override
+    protected boolean isEmptyObject(JsonObject value) {
+        return !factory.isNull(value) && value.isEmpty();
+    }
+
+    @Override
     protected ValueFactory<
             JsonValue,
             JsonStructure,
