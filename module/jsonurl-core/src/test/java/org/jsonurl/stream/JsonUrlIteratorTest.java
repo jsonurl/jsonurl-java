@@ -380,6 +380,26 @@ class JsonUrlIteratorTest {
                         "+",
                         JsonUrlEvent.END_STREAM}),
 
+                new EventTest(
+                    "%28hello%29",
+                    new Object[] {
+                        JsonUrlEvent.START_ARRAY,
+                        JsonUrlEvent.VALUE_STRING,
+                        "hello",
+                        JsonUrlEvent.END_ARRAY,
+                        JsonUrlEvent.END_STREAM}),
+
+                new EventTest(
+                    "%28hello",
+                    SyntaxException.class),
+
+                new EventTest(
+                    "%21%28hello!%29",
+                    new Object[] {
+                        JsonUrlEvent.VALUE_STRING,
+                        "(hello)",
+                        JsonUrlEvent.END_STREAM}),
+
             }));
     }
 
@@ -539,6 +559,27 @@ class JsonUrlIteratorTest {
                     new Object[] {
                         JsonUrlEvent.VALUE_STRING,
                         "! ",
+                        JsonUrlEvent.END_STREAM}),
+
+                new EventTest(
+                    "%28hello%29",
+                    new Object[] {
+                        JsonUrlEvent.VALUE_STRING,
+                        "(hello)",
+                        JsonUrlEvent.END_STREAM}),
+
+                new EventTest(
+                    "%28hello",
+                    new Object[] {
+                        JsonUrlEvent.VALUE_STRING,
+                        "(hello",
+                        JsonUrlEvent.END_STREAM}),
+
+                new EventTest(
+                    "%21%28hello!%29",
+                    new Object[] {
+                        JsonUrlEvent.VALUE_STRING,
+                        "!(hello!)",
                         JsonUrlEvent.END_STREAM}),
 
             }));
@@ -843,6 +884,34 @@ class JsonUrlIteratorTest {
                     JsonUrlEvent.END_ARRAY,
                     JsonUrlEvent.END_STREAM}),
 
+            new EventTest(
+                JsonUrlOption.NO_EMPTY_COMPOSITE,
+                "()",
+                new Object[] {
+                    JsonUrlEvent.START_ARRAY,
+                    JsonUrlEvent.END_ARRAY,
+                    JsonUrlEvent.END_STREAM}),
+            new EventTest(
+                JsonUrlOption.NO_EMPTY_COMPOSITE,
+                "(())",
+                new Object[] {
+                    JsonUrlEvent.START_ARRAY,
+                    JsonUrlEvent.START_ARRAY,
+                    JsonUrlEvent.END_ARRAY,
+                    JsonUrlEvent.END_ARRAY,
+                    JsonUrlEvent.END_STREAM}),
+            new EventTest(
+                JsonUrlOption.NO_EMPTY_COMPOSITE,
+                "((()))",
+                new Object[] {
+                    JsonUrlEvent.START_ARRAY,
+                    JsonUrlEvent.START_ARRAY,
+                    JsonUrlEvent.START_ARRAY,
+                    JsonUrlEvent.END_ARRAY,
+                    JsonUrlEvent.END_ARRAY,
+                    JsonUrlEvent.END_ARRAY,
+                    JsonUrlEvent.END_STREAM}),
+
             // Object
             new EventTest(
                 JsonUrlOption.EMPTY_UNQUOTED_KEY,
@@ -914,6 +983,7 @@ class JsonUrlIteratorTest {
                     "a",
                     JsonUrlEvent.VALUE_EMPTY_LITERAL,
                     JsonUrlEvent.END_STREAM}),
+
             new EventTest(
                 JsonUrlOption.EMPTY_UNQUOTED_KEY,
                 CompositeType.OBJECT,
@@ -924,6 +994,17 @@ class JsonUrlIteratorTest {
                     JsonUrlEvent.VALUE_STRING,
                     "b",
                     JsonUrlEvent.END_STREAM}),
+
+            new EventTest(
+                JsonUrlOption.EMPTY_UNQUOTED_VALUE,
+                CompositeType.OBJECT,
+                "a",
+                new Object[] {
+                    JsonUrlEvent.KEY_NAME,
+                    "a",
+                    JsonUrlEvent.VALUE_MISSING,
+                    JsonUrlEvent.END_STREAM}),
+
             new EventTest(
                 JsonUrlOption.WFU_COMPOSITE,
                 CompositeType.OBJECT,
@@ -1080,9 +1161,66 @@ class JsonUrlIteratorTest {
                     JsonUrlEvent.END_OBJECT,
                     JsonUrlEvent.END_STREAM}),
 
+            new EventTest(
+                EnumSet.of(JsonUrlOption.EMPTY_UNQUOTED_KEY, JsonUrlOption.EMPTY_UNQUOTED_VALUE),
+                "(:)",
+                new Object[] {
+                    JsonUrlEvent.START_OBJECT,
+                    JsonUrlEvent.KEY_NAME,
+                    EMPTY_STRING,
+                    JsonUrlEvent.VALUE_EMPTY_LITERAL,
+                    JsonUrlEvent.END_OBJECT,
+                    JsonUrlEvent.END_STREAM}),
+
+            new EventTest(
+                EnumSet.of(JsonUrlOption.EMPTY_UNQUOTED_KEY, JsonUrlOption.EMPTY_UNQUOTED_VALUE),
+                CompositeType.OBJECT,
+                ":",
+                new Object[] {
+                    JsonUrlEvent.KEY_NAME,
+                    EMPTY_STRING,
+                    JsonUrlEvent.VALUE_EMPTY_LITERAL,
+                    JsonUrlEvent.END_STREAM}),
+
+            new EventTest(
+                JsonUrlOption.NO_EMPTY_COMPOSITE,
+                "(:)",
+                new Object[] {
+                    JsonUrlEvent.START_OBJECT,
+                    JsonUrlEvent.END_OBJECT,
+                    JsonUrlEvent.END_STREAM}),
+
+            new EventTest(
+                JsonUrlOption.NO_EMPTY_COMPOSITE,
+                "(a:(:))",
+                new Object[] {
+                    JsonUrlEvent.START_OBJECT,
+                    JsonUrlEvent.KEY_NAME,
+                    "a",
+                    JsonUrlEvent.START_OBJECT,
+                    JsonUrlEvent.END_OBJECT,
+                    JsonUrlEvent.END_OBJECT,
+                    JsonUrlEvent.END_STREAM}),
+
+            new EventTest(
+                JsonUrlOption.NO_EMPTY_COMPOSITE,
+                CompositeType.OBJECT,
+                "a:(:)",
+                new Object[] {
+                    JsonUrlEvent.KEY_NAME,
+                    "a",
+                    JsonUrlEvent.START_OBJECT,
+                    JsonUrlEvent.END_OBJECT,
+                    JsonUrlEvent.END_STREAM}),
+
+
             // Exception
             new EventTest(
                 EMPTY_STRING,
+                SyntaxException.class),
+
+            new EventTest(
+                "¶",
                 SyntaxException.class),
 
             new EventTest(
@@ -1132,7 +1270,15 @@ class JsonUrlIteratorTest {
                 LimitException.class),
 
             new EventTest(
+                "(hello:)",
+                SyntaxException.class),
+
+            new EventTest(
                 "(:world)",
+                SyntaxException.class),
+
+            new EventTest(
+                "(:)",
                 SyntaxException.class),
 
             new EventTest(

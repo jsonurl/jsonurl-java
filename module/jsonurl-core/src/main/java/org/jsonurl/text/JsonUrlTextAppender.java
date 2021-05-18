@@ -21,6 +21,7 @@ import static org.jsonurl.JsonUrlOption.optionAQF;
 import static org.jsonurl.JsonUrlOption.optionCoerceNullToEmptyString;
 import static org.jsonurl.JsonUrlOption.optionEmptyUnquoted;
 import static org.jsonurl.JsonUrlOption.optionImpliedStringLiterals;
+import static org.jsonurl.JsonUrlOption.optionNoEmptyComposite;
 import static org.jsonurl.JsonUrlOption.optionWfuComposite;
 import static org.jsonurl.text.CharUtil.APOS;
 import static org.jsonurl.text.CharUtil.HEXENCODE_AQF;
@@ -78,6 +79,12 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
     private int depth;
 
     /**
+     * modified flag.
+     * This is used to implement NO_EMPTY_COMPOSITE.
+     */
+    private int modifiedDepth;
+
+    /**
      * Create a new JsonUrlTextAppender.
      * @param dest JSON&#x2192;URL text destination
      * @param options Set of JsonUrlOptions
@@ -104,7 +111,7 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
 
     @Override
     public JsonUrlTextAppender<A,R> endObject() throws IOException {
-        return endComposite();
+        return endComposite(true);
     }
 
     @Override
@@ -114,18 +121,20 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
 
     @Override
     public JsonUrlTextAppender<A,R> endArray() throws IOException {
-        return endComposite();
+        return endComposite(false);
     }
 
     @Override
     public JsonUrlTextAppender<A,R> valueSeparator() throws IOException {
         out.append(useWfuStructChars() ? '&' : ',');
+        modifiedDepth = depth;
         return this;
     }
 
     @Override
     public JsonUrlTextAppender<A,R> nameSeparator() throws IOException {
         out.append(useWfuStructChars() ? '=' : ':');
+        modifiedDepth = depth;
         return this;
     }
 
@@ -138,7 +147,8 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
             throw new IOException("implied strings: unexpected null");
 
         } else {
-            out.append("null");    
+            out.append("null");
+            modifiedDepth = depth;
         }
 
         return this;
@@ -160,7 +170,8 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
             add(String.valueOf(value), false);
 
         } else {
-            out.append(String.valueOf(value));    
+            out.append(String.valueOf(value));
+            modifiedDepth = depth;
         }
 
         return this;
@@ -176,7 +187,8 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
             add(String.valueOf(value), false);
 
         } else {
-            out.append(String.valueOf(value));    
+            out.append(String.valueOf(value));
+            modifiedDepth = depth;
         }
 
         
@@ -188,7 +200,8 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
         if (optionImpliedStringLiterals(options)) {
             add(String.valueOf(value), false);
         } else {
-            out.append(String.valueOf(value));    
+            out.append(String.valueOf(value));
+            modifiedDepth = depth;
         }
 
         return this;
@@ -199,7 +212,8 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
         if (optionImpliedStringLiterals(options)) {
             add(String.valueOf(value), false);
         } else {
-            out.append(String.valueOf(value));    
+            out.append(String.valueOf(value));
+            modifiedDepth = depth;
         }
 
         return this;
@@ -207,7 +221,8 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
 
     @Override
     public JsonUrlTextAppender<A,R> add(boolean value) throws IOException {
-        out.append(String.valueOf(value));    
+        out.append(String.valueOf(value));
+        modifiedDepth = depth;
         return this;
     }
 
@@ -225,13 +240,17 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
             return addNull();
         }
 
-        appendLiteral(
-                out,
-                text,
-                start,
-                end,
-                isKey,
-                options);
+        boolean modified = appendLiteral(
+            out,
+            text,
+            start,
+            end,
+            isKey,
+            options);
+
+        if (modified) {
+            modifiedDepth = depth;    
+        }
 
         return this;
     }
@@ -247,6 +266,7 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
     @Override
     public JsonUrlTextAppender<A,R> append(CharSequence csq) throws IOException {
         out.append(csq);
+        modifiedDepth = depth;
         return this;
     }
 
@@ -256,12 +276,14 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
             int start,
             int end) throws IOException {
         out.append(csq, start, end);
+        modifiedDepth = depth;
         return this;
     }
 
     @Override
     public JsonUrlTextAppender<A,R> append(char value) throws IOException {
         out.append(value);
+        modifiedDepth = depth;
         return this;
     }
 
@@ -284,17 +306,28 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
             out.append('(');
         }
 
+        modifiedDepth = depth;
         depth++;
         return this;
     }
 
-    private JsonUrlTextAppender<A,R> endComposite() throws IOException {
+    private JsonUrlTextAppender<A,R> endComposite(boolean isObject)
+            throws IOException {
+
         depth--;
+
+        if (isObject && isEmptyObject()) {
+            out.append(':');
+        }
 
         if (impliedType == null || depth > 0) {
             out.append(')');
         }
         return this;
+    }
+    
+    private boolean isEmptyObject() {
+        return modifiedDepth == depth && optionNoEmptyComposite(options());
     }
 
     /**

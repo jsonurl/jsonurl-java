@@ -231,6 +231,13 @@ class JsonUrlGrammar extends AbstractGrammar {
     }
 
     @Override
+    protected boolean isEmptyBufferedLiteral(boolean flag) {
+        return flag
+            ? this.decodedTextBuffer.length() == 0
+            : this.rawTextBuffer.length() == 0;
+    }
+
+    @Override
     protected JsonUrlEvent readLiteral(boolean isKey) {
         final int cval = nextChar();
 

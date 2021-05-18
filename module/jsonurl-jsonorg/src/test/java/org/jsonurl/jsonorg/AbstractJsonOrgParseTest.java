@@ -133,6 +133,11 @@ abstract class AbstractJsonOrgParseTest extends AbstractParseTest<
     }
 
     @Override
+    protected boolean isEmptyObject(JSONObject value) {
+        return !factory.isNull(value) && value.isEmpty();
+    }
+
+    @Override
     protected ValueFactory<
             Object,
             Object,
