@@ -36,10 +36,7 @@ jobs:
         name: jsonurl-maven-repository
         path: snapshot/*
     - name: Publish gh-pages
-      if: |
-          success()
-            && github.repository_owner == 'jsonurl'
-            && github.ref == 'refs/heads/main'
+      if: ${{ success() && github.repository_owner == 'jsonurl' && github.ref == 'refs/heads/main' }}
       run: >
            script/deploy_ghpages.sh
            'doc: Update by action ${{ github.workflow }}.${{ github.job }}/${{ github.run_id }} on behalf of ${{ github.actor }} for ${{ github.event_name }} ${{ github.sha }}'
@@ -50,7 +47,7 @@ jobs:
 
   matrix-build:
     needs: artifact
-    if: needs.artifact.result == 'success'
+    if: ${{ needs.artifact.result == 'success' }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -77,9 +74,7 @@ jobs:
 
   snyk:
     needs: artifact
-    if: |
-        needs.artifact.result == 'success'
-          && github.repository_owner == 'jsonurl'
+    if: ${{ needs.artifact.result == 'success' && github.repository_owner == 'jsonurl' && ( github.event_name == 'push' || github.event.pull_request.author_association == 'OWNER' || github.event.pull_request.author_association == 'MEMBER' || github.event.pull_request.author_association == 'COLLABORATOR' ) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -90,9 +85,7 @@ jobs:
 
   sonarcloud:
     needs: artifact
-    if: |
-        needs.artifact.result == 'success'
-          && github.repository_owner == 'jsonurl'
+    if: ${{ needs.artifact.result == 'success' && github.repository_owner == 'jsonurl' && ( github.event_name == 'push' || github.event.pull_request.author_association == 'OWNER' || github.event.pull_request.author_association == 'MEMBER' || github.event.pull_request.author_association == 'COLLABORATOR' ) }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
