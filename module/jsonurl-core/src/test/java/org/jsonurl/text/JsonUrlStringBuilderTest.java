@@ -151,6 +151,21 @@ class JsonUrlStringBuilderTest {
         assertCodePoint(expected, codePoint);
     }
 
+    @ParameterizedTest
+    @ValueSource(chars = {
+        '+', '(', ')', ',', ':', '!'
+    })
+    void testAddCodePointEscaped(char codePoint) throws IOException {
+        String actual = new JsonUrlStringBuilder(JsonUrlOption.AQF)
+            .addCodePoint(codePoint)
+            .build();
+
+        assertEquals(
+            "!" + codePoint,
+            actual,
+            "addCodePoint(AQF," + codePoint + ") is escaped");
+    }
+
     @Test
     void testEmptyObject() throws IOException {
         final String testName = "empty object";

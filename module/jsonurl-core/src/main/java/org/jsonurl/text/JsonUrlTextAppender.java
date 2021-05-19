@@ -384,7 +384,11 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
             dest.append("%27");
 
         } else {
-            PercentCodec.encode(dest, codePoint, HEXENCODE_UNQUOTED, 0);
+            PercentCodec.encode(
+                dest,
+                codePoint,
+                optionAQF(options) ? HEXENCODE_AQF : HEXENCODE_UNQUOTED,
+                0);
         }
     }
 
