@@ -326,6 +326,14 @@ class JsonUrlIteratorTest {
                         JsonUrlEvent.END_STREAM}),
 
                 new EventTest(
+                    EnumSet.of(JsonUrlOption.IMPLIED_STRING_LITERALS),
+                    "!e",
+                    new Object[] {
+                        JsonUrlEvent.VALUE_STRING,
+                        "",
+                        JsonUrlEvent.END_STREAM}),
+
+                new EventTest(
                         "!e!e",
                         SyntaxException.class),
 
@@ -485,6 +493,14 @@ class JsonUrlIteratorTest {
                         JsonUrlEvent.END_STREAM}),
 
                 new EventTest(
+                    "!e",
+                    new Object[] {
+                        JsonUrlEvent.VALUE_STRING,
+                        "!e",
+                        JsonUrlEvent.END_STREAM}),
+
+                new EventTest(
+                    EnumSet.of(JsonUrlOption.IMPLIED_STRING_LITERALS),
                     "!e",
                     new Object[] {
                         JsonUrlEvent.VALUE_STRING,

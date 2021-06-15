@@ -250,6 +250,15 @@ class JsonUrlStringBuilderTest {
             testName);
 
         assertEquals(
+            "!e",
+            new JsonUrlStringBuilder(
+                    JsonUrlOption.COERCE_NULL_TO_EMPTY_STRING,
+                    JsonUrlOption.IMPLIED_STRING_LITERALS,
+                    JsonUrlOption.AQF)
+                .add((String)null).build(),
+            testName);
+
+        assertEquals(
             "",
             new JsonUrlStringBuilder(
                     JsonUrlOption.AQF,
