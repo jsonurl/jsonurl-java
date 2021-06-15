@@ -183,7 +183,7 @@ public interface JsonTextBuilder<R> {
      * @see #add(CharSequence, int, int, boolean)
      */
     default JsonTextBuilder<R> add(CharSequence text) throws IOException {
-        return add(text, 0, text.length(), false);
+        return add(text, 0, text == null ? 0 : text.length(), false);
     }
 
     /**
