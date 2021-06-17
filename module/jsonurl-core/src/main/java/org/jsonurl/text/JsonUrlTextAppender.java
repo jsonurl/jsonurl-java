@@ -89,7 +89,7 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
      * @param dest JSON&#x2192;URL text destination
      * @param options Set of JsonUrlOptions
      */
-    public JsonUrlTextAppender(
+    protected JsonUrlTextAppender(
             A dest,
             CompositeType impliedType,
             Set<JsonUrlOption> options) {
@@ -504,7 +504,14 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
                 dest.append(text, start, end);
 
             } else if (optionAQF(options)) {
-                dest.append('!').append(text, start, end);
+                dest.append('!');
+
+                if (contains(text, start, end, '+')) {
+                    encodeAqf(dest, text, start, end);
+
+                } else {
+                    dest.append(text, start, end);                    
+                }
 
             } else if (contains(text, start, end, '+')) {
                 encode(dest, text, start, end, false, false);
