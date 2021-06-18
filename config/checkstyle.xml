@@ -191,7 +191,7 @@ Checkstyle configuration that checks the Google coding conventions from Google J
     </module>
     <module name="JavadocMethod">
       <property name="allowedAnnotations" value="Override, Test"/>
-      <property name="scope" value="public"/>
+      <property name="accessModifiers" value="public"/>
       <property name="allowMissingParamTags" value="true"/>
       <property name="allowMissingReturnTag" value="true"/>
       <property name="tokens" value="METHOD_DEF, CTOR_DEF, ANNOTATION_FIELD_DEF"/>

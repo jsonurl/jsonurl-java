@@ -80,7 +80,7 @@ public class JsonUrlCharSequence extends AbstractCharIterator
      * @param name the resource {@link Resource#getName() name}
      * @param text a valid CharSequence
      * @param limit maximum number of parsed characters before a
-     *  {@link org.jsonurl.LimitException LimitException} is thrown.
+     *     {@link org.jsonurl.LimitException LimitException} is thrown.
      */
     public JsonUrlCharSequence(String name, CharSequence text, long limit) {
         this(name, text, 0, text.length(), limit);
@@ -93,7 +93,7 @@ public class JsonUrlCharSequence extends AbstractCharIterator
      * @param offset starting offset
      * @param length stop when this length is reached
      * @param limit maximum number of parsed characters before a
-     *  {@link org.jsonurl.LimitException LimitException} is thrown.
+     *     {@link org.jsonurl.LimitException LimitException} is thrown.
      */
     public JsonUrlCharSequence(
             String name,

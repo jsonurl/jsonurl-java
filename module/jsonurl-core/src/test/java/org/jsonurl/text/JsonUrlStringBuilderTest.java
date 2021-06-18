@@ -530,10 +530,10 @@ class JsonUrlStringBuilderTest {
     @ParameterizedTest
     @Tag("exception")
     @ValueSource(strings = {
-            Character.MIN_LOW_SURROGATE + "" + Character.MIN_HIGH_SURROGATE, // NOPMD
-            Character.MIN_HIGH_SURROGATE + "", // NOPMD
-            Character.MIN_HIGH_SURROGATE + "" + Character.MIN_HIGH_SURROGATE, // NOPMD
-            Character.MAX_HIGH_SURROGATE + "" + (Character.MAX_LOW_SURROGATE + 1), // NOPMD
+        Character.MIN_LOW_SURROGATE + "" + Character.MIN_HIGH_SURROGATE, // NOPMD
+        Character.MIN_HIGH_SURROGATE + "", // NOPMD
+        Character.MIN_HIGH_SURROGATE + "" + Character.MIN_HIGH_SURROGATE, // NOPMD
+        Character.MAX_HIGH_SURROGATE + "" + (Character.MAX_LOW_SURROGATE + 1), // NOPMD
     })
     void testExceptionUtf8(String text) throws IOException {
         assertThrows(

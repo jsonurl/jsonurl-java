@@ -208,12 +208,12 @@ public abstract class AbstractParseTest<
 
         @ParameterizedTest
         @ValueSource(strings = {
-                "(1)",
-                "(a(",
-                "(a:",
-                "(a:b(",
-                "(a:b,a",
-                "(a:b,c&)",
+            "(1)",
+            "(a(",
+            "(a:",
+            "(a:b(",
+            "(a:b,a",
+            "(a:b,c&)",
         })
         void testExceptionObject(String text) {
             assertThrows(
@@ -228,8 +228,8 @@ public abstract class AbstractParseTest<
 
         @ParameterizedTest
         @ValueSource(strings = {
-                "(a:b)",
-                "(a(",
+            "(a:b)",
+            "(a(",
         })
         void testExceptionArray(String text) {
             assertThrows(
@@ -802,10 +802,10 @@ public abstract class AbstractParseTest<
         
         @ParameterizedTest
         @ValueSource(strings = {
-                HELLO,
-                "t", "tr", "tru", "True", "tRue", "trUe", "truE",
-                "f", "fa", "fal", "fals", "False", "fAlse", "faLse", "falSe", "falsE",
-                "n", "nu", "nul", "Null", "nUll", "nuLl", "nulL",
+            HELLO,
+            "t", "tr", "tru", "True", "tRue", "trUe", "truE",
+            "f", "fa", "fal", "fals", "False", "fAlse", "faLse", "falSe", "falsE",
+            "n", "nu", "nul", "Null", "nUll", "nuLl", "nulL",
         })
         void testString(String text) throws IOException {
             assertParse(text, getFactoryString(text));
@@ -865,13 +865,13 @@ public abstract class AbstractParseTest<
             // https://www.piday.org/million/
             //
             "3.14159265358979323846264338327950288419716939937510582097494459230781"
-            + "64062862089986280348253421170679821480865132823066470938446095505822"
-            + "31725359408128481117450284102701938521105559644622948954930381964428"
-            + "81097566593344612847564823378678316527120190914564856692346034861045"
-            + "43266482133936072602491412737245870066063155881748815209209628292540"
-            + "91715364367892590360011330530548820466521384146951941511609433057270"
-            + "36575959195309218611738193261179310511854807446237996274956735188575"
-            + "2724891227938183011949"
+                + "64062862089986280348253421170679821480865132823066470938446095505822"
+                + "31725359408128481117450284102701938521105559644622948954930381964428"
+                + "81097566593344612847564823378678316527120190914564856692346034861045"
+                + "43266482133936072602491412737245870066063155881748815209209628292540"
+                + "91715364367892590360011330530548820466521384146951941511609433057270"
+                + "36575959195309218611738193261179310511854807446237996274956735188575"
+                + "2724891227938183011949"
         })
         void testMathContext(String text) throws IOException {
             if (factory instanceof BigMathProvider) {
