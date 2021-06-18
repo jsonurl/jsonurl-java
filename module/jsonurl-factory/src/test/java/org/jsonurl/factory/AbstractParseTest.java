@@ -77,8 +77,16 @@ import org.junit.jupiter.params.provider.ValueSource;
     // though it is generally good to avoid duplicate literals,
     // inline literals in unit tests often makes them much easier to read
     //
-    "PMD.AvoidDuplicateLiterals"
+    "PMD.AvoidDuplicateLiterals",
+
+    //
+    // these are really false positives. Only the parse method can actually
+    // throw the exception being tested, so there's no danger that the test
+    // result would be misleading.
+    //
+    "java:S5778"
 })
+
 public abstract class AbstractParseTest<
         V,
         C extends V,

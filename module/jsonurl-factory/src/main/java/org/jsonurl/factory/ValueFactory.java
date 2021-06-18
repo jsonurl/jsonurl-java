@@ -40,6 +40,7 @@ import org.jsonurl.text.NumberText;
  * @author David MacCormack
  * @since 2019-09-01
  */
+@SuppressWarnings({"PMD.GenericsNaming", "java:S119"}) // See SuppressWarnings.md
 public interface ValueFactory<
         V,
         C extends V,
@@ -111,6 +112,7 @@ public interface ValueFactory<
      * @param <N> null type
      * @param <S> string type
      */
+    @SuppressWarnings({"PMD.GenericsNaming", "java:S119"}) // See SuppressWarnings.md
     interface BigMathFactory<
         V,
         C extends V,

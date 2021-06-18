@@ -110,11 +110,15 @@ public class ParseException extends RuntimeException {
     /**
      * Exception type description.
      */
+    @SuppressWarnings(
+        // false positive; It's overridden by subclasses
+        "java:S3400")
     protected String typeDescription() {
         return "parse error";
     }
 
     @Override
+    @SuppressWarnings("java:S1117") // See SuppressWarnings.md
     public String toString() {
         StringBuilder buf = new StringBuilder(64);
 

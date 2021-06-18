@@ -468,12 +468,18 @@ public class NumberBuilder implements NumberText { // NOPMD
      * @param stop an index
      * @return true if the CharSequence was successfully parsed
      */
-    public boolean parse(//NOPMD
+    @SuppressWarnings({
+        // See SuppressWarnings.md#complexity
+        "PMD.CyclomaticComplexity",
+        "PMD.NPathComplexity",
+        "java:S3776"
+    })
+    public boolean parse(
             CharSequence text,
             int start,
             int stop,
             Set<JsonUrlOption> options) {
-        int pos = this.start = start; //NOPMD
+        int pos = this.start = start;
 
         char c = text.charAt(start); //NOPMD
 
@@ -612,7 +618,17 @@ public class NumberBuilder implements NumberText { // NOPMD
      * @param options a valid set of options or {@code null}
      * @return true if the CharSequence is a JSON&#x2192;URL number
      */
-    public static boolean isNumber(//NOPMD
+    @SuppressWarnings({
+        // See SuppressWarnings.md#complexity
+        "PMD.CyclomaticComplexity",
+        "PMD.NPathComplexity",
+
+        //
+        // this is part of the public API, and I don't want to break it
+        //
+        "java:S1172"
+    })
+    public static boolean isNumber(
             CharSequence text,
             int start,
             int stop,
@@ -1104,9 +1120,15 @@ public class NumberBuilder implements NumberText { // NOPMD
      * @param stop stop index
      * @return a long
      */
+    @SuppressWarnings({
+        "PMD.ShortVariable",
+
+        // doing so is semantically meaningful in this case
+        "PMD.AvoidReassigningParameters"
+    })
     private static long parseLong(
             CharSequence text,
-            int start, // NOPMD
+            int start,
             int stop,
             int defaultValue) {
         
@@ -1115,9 +1137,9 @@ public class NumberBuilder implements NumberText { // NOPMD
         }
 
         long ret = 0;
-        boolean isneg = false; // NOPMD
+        boolean isneg = false;
 
-        char c = text.charAt(start); // NOPMD
+        char c = text.charAt(start);
         
         switch (c) {
         case MINUS:

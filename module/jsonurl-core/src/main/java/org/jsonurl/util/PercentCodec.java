@@ -67,8 +67,15 @@ public final class PercentCodec { // NOPMD - ClassNamingConventions
      * @return a UNICODE codepoint
      */
     @SuppressWarnings({
+        // See SuppressWarnings.md#complexity
         "PMD.CyclomaticComplexity",
-        "PMD.AvoidLiteralsInIfCondition"})
+        "PMD.NPathComplexity",
+        "java:S3776",
+        
+        // once you understand UTF-8 it's far more readable with the
+        // literals there
+        "PMD.AvoidLiteralsInIfCondition"
+    })
     public static int decode(
             CharIterator text,
             boolean decodePlus) throws IOException {
@@ -193,6 +200,10 @@ public final class PercentCodec { // NOPMD - ClassNamingConventions
      * @param start start position
      * @param end end position
      */
+    @SuppressWarnings({
+        // See SuppressWarnings.md
+        "PMD.AvoidReassigningLoopVariables", "java:S127"
+    })
     public static void encode(
             Appendable dest,
             String[] hexEncode,
@@ -209,7 +220,7 @@ public final class PercentCodec { // NOPMD - ClassNamingConventions
 
             final int codePoint;
             if (Character.isHighSurrogate(chr)) {
-                i++; // NOPMD - needed to encode properly
+                i++;
 
                 if (i == end) {
                     throw new MalformedInputException(i);

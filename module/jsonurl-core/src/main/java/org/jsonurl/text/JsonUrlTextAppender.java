@@ -396,26 +396,20 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
     /**
      * Test if the given text matches one of: true, false, null.
      */
-    @SuppressWarnings("PMD.CyclomaticComplexity")
+    @SuppressWarnings({"java:S3776", "PMD.CyclomaticComplexity"})
     private static boolean isTrueFalseNull(CharSequence text, int start, int end) {
         switch (end - start) {
         case 4:
             switch (text.charAt(0)) {
             case 't':
-                if (text.charAt(1) == 'r'
-                        && text.charAt(2) == 'u'
-                        && text.charAt(3) == 'e') {
-                    return true;
-                }
-                return false;
+                return text.charAt(1) == 'r'
+                    && text.charAt(2) == 'u'
+                    && text.charAt(3) == 'e';
 
             case 'n':
-                if (text.charAt(1) == 'u'
-                        && text.charAt(2) == 'l'
-                        && text.charAt(3) == 'l') {
-                    return true;
-                }
-                return false;
+                return text.charAt(1) == 'u'
+                    && text.charAt(2) == 'l'
+                    && text.charAt(3) == 'l';
 
             default:
                 return false;
@@ -424,14 +418,11 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
             // fall through
 
         case 5:
-            if (text.charAt(0) == 'f'
-                    && text.charAt(1) == 'a'
-                    && text.charAt(2) == 'l'
-                    && text.charAt(3) == 's'
-                    && text.charAt(4) == 'e') {
-                return true;
-            }
-            return false;
+            return text.charAt(0) == 'f'
+                && text.charAt(1) == 'a'
+                && text.charAt(2) == 'l'
+                && text.charAt(3) == 's'
+                && text.charAt(4) == 'e';
 
         default:
             return false;
@@ -467,7 +458,12 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
      * @param options a valid JsonUrlOptions or null
      * @return true if dest was modified
      */
-    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NPathComplexity"})
+    @SuppressWarnings({
+        // See SuppressWarnings.md#complexity
+        "PMD.CyclomaticComplexity",
+        "PMD.NPathComplexity",
+        "java:S3776"
+    })
     private static <T extends Appendable> boolean appendLiteral(
             T dest,
             CharSequence text,

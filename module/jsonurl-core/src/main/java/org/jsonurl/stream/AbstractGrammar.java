@@ -110,11 +110,6 @@ abstract class AbstractGrammar extends AbstractEventIterator {
      */
     private static final String INTERNAL_PARSE_ERROR = "internal parse error";
 
-    /*
-     * empty string.
-     *
-    private static final String EMPTY_STRING = "";*/
-
     /**
      * Parse state stack.
      */
@@ -135,7 +130,6 @@ abstract class AbstractGrammar extends AbstractEventIterator {
      * Buffered "next" event value.
      */
     private JsonUrlEvent savedEventValue;
-    //private Deque<JsonUrlEvent> savedEventStack = new LinkedList<>();
 
     /**
      * Current parse/nesting depth.
@@ -153,7 +147,7 @@ abstract class AbstractGrammar extends AbstractEventIterator {
      * @param limits a valid JsonUrlLimits or null
      * @param options valid JsonUrlOptions or null
      */
-    public AbstractGrammar(
+    protected AbstractGrammar(
             CharIterator text,
             JsonUrlLimits limits,
             Set<JsonUrlOption> options) {

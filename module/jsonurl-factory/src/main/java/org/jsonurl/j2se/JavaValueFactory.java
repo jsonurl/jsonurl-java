@@ -25,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.jsonurl.BigMath;
+import org.jsonurl.BigMathProvider;
 import org.jsonurl.factory.ValueFactory;
 import org.jsonurl.text.NumberBuilder;
 import org.jsonurl.text.NumberText;
@@ -70,8 +71,8 @@ public interface JavaValueFactory extends ValueFactory.TransparentBuilder<
      */
     BigMathFactory BIGMATH32 = new BigMathFactory(
         MathContext.DECIMAL32,
-        BigMath.BIG_INTEGER32_BOUNDARY_NEG,
-        BigMath.BIG_INTEGER32_BOUNDARY_POS,
+        BigMathProvider.BIG_INTEGER32_BOUNDARY_NEG,
+        BigMathProvider.BIG_INTEGER32_BOUNDARY_POS,
         null);
     
     /**
@@ -79,8 +80,8 @@ public interface JavaValueFactory extends ValueFactory.TransparentBuilder<
      */
     BigMathFactory BIGMATH64 = new BigMathFactory(
         MathContext.DECIMAL64,
-        BigMath.BIG_INTEGER64_BOUNDARY_NEG,
-        BigMath.BIG_INTEGER64_BOUNDARY_POS,
+        BigMathProvider.BIG_INTEGER64_BOUNDARY_NEG,
+        BigMathProvider.BIG_INTEGER64_BOUNDARY_POS,
         null);
     
     /**
@@ -88,8 +89,8 @@ public interface JavaValueFactory extends ValueFactory.TransparentBuilder<
      */
     BigMathFactory BIGMATH128 = new BigMathFactory(
         MathContext.DECIMAL128,
-        BigMath.BIG_INTEGER128_BOUNDARY_NEG,
-        BigMath.BIG_INTEGER128_BOUNDARY_POS,
+        BigMathProvider.BIG_INTEGER128_BOUNDARY_NEG,
+        BigMathProvider.BIG_INTEGER128_BOUNDARY_POS,
         null);
 
     /**
@@ -129,7 +130,7 @@ public interface JavaValueFactory extends ValueFactory.TransparentBuilder<
             MathContext context,
             String bigIntegerBoundaryNeg,
             String bigIntegerBoundaryPos,
-            BigMath.BigIntegerOverflow bigIntegerOverflow) {
+            BigMathProvider.BigIntegerOverflow bigIntegerOverflow) {
 
             super(context,
                 bigIntegerBoundaryNeg,

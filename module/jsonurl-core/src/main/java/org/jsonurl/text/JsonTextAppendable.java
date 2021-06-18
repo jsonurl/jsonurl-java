@@ -29,5 +29,8 @@ package org.jsonurl.text;
  * @author David MacCormack
  * @since 2020-11-01
  */
+@SuppressWarnings(
+    // false positive - it's used by subclasses
+    "java:S2326")
 public interface JsonTextAppendable<A,R> extends JsonTextBuilder<R>, Appendable {
 }

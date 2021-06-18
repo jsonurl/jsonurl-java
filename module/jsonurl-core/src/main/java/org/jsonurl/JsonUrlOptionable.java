@@ -39,6 +39,7 @@ public interface JsonUrlOptionable {
     /**
      * Get the options from the given object, if possible.
      */
+    @SuppressWarnings("java:S1168") // See SuppressWarnings.md - !API!
     static Set<JsonUrlOption> getJsonUrlOptions(Object obj) {
         if (obj instanceof JsonUrlOptionable) {
             return ((JsonUrlOptionable)obj).options();
