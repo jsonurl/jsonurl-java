@@ -651,9 +651,9 @@ public abstract class AbstractParseTest<
                     newParser(newOptions(option)).parse("1e%2B1"),
                     desc);
 
-                // stringify("1e+1") -> string("1e%2B1")
+                // stringify("1e+1") -> string("1e!+1")
                 assertEquals(
-                    "!1e+1",
+                    "1e!+1",
                     new JsonUrlStringBuilder(
                         newOptions(option)).add("1e+1").build(),
                     desc);

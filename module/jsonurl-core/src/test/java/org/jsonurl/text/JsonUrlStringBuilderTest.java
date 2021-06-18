@@ -576,7 +576,7 @@ class JsonUrlStringBuilderTest {
         "n", "nu", "nul", "Null", "nUll", "nuLl", "nulL",
     })
     void testNonQuotedString(String text) throws IOException {
-        testValue(text, text, text, text, text);
+        testValue(text, text, text, text, text, text);
     }
 
     @ParameterizedTest
@@ -584,49 +584,59 @@ class JsonUrlStringBuilderTest {
         "true", "false", "null", "1", "1.0", "1e3", "1e-3",
     })
     void testQuotedString(String text) throws IOException {
-        testValue(text, text, '\'' + text + '\'', text, '!' + text);
+        testValue(text, text, '\'' + text + '\'', text, '!' + text, text);
     }
 
     @ParameterizedTest
     @CsvSource({
         //
         // text - a string literal
+        //
         // expected - with no options it determines that the plus needs to
         //     be encoded so that it doesn't look like a number
+        //
         // expectedISL - Plus needs to be encoded so it isn't decoded as a
         //     space
+        //
         // expectedAqf - this is a valid literal in the AQF syntax so
         //     the first character must be escaped.
         //
-        "1e+3,1e%2B3,1e%2B3,!1e+3",
+        // expectedISLAqf - the leading one is not escaped because it's
+        //      an implied string. However, the plus needs to be escaped so it
+        //      isn't interpreted as a space.
+        //
+        "1e+3,1e%2B3,1e%2B3,1e!+3,1e!+3",
     })
     void testEncodedString(
             String text,
             String expected,
             String expectedImpliedStringLiteral,
-            String expectedAqf) throws IOException {
+            String expectedAqf,
+            String expectedImpliedStringAqf) throws IOException {
 
         testValue(
                 text,
                 text,
                 expected,
                 expectedImpliedStringLiteral,
-                expectedAqf);
+                expectedAqf,
+                expectedImpliedStringAqf);
     }
 
     @Test
     @SuppressWarnings("PMD.AvoidDuplicateLiterals")
     void testEncodedString() throws IOException { // NOPMD - JUnitTestsShouldIncludeAssert
-        testValue("'hello", "%27hello", "%27hello", "'hello", "'hello");
-        testValue("hello,", "'hello,'", "'hello,'", "hello%2C", "hello!,");
-        testValue("hello, ", "'hello,+'", "'hello,+'", "hello%2C+", "hello!,+");
-        testValue("a b", "a+b", "a+b", "a+b", "a+b");
-        testValue("a(", "'a('", "'a('", "a%28", "a!(");
+        testValue("'hello", "%27hello", "%27hello", "'hello", "'hello", null);
+        testValue("hello,", "'hello,'", "'hello,'", "hello%2C", "hello!,", null);
+        testValue("hello, ", "'hello,+'", "'hello,+'", "hello%2C+", "hello!,+", null);
+        testValue("a b", "a+b", "a+b", "a+b", "a+b", null);
+        testValue("a(", "'a('", "'a('", "a%28", "a!(", null);
         testValue("bob's burgers", 
                 "bob's+burgers",
                 "bob's+burgers",
                 "bob's+burgers",
-                "bob's+burgers");
+                "bob's+burgers",
+                null);
     }
 
     @ParameterizedTest
@@ -666,7 +676,8 @@ class JsonUrlStringBuilderTest {
             String keyOutput,
             String nonKeyOutput,
             String nonKeyImpliedStringLiteralOutput,
-            String nonKeyAqfOutput) throws IOException {
+            String nonKeyAqfOutput,
+            String nonKeyImpliedStringAqfOutput) throws IOException {
         
         assertEquals(
             keyOutput,
@@ -698,5 +709,18 @@ class JsonUrlStringBuilderTest {
                .build(),
             nonKeyAqfOutput);
 
+        assertEquals(
+            coalesce(nonKeyImpliedStringAqfOutput, nonKeyAqfOutput),
+            new JsonUrlStringBuilder(
+                    JsonUrlOption.AQF,
+                    JsonUrlOption.IMPLIED_STRING_LITERALS)
+               .add(text, 0, text.length())
+               .build(),
+            coalesce(nonKeyImpliedStringAqfOutput, nonKeyAqfOutput));
+
+    }
+    
+    private static String coalesce(String a, String b) { // NOPMD - ShortVariable
+        return a == null ? b : a;
     }
 }
