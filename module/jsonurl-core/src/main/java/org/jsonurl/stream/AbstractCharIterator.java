@@ -89,7 +89,7 @@ public abstract class AbstractCharIterator implements CharIterator {
      * Create a new AbstractCharIterator.
      * @param name Resource {@link Resource#getName() name}
      * @param limit maximum number of parsed characters before a
-     *  {@link org.jsonurl.LimitException LimitException} is thrown. 
+     *     {@link org.jsonurl.LimitException LimitException} is thrown. 
      */
     public AbstractCharIterator(String name, long limit) {
         this.name = name;
