@@ -21,6 +21,7 @@ import java.math.MathContext;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsonurl.BigMath;
+import org.jsonurl.BigMathProvider;
 import org.jsonurl.factory.ValueFactory;
 import org.jsonurl.j2se.JavaValueFactory;
 import org.jsonurl.text.NumberBuilder;
@@ -54,8 +55,8 @@ public interface JsonOrgValueFactory extends ValueFactory.TransparentBuilder<
      */
     BigMathFactory BIGMATH32 = new BigMathFactory(
         MathContext.DECIMAL32,
-        BigMath.BIG_INTEGER32_BOUNDARY_NEG,
-        BigMath.BIG_INTEGER32_BOUNDARY_POS,
+        BigMathProvider.BIG_INTEGER32_BOUNDARY_NEG,
+        BigMathProvider.BIG_INTEGER32_BOUNDARY_POS,
         null);
     
     /**
@@ -63,8 +64,8 @@ public interface JsonOrgValueFactory extends ValueFactory.TransparentBuilder<
      */
     BigMathFactory BIGMATH64 = new BigMathFactory(
         MathContext.DECIMAL64,
-        BigMath.BIG_INTEGER64_BOUNDARY_NEG,
-        BigMath.BIG_INTEGER64_BOUNDARY_POS,
+        BigMathProvider.BIG_INTEGER64_BOUNDARY_NEG,
+        BigMathProvider.BIG_INTEGER64_BOUNDARY_POS,
         null);
     
     /**
@@ -72,8 +73,8 @@ public interface JsonOrgValueFactory extends ValueFactory.TransparentBuilder<
      */
     BigMathFactory BIGMATH128 = new BigMathFactory(
         MathContext.DECIMAL128,
-        BigMath.BIG_INTEGER128_BOUNDARY_NEG,
-        BigMath.BIG_INTEGER128_BOUNDARY_POS,
+        BigMathProvider.BIG_INTEGER128_BOUNDARY_NEG,
+        BigMathProvider.BIG_INTEGER128_BOUNDARY_POS,
         null);
 
     /**

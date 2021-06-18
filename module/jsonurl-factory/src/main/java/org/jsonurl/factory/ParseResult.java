@@ -29,11 +29,12 @@ import org.jsonurl.text.NumberText;
  * Used by Parser.parse() to separate the logic of parsing the event
  * stream and building a result using a ValueFactory.
  */
+@SuppressWarnings({"PMD.GenericsNaming", "java:S119"}) // See SuppressWarnings.md
 class ParseResult<V,
         C extends V,
-        ABT, // NOPMD - GenericsNaming
+        ABT,
         A extends C,
-        JBT, // NOPMD - GenericsNaming
+        JBT,
         J extends C,
         B extends V,
         M extends V,
@@ -282,7 +283,6 @@ class ParseResult<V,
         // means that the stack could have more than one element, and the
         // top element is not the result
         //
-        // return factoryValueStack.getLast();
         return valueStack.peek();
     }
 

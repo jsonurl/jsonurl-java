@@ -46,6 +46,7 @@ import org.jsonurl.stream.JsonUrlIterator;
  * @author David MacCormack
  * @since 2019-09-01
  */
+@SuppressWarnings({"PMD.GenericsNaming", "java:S119"}) // See SuppressWarnings.md
 public interface Parser<
         V,
         C extends V,
@@ -120,7 +121,7 @@ public interface Parser<
     default J parseObject(
             CharSequence text,
             JBT impliedObject) {
-        return (J)parseObject(text, 0, text.length(), impliedObject, null);
+        return parseObject(text, 0, text.length(), impliedObject, null);
     }
 
     /**

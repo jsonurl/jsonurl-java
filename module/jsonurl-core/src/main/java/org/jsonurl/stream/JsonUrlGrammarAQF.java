@@ -138,7 +138,12 @@ class JsonUrlGrammarAQF extends AbstractGrammar {
     }
 
     @Override
-    @SuppressWarnings("PMD.CyclomaticComplexity")
+    @SuppressWarnings({
+        "PMD.CyclomaticComplexity",
+        
+        // false positive
+        "java:S135"
+    })
     protected boolean readAndBufferLiteral() {
         final StringBuilder decodedText = this.decodedTextBuffer;
         decodedText.setLength(0);

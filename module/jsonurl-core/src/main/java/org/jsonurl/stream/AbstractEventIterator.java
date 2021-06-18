@@ -87,7 +87,7 @@ public abstract class AbstractEventIterator
      * Construct a new AbstractIterator.
      * @param text input text
      */
-    public AbstractEventIterator(
+    protected AbstractEventIterator(
             CharIterator text,
             JsonUrlLimits limits,
             Set<JsonUrlOption> options) {
@@ -168,6 +168,7 @@ public abstract class AbstractEventIterator
      *
      * @param type the type found during parse
      */
+    @SuppressWarnings("java:S1117") // See SuppressWarnings.md
     protected void checkResultType(ValueType type) {
         if (!doneTypeCheck) {
             doneTypeCheck = true;
@@ -191,6 +192,7 @@ public abstract class AbstractEventIterator
      *
      * @see #checkResultType(ValueType)
      */
+    @SuppressWarnings("java:S1117") // See SuppressWarnings.md
     protected void checkResultTypeIsComposite() {
         if (!doneTypeCheck) {
             doneTypeCheck = true;

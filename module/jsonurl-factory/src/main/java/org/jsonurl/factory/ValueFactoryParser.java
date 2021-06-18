@@ -31,6 +31,7 @@ import org.jsonurl.stream.JsonUrlIterator;
  * @author David MacCormack
  * @since 2019-09-01
  */
+@SuppressWarnings({"PMD.GenericsNaming", "java:S119"}) // See SuppressWarnings.md
 public class ValueFactoryParser<
         V,
         C extends V,

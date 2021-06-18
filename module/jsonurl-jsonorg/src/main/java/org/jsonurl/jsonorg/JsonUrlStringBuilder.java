@@ -31,6 +31,7 @@ import org.jsonurl.JsonUrlOption;
  * @author David MacCormack
  * @since 2020-11-01
  */
+@SuppressWarnings("java:S2176") // See SuppressWarnings.md
 public class JsonUrlStringBuilder extends org.jsonurl.text.JsonUrlStringBuilder {
 
     /**

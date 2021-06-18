@@ -81,7 +81,7 @@ public abstract class AbstractCharIterator implements CharIterator {
      * exception is thrown.
      * @param name Resource {@link Resource#getName() name}
      */
-    public AbstractCharIterator(String name) {
+    protected AbstractCharIterator(String name) {
         this(name, JsonUrlLimits.DEFAULT_MAX_PARSE_CHARS);
     }
 
@@ -91,7 +91,7 @@ public abstract class AbstractCharIterator implements CharIterator {
      * @param limit maximum number of parsed characters before a
      *     {@link org.jsonurl.LimitException LimitException} is thrown. 
      */
-    public AbstractCharIterator(String name, long limit) {
+    protected AbstractCharIterator(String name, long limit) {
         this.name = name;
         this.limit = limit;
     }

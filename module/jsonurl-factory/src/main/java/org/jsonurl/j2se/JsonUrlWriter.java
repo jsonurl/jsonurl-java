@@ -53,13 +53,12 @@ public final class JsonUrlWriter { // NOPMD
     /**
      * Write the given Java Object as JSON&#x2192;URL text.
      * 
-     * @param <A> Accumulator type
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param value null or Java Object
      * @return true if dest was modified
      */
-    public static <A,R> boolean write(// NOPMD
+    public static <R> boolean write(
             JsonTextBuilder<R> dest,
             Object value) throws IOException {
         return write(dest, getJsonUrlOptions(dest), value);
@@ -68,14 +67,19 @@ public final class JsonUrlWriter { // NOPMD
     /**
      * Write the given Java Object as JSON&#x2192;URL text.
      * 
-     * @param <A> Accumulator type
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param value null or Java Object
      * @param options a valid JsonUrlOptions or null
      * @return true if dest was modified
      */
-    public static <A,R> boolean write(// NOPMD
+    @SuppressWarnings({
+        // See SuppressWarnings.md#complexity
+        "PMD.CyclomaticComplexity",
+        "PMD.NPathComplexity",
+        "java:S3776"
+    })
+    public static <R> boolean write(
             JsonTextBuilder<R> dest,
             Set<JsonUrlOption> options,
             Object value) throws IOException {
@@ -153,13 +157,12 @@ public final class JsonUrlWriter { // NOPMD
     /**
      * Write the given Map as JSON&#x2192;URL text.
      * 
-     * @param <A> Accumulator type
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param value null or Java Object
      * @return true if dest was modified
      */
-    public static <A,R> boolean write(
+    public static <R> boolean write(
             JsonTextBuilder<R> dest,
             Map<?,?> value) throws IOException {
         return write(dest, getJsonUrlOptions(dest), value);
@@ -168,14 +171,13 @@ public final class JsonUrlWriter { // NOPMD
     /**
      * Write the given Map as JSON&#x2192;URL text.
      * 
-     * @param <A> Accumulator type
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param value null or Java Object
      * @param options a valid JsonUrlOptions or null
      * @return true if dest was modified
      */
-    public static <A,R> boolean write(
+    public static <R> boolean write(
             JsonTextBuilder<R> dest,
             Set<JsonUrlOption> options,
             Map<?,?> value) throws IOException {
@@ -212,7 +214,7 @@ public final class JsonUrlWriter { // NOPMD
         return ret;
     }
     
-    private static <A,R> boolean write(
+    private static <R> boolean write(
             JsonTextBuilder<R> dest,
             Set<JsonUrlOption> options,
             CharSequence key,
@@ -236,13 +238,12 @@ public final class JsonUrlWriter { // NOPMD
     /**
      * Write the given Iterable as JSON&#x2192;URL text.
      * 
-     * @param <A> Accumulator type
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param value null or an iterable object
      * @return true if dest was modified
      */
-    public static <A,R> boolean write(
+    public static <R> boolean write(
             JsonTextBuilder<R> dest,
             Iterable<?> value) throws IOException {
         return write(dest, getJsonUrlOptions(dest), value);
@@ -252,13 +253,12 @@ public final class JsonUrlWriter { // NOPMD
      * Write the given Iterable as JSON&#x2192;URL text. The result
      * will represent the given iterable as an array.
      * 
-     * @param <A> Accumulator type
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param value null or an iterable object
      * @param options a valid JsonUrlOptions or null
      */
-    public static <A,R> boolean write(
+    public static <R> boolean write(
             JsonTextBuilder<R> dest,
             Set<JsonUrlOption> options,
             Iterable<?> value) throws IOException {
@@ -284,7 +284,7 @@ public final class JsonUrlWriter { // NOPMD
         return ret;
     }
     
-    private static <A,R> boolean write(
+    private static <R> boolean write(
             JsonTextBuilder<R> dest,
             Set<JsonUrlOption> options,
             Object value,
@@ -306,13 +306,12 @@ public final class JsonUrlWriter { // NOPMD
     /**
      * Write the given array as JSON&#x2192;URL text.
      * 
-     * @param <A> Accumulator type
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param array null or a valid array
      * @return true if dest was modified
      */
-    public static <A,R> boolean write(
+    public static <R> boolean write(
             JsonTextBuilder<R> dest,
             Set<JsonUrlOption> options,
             boolean... array) throws IOException {
@@ -337,13 +336,12 @@ public final class JsonUrlWriter { // NOPMD
     /**
      * Write the given array as JSON&#x2192;URL text.
      * 
-     * @param <A> Accumulator type
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param array null or a valid array
      * @return true if dest was modified
      */
-    public static <A,R> boolean write(
+    public static <R> boolean write(
             JsonTextBuilder<R> dest,
             Set<JsonUrlOption> options,
             byte... array) throws IOException {
@@ -368,13 +366,18 @@ public final class JsonUrlWriter { // NOPMD
     /**
      * Write the given array as JSON&#x2192;URL text.
      * 
-     * @param <A> Accumulator type
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param array null or a valid array
      * @return true if dest was modified
      */
-    public static <A,R> boolean write(// NOPMD - CyclomaticComplexity
+    @SuppressWarnings({
+        // See SuppressWarnings.md
+        "PMD.CyclomaticComplexity",
+        "PMD.AvoidReassigningLoopVariables",
+        "java:S127"
+    })
+    public static <R> boolean write(
             JsonTextBuilder<R> dest,
             Set<JsonUrlOption> options,
             char... array) throws IOException {
@@ -401,7 +404,7 @@ public final class JsonUrlWriter { // NOPMD
             int codePoint;
 
             if (Character.isHighSurrogate(chr)) {
-                i++; // NOPMD - consumed two characters
+                i++; // consumed two characters
 
                 if (i == length) {
                     throw new MalformedInputException(i);
@@ -430,13 +433,12 @@ public final class JsonUrlWriter { // NOPMD
     /**
      * Write the given array as JSON&#x2192;URL text.
      * 
-     * @param <A> Accumulator type
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param array null or a valid array
      * @return true if dest was modified
      */
-    public static <A,R> boolean write(
+    public static <R> boolean write(
             JsonTextBuilder<R> dest,
             Set<JsonUrlOption> options,
             double... array) throws IOException {
@@ -462,13 +464,12 @@ public final class JsonUrlWriter { // NOPMD
     /**
      * Write the given array as JSON&#x2192;URL text.
      * 
-     * @param <A> Accumulator type
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param array null or a valid array
      * @return true if dest was modified
      */
-    public static <A,R> boolean write(
+    public static <R> boolean write(
             JsonTextBuilder<R> dest,
             Set<JsonUrlOption> options,
             float... array) throws IOException {
@@ -494,13 +495,12 @@ public final class JsonUrlWriter { // NOPMD
     /**
      * Write the given array as JSON&#x2192;URL text.
      * 
-     * @param <A> Accumulator type
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param array null or a valid array
      * @return true if dest was modified
      */
-    public static <A,R> boolean write(
+    public static <R> boolean write(
             JsonTextBuilder<R> dest,
             Set<JsonUrlOption> options,
             int... array) throws IOException {
@@ -526,13 +526,12 @@ public final class JsonUrlWriter { // NOPMD
     /**
      * Write the given array as JSON&#x2192;URL text.
      * 
-     * @param <A> Accumulator type
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param array null or a valid array
      * @return true if dest was modified
      */
-    public static <A,R> boolean write(
+    public static <R> boolean write(
             JsonTextBuilder<R> dest,
             Set<JsonUrlOption> options,
             long... array) throws IOException {
@@ -558,13 +557,12 @@ public final class JsonUrlWriter { // NOPMD
     /**
      * Write the given array as JSON&#x2192;URL text.
      * 
-     * @param <A> Accumulator type
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param array null or a valid array
      * @return true if dest was modified
      */
-    public static <A,R> boolean write(
+    public static <R> boolean write(
             JsonTextBuilder<R> dest,
             Set<JsonUrlOption> options,
             short... array) // NOPMD - AvoidUsingShortType
@@ -591,13 +589,12 @@ public final class JsonUrlWriter { // NOPMD
     /**
      * Write the given array as JSON&#x2192;URL text.
      * 
-     * @param <A> Accumulator type
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param array null or a valid array
      * @return true if dest was modified
      */
-    public static <A,R> boolean write(
+    public static <R> boolean write(
             JsonTextBuilder<R> dest,
             Object... array) throws IOException {
         return write(dest, getJsonUrlOptions(dest), array);
@@ -606,14 +603,13 @@ public final class JsonUrlWriter { // NOPMD
     /**
      * Write the given array as JSON&#x2192;URL text.
      * 
-     * @param <A> Accumulator type
      * @param <R> Result type
      * @param dest non-null JsonTextBuilder
      * @param array null or a valid array
      * @param options a valid JsonUrlOptions or null
      * @return true if dest was modified
      */
-    public static <A,R> boolean write(
+    public static <R> boolean write(
             JsonTextBuilder<R> dest,
             Set<JsonUrlOption> options,
             Object... array) throws IOException {
@@ -639,7 +635,7 @@ public final class JsonUrlWriter { // NOPMD
         return ret;
     }
 
-    private static <A,R> boolean writeNull(
+    private static <R> boolean writeNull(
             JsonTextBuilder<R> dest,
             Set<JsonUrlOption> options) throws IOException {
 
