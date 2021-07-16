@@ -27,6 +27,25 @@ import org.jsonurl.stream.JsonUrlIterator;
 
 /**
  * Concrete implementation of {@link Parser}.
+ *
+ * <h2>Concurrency</h2>
+ *
+ * <p>Each instance of {@code ValueFactoryParser} stores references to a
+ * {@link ValueFactory},
+ * a set of {@link org.jsonurl.JsonUrlOption JsonUrlOptions},
+ * and {@linkplain org.jsonurl.JsonUrlLimits JsonUrlLimits}.
+ * The state of each call to the {@link #parse(CharSequence)} method (or one
+ * of its variants) is local. That means it is technically safe to reuse a
+ * {@code ValueFactoryParser} across multiple threads. However, the parser does
+ * provide access to its set of {@link #options()}, via a reference to a
+ * mutable set. That means that it's possible to change the set by doing
+ * something like:
+ * <pre>JsonUrlParser p = ...;
+ *p.options().add(JsonUrlOption.SKIP_NULLS);</pre>
+ * Therefore, reusing a {@code ValueFactoryParser} is not recommended.
+ * Because this object it so lightweight, and you're unlikely to realize any
+ * real world benefit, you're better off simply creating a new instance each
+ * time you need one.
  * @author jsonurl.org
  * @author David MacCormack
  * @since 2019-09-01

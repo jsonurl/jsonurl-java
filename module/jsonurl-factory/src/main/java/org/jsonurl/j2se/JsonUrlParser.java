@@ -28,6 +28,9 @@ import org.jsonurl.factory.ValueFactoryParser;
 /**
  * A {@link org.jsonurl.factory.Parser Parser} bound to Java SE data types.
  *
+ * <p>See {@link org.jsonurl.factory.ValueFactoryParser ValueFactoryParser}
+ * for a note regarding concurrency.
+ *
  * @author jsonurl.org
  * @author David MacCormack
  * @since 2019-09-01
