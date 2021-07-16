@@ -35,6 +35,9 @@ import org.jsonurl.factory.ValueFactoryParser;
  * A <a href="https://jsonurl.org/">JSON&#x2192;URL</a> parser bound to the
  * JSON-P interface defined by JSR-374.
  *
+ * <p>See {@link org.jsonurl.factory.ValueFactoryParser ValueFactoryParser}
+ * for a note regarding concurrency.
+ *
  * @author jsonurl.org
  * @author David MacCormack
  * @since 2019-09-01
