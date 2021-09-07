@@ -1207,6 +1207,17 @@ class JsonUrlIteratorTest {
                     JsonUrlEvent.END_STREAM}),
 
             new EventTest(
+                EnumSet.of(
+                    JsonUrlOption.EMPTY_UNQUOTED_KEY,
+                    JsonUrlOption.EMPTY_UNQUOTED_VALUE,
+                    JsonUrlOption.NO_EMPTY_COMPOSITE),
+                "(:)",
+                new Object[] {
+                    JsonUrlEvent.START_OBJECT,
+                    JsonUrlEvent.END_OBJECT,
+                    JsonUrlEvent.END_STREAM}),
+
+            new EventTest(
                 JsonUrlOption.NO_EMPTY_COMPOSITE,
                 "(a:(:))",
                 new Object[] {
