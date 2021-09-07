@@ -1,5 +1,14 @@
 # ChangeLog (jsonurl-java)
 
+## v2.0.2
+
+### Bug Fixes
+
+*   Fix ampersand decode bug ([@dmaccormack](https://github.com/dmaccormack "Link to profile for user dmaccormack"))
+*   Fix bug in JsonUrlTestAppender.addCodePoint() ([@dmaccormack](https://github.com/dmaccormack "Link to profile for user dmaccormack"))
+*   Fix NPE when appending a null String ([@dmaccormack](https://github.com/dmaccormack "Link to profile for user dmaccormack"))
+*   Fix bug writing number-like strings that include plus, with AQF ([@dmaccormack](https://github.com/dmaccormack "Link to profile for user dmaccormack"))
+
 ## v2.0.1
 
 ### Overview
