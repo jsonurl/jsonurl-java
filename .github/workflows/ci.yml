@@ -24,7 +24,8 @@ jobs:
       uses: actions/setup-java@v2
       with:
         java-version: 8
-        distribution: 'zulu'
+        distribution: 'adopt'
+        cache: maven
     - name: Set artifact version
       run: script/version_snapshot.sh
       shell: bash
@@ -63,13 +64,7 @@ jobs:
       with:
         java-version: ${{ matrix.jdk }}
         distribution: ${{ matrix.distribution }}
-    - name: Cache Maven dependencies
-      timeout-minutes: 10
-      uses: actions/cache@v1
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-m2
+        cache: maven
     - name: Set artifact version
       run: script/version_snapshot.sh
       shell: bash
@@ -99,17 +94,11 @@ jobs:
       uses: actions/setup-java@v2
       with:
         java-version: 11
-        distribution: 'zulu'
+        distribution: 'adopt'
+        cache: maven
     - name: Set artifact version
       run: script/version_snapshot.sh
       shell: bash
-    - name: Cache Maven dependencies
-      timeout-minutes: 10
-      uses: actions/cache@v1
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-m2
     - name: SonarCloud scan of ${{ github.ref }}
       run: >
         mvn -P jacoco -B
