@@ -5,6 +5,8 @@ name: ci
 
 on:
   push:
+    branches-ignore:
+    - 'dependabot/**'
     paths-ignore:
     - '**.gitattributes'
     - '**.gitignore'
@@ -38,7 +40,7 @@ jobs:
         name: jsonurl-maven-repository
         path: snapshot/*
     - name: Publish gh-pages
-      if: ${{ success() && github.repository_owner == 'jsonurl' && github.ref == 'refs/heads/main' }}
+      if: ${{ success() && github.event.repository.fork == false && github.ref == 'refs/heads/main' }}
       run: >
            script/deploy_ghpages.sh
            'doc: Update by action ${{ github.workflow }}.${{ github.job }}/${{ github.run_id }} on behalf of ${{ github.actor }} for ${{ github.event_name }} ${{ github.sha }}'
@@ -73,7 +75,7 @@ jobs:
 
   snyk:
     needs: artifact
-    if: ${{ needs.artifact.result == 'success' && github.repository_owner == 'jsonurl' && ( github.event_name == 'push' || github.event.pull_request.author_association == 'OWNER' || github.event.pull_request.author_association == 'MEMBER' || github.event.pull_request.author_association == 'COLLABORATOR' ) }}
+    if: ${{ needs.artifact.result == 'success' && github.event.repository.fork == false && ( github.event_name == 'push' || github.event.pull_request.author_association == 'OWNER' || github.event.pull_request.author_association == 'MEMBER' || github.event.pull_request.author_association == 'COLLABORATOR' ) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -84,7 +86,7 @@ jobs:
 
   sonarcloud:
     needs: artifact
-    if: ${{ needs.artifact.result == 'success' && github.event.repository.fork == false && github.event.pusher.name != 'dependabot[bot]' && ( github.event_name == 'push' || github.event.pull_request.author_association == 'OWNER' || github.event.pull_request.author_association == 'MEMBER' || github.event.pull_request.author_association == 'COLLABORATOR' ) }}
+    if: ${{ needs.artifact.result == 'success' && github.event.repository.fork == false && ( github.event_name == 'push' || github.event.pull_request.author_association == 'OWNER' || github.event.pull_request.author_association == 'MEMBER' || github.event.pull_request.author_association == 'COLLABORATOR' ) }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
