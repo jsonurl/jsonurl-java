@@ -76,6 +76,7 @@ public final class JsonUrlWriter { // NOPMD
     @SuppressWarnings({
         // See SuppressWarnings.md#complexity
         "PMD.CyclomaticComplexity",
+        "PMD.CognitiveComplexity",
         "PMD.NPathComplexity",
         "java:S3776"
     })
@@ -374,6 +375,7 @@ public final class JsonUrlWriter { // NOPMD
     @SuppressWarnings({
         // See SuppressWarnings.md
         "PMD.CyclomaticComplexity",
+        "PMD.CognitiveComplexity",
         "PMD.AvoidReassigningLoopVariables",
         "java:S127"
     })

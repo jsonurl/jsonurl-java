@@ -73,6 +73,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 @SuppressWarnings({
     "checkstyle:AbbreviationAsWordInName",
 
+    // yup, I have a lot of tests
+    "PMD.ExcessiveClassLength",
+
     //
     // though it is generally good to avoid duplicate literals,
     // inline literals in unit tests often makes them much easier to read
@@ -604,7 +607,8 @@ public abstract class AbstractParseTest<
 
             assertEquals(
                 factory.getString(EMPTY_STRING),
-                newParser(JsonUrlOption.EMPTY_UNQUOTED_VALUE).parse(text));
+                newParser(JsonUrlOption.EMPTY_UNQUOTED_VALUE).parse(text),
+                "empty string with option EMPTY_UNQUOTED_VALUE");
 
             assertEquals(
                 factory.getString(text),
@@ -897,7 +901,11 @@ public abstract class AbstractParseTest<
             }
         }
 
-        @SuppressWarnings("PMD.CyclomaticComplexity")
+        @SuppressWarnings({
+            // See SuppressWarnings.md
+            "PMD.CyclomaticComplexity",
+            "PMD.CognitiveComplexity"
+        })
         void testBigInteger(
                 String text,
                 MathContext mctx,
@@ -1370,7 +1378,9 @@ public abstract class AbstractParseTest<
                 makeImplied(text),
                 factory.newObjectBuilder());
             
-            assertTrue(isEqual(expectedObject, actualObject));
+            assertTrue(
+                isEqual(expectedObject, actualObject),
+                "empty implied object");
             
             A expectedArray = factory.newArray(factory.newArrayBuilder());
 
@@ -1378,7 +1388,9 @@ public abstract class AbstractParseTest<
                 makeImplied(text),
                 factory.newArrayBuilder());
             
-            assertTrue(isEqual(expectedArray, actualArray));
+            assertTrue(
+                isEqual(expectedArray, actualArray),
+                "empty implied array");
         }
 
         private void assertObjectWfu(String text, J actual) {

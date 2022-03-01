@@ -325,6 +325,8 @@ class JsonUrlWriterTest {
     }
     
     private Map<?,?> newNonStringMap() {
+        // It's not used concurrently
+        @SuppressWarnings("PMD.UseConcurrentHashMap")
         Map<Object, Object> ret = new HashMap<>(); 
         ret.put(new Object(), new Object());
         return ret;
