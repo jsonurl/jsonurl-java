@@ -70,6 +70,7 @@ public final class PercentCodec { // NOPMD - ClassNamingConventions
         // See SuppressWarnings.md#complexity
         "PMD.CyclomaticComplexity",
         "PMD.NPathComplexity",
+        "PMD.CognitiveComplexity",
         "java:S3776",
         
         // once you understand UTF-8 it's far more readable with the

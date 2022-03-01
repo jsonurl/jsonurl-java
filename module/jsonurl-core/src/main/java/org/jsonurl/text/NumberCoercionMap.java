@@ -55,11 +55,15 @@ import java.util.concurrent.atomic.LongAdder;
  *      <td>{@link java.lang.Double Double}</td></tr>
  * </table>
  */
-final class NumberCoercionMap { //NOPMD - ClassNamingConventions
+final class NumberCoercionMap {
 
     /**
      * Static map of input type to coerced type.
      */
+    // access is guaranteed to be sync inside the static initializer, and it
+    // is read-only thereafter. There's no need for the additional overhead
+    // of ConcurrentHashMap here.
+    @SuppressWarnings("PMD.UseConcurrentHashMap")
     private static final Map<
             Class<? extends Number>,
             Class<? extends Number>> MAP = new HashMap<>();

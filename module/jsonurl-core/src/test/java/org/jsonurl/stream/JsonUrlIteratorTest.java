@@ -44,7 +44,10 @@ import org.junit.jupiter.params.provider.MethodSource;
  * @author David MacCormack
  * @since 2019-10-01
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({
+    "PMD.AvoidDuplicateLiterals",
+    "PMD.ExcessiveClassLength" // yup, I have a lot of tests
+})
 class JsonUrlIteratorTest {
 
     /** empty string. */
@@ -253,7 +256,10 @@ class JsonUrlIteratorTest {
         testEvents(test, jui);
     }
 
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
+    @SuppressWarnings({
+        "checkstyle:AbbreviationAsWordInName",
+        "PMD.ExcessiveMethodLength" // yup, I have a lot of tests
+    })
     static Stream<EventTest> testAQF() {
         return Stream.concat(COMMON_TESTS.parallelStream(),
             Arrays.stream(new EventTest[] {
@@ -428,7 +434,10 @@ class JsonUrlIteratorTest {
         testEvents(test, jui);
     }
 
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
+    @SuppressWarnings({
+        "checkstyle:AbbreviationAsWordInName",
+        "PMD.ExcessiveMethodLength" // yup, I have a lot of tests
+    })
     static Stream<EventTest> testNotAQF() {
         return Stream.concat(COMMON_TESTS.parallelStream(),
             Arrays.stream(new EventTest[] {

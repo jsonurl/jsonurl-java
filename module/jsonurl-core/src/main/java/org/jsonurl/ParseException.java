@@ -120,23 +120,23 @@ public class ParseException extends RuntimeException {
     @Override
     @SuppressWarnings("java:S1117") // See SuppressWarnings.md
     public String toString() {
-        StringBuilder buf = new StringBuilder(64);
+        final StringBuilder buf = new StringBuilder(64);
 
         buf.append("jsonurl ")
             .append(typeDescription())
             .append(": ")
             .append(getMessage());
 
-        int line = getLineNumber();
+        final int line = getLineNumber();
         if (line > -1) {
             buf.append(" at ").append(line);
             
-            int col = getColumn();
+            final int col = getColumn();
             if (col > -1) {
                 buf.append(':').append(col);
             }
         } else {
-            long off = getOffset();
+            final long off = getOffset();
             if (off > -1) {
                 buf.append(" at ").append(off);
             }            

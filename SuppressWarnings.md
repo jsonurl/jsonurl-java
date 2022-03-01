@@ -34,6 +34,7 @@ make it harder to follow the logic due to the additional indirection.
     // See SuppressWarnings.md#complexity
     "PMD.CyclomaticComplexity",
     "PMD.NPathComplexity",
+    "PMD.CognitiveComplexity",
     "java:S3776"
 })
 ```
@@ -85,4 +86,11 @@ couldn't find a PMD parameter that allows me to change the regex.
 ```java
 @SuppressWarnings({"PMD.GenericsNaming", "java:S119"}) // See SuppressWarnings.md
 ```
+## Duplicate Literals
 
+Though it is generally good to avoid duplicate literals, inline literals in
+unit tests often makes them much easier to read.
+
+```java
+@SuppressWarnings("PMD.AvoidDuplicateLiterals") // See SuppressWarnings.md
+```

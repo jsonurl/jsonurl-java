@@ -121,6 +121,6 @@ public abstract class AbstractJsonApiWriteTest<
         V obj2 = vfp.parse(jsonUriText);
 
         String jsonText = valueToString(obj2);
-        assertEquals(text, jsonText);
+        assertEquals(text, jsonText, text);
     }
 }
