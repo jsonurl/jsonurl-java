@@ -124,6 +124,11 @@ public class NumberBuilder implements NumberText { // NOPMD
      * minus/dash.
      */
     private static final char PLUS = '+';
+
+    /**
+     * ASCII space.
+     */
+    private static final char SPACE = ' ';
     
     /**
      * Lookup table for exponent values.
@@ -382,7 +387,8 @@ public class NumberBuilder implements NumberText { // NOPMD
     private static NumberText.Exponent getExponentType(//NOPMD
             CharSequence text,
             int start,
-            int stop) {
+            int stop,
+            boolean spaceIsPlus) {
 
         if (stop <= start) {
             return NumberText.Exponent.NONE;
@@ -406,6 +412,11 @@ public class NumberBuilder implements NumberText { // NOPMD
         char c = text.charAt(i); //NOPMD
 
         switch (c) {
+        case SPACE:
+            if (!spaceIsPlus) {
+                return NumberText.Exponent.NONE;    
+            }
+            // fall through
         case PLUS:
             i++;
             if (i == stop) {
@@ -521,7 +532,7 @@ public class NumberBuilder implements NumberText { // NOPMD
             fractIndexStop = pos = digits(text, pos + 1, stop);
         }
 
-        exponentType = getExponentType(text, pos, stop);
+        exponentType = getExponentType(text, pos, stop, false);
 
         switch (exponentType) { // NOPMD - SwitchStmtsShouldHaveDefault
         case JUST_VALUE:
@@ -611,6 +622,27 @@ public class NumberBuilder implements NumberText { // NOPMD
 
     /**
      * Determine if the given CharSequence is a valid JSON&#x2192;URL number literal.
+     *
+     * <p>Convenience for {@link
+     * #isNumber(CharSequence, int, int, boolean, boolean, Set)
+     * isNumber(s, 0, stop, isNonFractional, false, options)}.
+     * @param text a valid CharSequence
+     * @param start an index
+     * @param stop an index
+     * @param options a valid set of options or {@code null}
+     * @return true if the CharSequence is a JSON&#x2192;URL number
+     */
+    public static boolean isNumber(
+            CharSequence text,
+            int start,
+            int stop,
+            boolean isNonFractional,
+            Set<JsonUrlOption> options) {
+        return isNumber(text, start, stop, isNonFractional, false, options);
+    }
+
+    /**
+     * Determine if the given CharSequence is a valid JSON&#x2192;URL number literal.
      * 
      * @param text a valid CharSequence
      * @param start an index
@@ -633,6 +665,7 @@ public class NumberBuilder implements NumberText { // NOPMD
             int start,
             int stop,
             boolean isNonFractional,
+            boolean spaceIsPlus,
             Set<JsonUrlOption> options) {
 
         int pos = start; //NOPMD - DataflowAnomalyAnalysis
@@ -677,7 +710,7 @@ public class NumberBuilder implements NumberText { // NOPMD
 
         final int expDigitSkip;
 
-        switch (getExponentType(text, pos, stop)) {
+        switch (getExponentType(text, pos, stop, spaceIsPlus)) {
         case JUST_VALUE:
             expDigitSkip = 1;
             pos = digits(text, pos + 1, stop);

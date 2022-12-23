@@ -520,6 +520,23 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
             }
             return true;
         }
+        
+        if (NumberBuilder.isNumber(text, start, end, false, true, options)) {
+            //
+            // Special handling if this would look like a number literal once
+            // the space is replaced with '+' 
+            //
+            if (optionAQF(options)) {
+                dest.append('!');
+                encodeAqf(dest, text, start, end);
+
+            } else {
+                dest.append('\'');
+                encode(dest, text, start, end, true, false);
+                dest.append('\'');
+            }
+            return true;
+        }
 
         if (optionAQF(options)) {
             encodeAqf(dest, text, start, end);

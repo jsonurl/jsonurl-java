@@ -527,6 +527,33 @@ class JsonUrlStringBuilderTest {
              expected);
     }
 
+    @Test
+    void testText7() throws IOException {
+        String expectedAqf = "(!1e+3:1)";
+        assertEquals(
+            expectedAqf,
+            new JsonUrlStringBuilder(JsonUrlOption.AQF)
+            .beginObject()
+            .addKey("1e 3")
+            .nameSeparator()
+            .add(1)
+            .endObject()
+            .build(),
+            expectedAqf);
+
+        String expected = "('1e+3':1)";
+        assertEquals(
+            expected,
+            new JsonUrlStringBuilder()
+            .beginObject()
+            .addKey("1e 3")
+            .nameSeparator()
+            .add(1)
+            .endObject()
+            .build(),
+            expected);
+    }
+
     @ParameterizedTest
     @Tag("exception")
     @ValueSource(strings = {
