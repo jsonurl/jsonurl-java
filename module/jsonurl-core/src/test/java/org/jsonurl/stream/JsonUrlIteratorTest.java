@@ -414,6 +414,17 @@ class JsonUrlIteratorTest {
                         "(hello)",
                         JsonUrlEvent.END_STREAM}),
 
+                new EventTest(
+                    "(!1e+1:!1e+1)",
+                    new Object[] {
+                        JsonUrlEvent.START_OBJECT,
+                        JsonUrlEvent.KEY_NAME,
+                        "1e 1",
+                        JsonUrlEvent.VALUE_STRING,
+                        "1e 1",
+                        JsonUrlEvent.END_OBJECT,
+                        JsonUrlEvent.END_STREAM}),
+
             }));
     }
 
@@ -605,6 +616,17 @@ class JsonUrlIteratorTest {
                     new Object[] {
                         JsonUrlEvent.VALUE_STRING,
                         "!(hello!)",
+                        JsonUrlEvent.END_STREAM}),
+
+                new EventTest(
+                    "('1e+1':'1e+1')",
+                    new Object[] {
+                        JsonUrlEvent.START_OBJECT,
+                        JsonUrlEvent.KEY_NAME,
+                        "1e 1",
+                        JsonUrlEvent.VALUE_STRING,
+                        "1e 1",
+                        JsonUrlEvent.END_OBJECT,
                         JsonUrlEvent.END_STREAM}),
 
             }));
@@ -1292,6 +1314,17 @@ class JsonUrlIteratorTest {
                     JsonUrlEvent.KEY_NAME,
                     "a",
                     JsonUrlEvent.START_OBJECT,
+                    JsonUrlEvent.END_OBJECT,
+                    JsonUrlEvent.END_STREAM}),
+
+            new EventTest(
+                "(1e+1:1e+1)",
+                new Object[] {
+                    JsonUrlEvent.START_OBJECT,
+                    JsonUrlEvent.KEY_NAME,
+                    "1e+1",
+                    JsonUrlEvent.VALUE_NUMBER,
+                    "1e+1",
                     JsonUrlEvent.END_OBJECT,
                     JsonUrlEvent.END_STREAM}),
 
