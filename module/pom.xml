@@ -88,7 +88,7 @@
 
     <checkstyle.config.file>config/checkstyle.xml</checkstyle.config.file>
     <checkstyle.config.module.location>../../${checkstyle.config.file}</checkstyle.config.module.location>
-    <pmd.version>6.43.0</pmd.version>
+    <pmd.version>6.53.0</pmd.version>
     <pmd.config.file>config/pmd-ruleset.xml</pmd.config.file>
     <pmd.config.module.location>../../${pmd.config.file}</pmd.config.module.location>
     <jacoco.minimum.coverage>0.80</jacoco.minimum.coverage>
