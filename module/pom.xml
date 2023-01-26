@@ -42,7 +42,7 @@
     <maven.compiler.source>${jdk.version}</maven.compiler.source>
     <maven.compiler.target>${jdk.version}</maven.compiler.target>
 
-    <maven.compiler.plugin>3.8.1</maven.compiler.plugin>
+    <maven.compiler.plugin>3.10.1</maven.compiler.plugin>
     <maven.jar.plugin>3.2.0</maven.jar.plugin>
     <maven.source.plugin>3.2.1</maven.source.plugin>
     <maven.surefire.plugin>2.22.2</maven.surefire.plugin>
