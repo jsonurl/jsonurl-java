@@ -52,7 +52,7 @@
     <maven.pmd.plugin>3.16.0</maven.pmd.plugin>
     <maven.jacoco.plugin>0.8.5</maven.jacoco.plugin>
     <maven.gpg.plugin>1.6</maven.gpg.plugin>
-    <maven.site.plugin>3.8.2</maven.site.plugin>
+    <maven.site.plugin>3.12.1</maven.site.plugin>
     <maven.doxia.plugin>[1.9,)</maven.doxia.plugin>
     <maven.project.info.reports.plugin>2.9</maven.project.info.reports.plugin>
     <maven.changelog.plugin>2.3</maven.changelog.plugin>
