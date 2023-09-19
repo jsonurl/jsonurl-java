@@ -67,7 +67,7 @@
 
         Doing so allows both to share the same config file.
     -->
-    <checkstyle.version>8.43</checkstyle.version>
+    <checkstyle.version>10.12.3</checkstyle.version>
 
     <nexus.url>https://oss.sonatype.org</nexus.url>
 
