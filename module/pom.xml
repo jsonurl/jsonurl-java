@@ -58,7 +58,7 @@
     <maven.changelog.plugin>2.3</maven.changelog.plugin>
     <maven.scm.publish.plugin>3.0.0</maven.scm.publish.plugin>
     <nexus.staging.plugin>1.6.8</nexus.staging.plugin>
-    <codehaus.versions.plugin>2.7</codehaus.versions.plugin>
+    <codehaus.versions.plugin>2.16.1</codehaus.versions.plugin>
     <sonar.maven.plugin>3.10.0.2594</sonar.maven.plugin>
     
     <!--
