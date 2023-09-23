@@ -738,6 +738,52 @@ class JsonUrlIteratorTest {
                     "&true",
                     JsonUrlEvent.END_STREAM}),
 
+            new EventTest(
+                "true%3D",
+                new Object[] {
+                    JsonUrlEvent.VALUE_STRING,
+                    "true=",
+                    JsonUrlEvent.END_STREAM}),
+
+            new EventTest(
+                "%3Dtrue",
+                new Object[] {
+                    JsonUrlEvent.VALUE_STRING,
+                    "=true",
+                    JsonUrlEvent.END_STREAM}),
+
+            new EventTest(
+                JsonUrlOption.IMPLIED_STRING_LITERALS,
+                "true%26",
+                new Object[] {
+                    JsonUrlEvent.VALUE_STRING,
+                    "true&",
+                    JsonUrlEvent.END_STREAM}),
+
+            new EventTest(
+                JsonUrlOption.IMPLIED_STRING_LITERALS,
+                "%26true",
+                new Object[] {
+                    JsonUrlEvent.VALUE_STRING,
+                    "&true",
+                    JsonUrlEvent.END_STREAM}),
+
+            new EventTest(
+                JsonUrlOption.IMPLIED_STRING_LITERALS,
+                "true%3D",
+                new Object[] {
+                    JsonUrlEvent.VALUE_STRING,
+                    "true=",
+                    JsonUrlEvent.END_STREAM}),
+
+            new EventTest(
+                JsonUrlOption.IMPLIED_STRING_LITERALS,
+                "%3Dtrue",
+                new Object[] {
+                    JsonUrlEvent.VALUE_STRING,
+                    "=true",
+                    JsonUrlEvent.END_STREAM}),
+
             // Array
             new EventTest(
                 "(true)",
