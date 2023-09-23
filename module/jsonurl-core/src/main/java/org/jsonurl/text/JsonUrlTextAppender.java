@@ -463,6 +463,7 @@ public abstract class JsonUrlTextAppender<A extends Appendable, R> // NOPMD
         "PMD.CyclomaticComplexity",
         "PMD.NPathComplexity",
         "PMD.CognitiveComplexity",
+        "PMD.ExcessiveMethodLength",
         "java:S3776"
     })
     private static <T extends Appendable> boolean appendLiteral(
