@@ -21,9 +21,9 @@ jobs:
   artifact:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up JDK 8
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@v3
       with:
         java-version: 8
         distribution: 'adopt'
@@ -34,7 +34,7 @@ jobs:
     - name: Stage artifacts
       run: mvn -B -DaltDeploymentRepository=ossrh::default::file:snapshot/ deploy
     - name: Package artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       if: success()
       with:
         name: jsonurl-maven-repository
@@ -56,13 +56,13 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        jdk: [8, 11, 13, 15, 16]
+        jdk: [8, 11, 17]
         distribution: [ 'zulu', 'adopt' ]
     name: Java ${{ matrix.jdk }} (${{ matrix.distribution }}) on ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up JDK  ${{ matrix.jdk }}
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@v3
       with:
         java-version: ${{ matrix.jdk }}
         distribution: ${{ matrix.distribution }}
@@ -78,7 +78,7 @@ jobs:
     if: ${{ needs.artifact.result == 'success' && github.event.repository.fork == false && ( github.event_name == 'push' || github.event.pull_request.author_association == 'OWNER' || github.event.pull_request.author_association == 'MEMBER' || github.event.pull_request.author_association == 'COLLABORATOR' ) }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Run Snyk to check ${{ github.ref }} for vulnerabilities
         uses: snyk/actions/maven-3-jdk-11@master
         env:
@@ -89,11 +89,11 @@ jobs:
     if: ${{ needs.artifact.result == 'success' && github.event.repository.fork == false && ( github.event_name == 'push' || github.event.pull_request.author_association == 'OWNER' || github.event.pull_request.author_association == 'MEMBER' || github.event.pull_request.author_association == 'COLLABORATOR' ) }}
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0        
     - name: Set up JDK 11
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@v3
       with:
         java-version: 11
         distribution: 'adopt'
