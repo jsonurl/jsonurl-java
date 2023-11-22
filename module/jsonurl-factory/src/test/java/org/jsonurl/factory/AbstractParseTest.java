@@ -1005,6 +1005,7 @@ public abstract class AbstractParseTest<
             BIG_INTEGER128_BOUNDARY_POS + '0',
             '-' + BIG_INTEGER128_BOUNDARY_NEG + '0',
         })
+        @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
         void testBigInteger(String text) throws IOException {
             if (!(factory instanceof BigMathProvider)) {
                 return;

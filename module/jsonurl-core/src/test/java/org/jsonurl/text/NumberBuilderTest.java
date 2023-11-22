@@ -418,6 +418,7 @@ class NumberBuilderTest { // NOPMD
     @ValueSource(strings = {
         Long.MAX_VALUE + "0",
     })
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void testOverflow(String text) {
         testOverflow(
             text,
