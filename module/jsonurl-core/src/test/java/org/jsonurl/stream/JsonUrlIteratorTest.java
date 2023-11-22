@@ -46,7 +46,8 @@ import org.junit.jupiter.params.provider.MethodSource;
  */
 @SuppressWarnings({
     "PMD.AvoidDuplicateLiterals",
-    "PMD.ExcessiveClassLength" // yup, I have a lot of tests
+    "PMD.ExcessiveClassLength", // yup, I have a lot of tests
+    "PMD.TestClassWithoutTestCases"
 })
 class JsonUrlIteratorTest {
 
@@ -235,7 +236,10 @@ class JsonUrlIteratorTest {
     
     @ParameterizedTest
     @MethodSource
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
+    @SuppressWarnings({
+        "checkstyle:AbbreviationAsWordInName",
+        "PMD.JUnitTestsShouldIncludeAssert"
+    })
     void testAQF(EventTest test) throws IOException {
         CharIterator text = new JsonUrlCharSequence(
             "testAQF",
@@ -419,7 +423,10 @@ class JsonUrlIteratorTest {
 
     @ParameterizedTest
     @MethodSource
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
+    @SuppressWarnings({
+        "checkstyle:AbbreviationAsWordInName",
+        "PMD.JUnitTestsShouldIncludeAssert"
+    })
     void testNotAQF(EventTest test) throws IOException {
         CharIterator text = new JsonUrlCharSequence(
             "testNotAqf",

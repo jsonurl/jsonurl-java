@@ -575,6 +575,7 @@ class JsonUrlStringBuilderTest {
         "f", "fa", "fal", "fals", "False", "fAlse", "faLse", "falSe", "falsE",
         "n", "nu", "nul", "Null", "nUll", "nuLl", "nulL",
     })
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void testNonQuotedString(String text) throws IOException {
         testValue(text, text, text, text, text, text);
     }
@@ -583,6 +584,7 @@ class JsonUrlStringBuilderTest {
     @ValueSource(strings = {
         "true", "false", "null", "1", "1.0", "1e3", "1e-3",
     })
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void testQuotedString(String text) throws IOException {
         testValue(text, text, '\'' + text + '\'', text, '!' + text, text);
     }
@@ -607,6 +609,7 @@ class JsonUrlStringBuilderTest {
         //
         "1e+3,1e%2B3,1e%2B3,1e!+3,1e!+3",
     })
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void testEncodedString(
             String text,
             String expected,

@@ -295,7 +295,7 @@ public class NumberBuilder implements NumberText { // NOPMD
             BigMathProvider mcp,
             Set<JsonUrlOption> options) {
         this.mcp = mcp;
-        parse(text, start, stop, options);
+        parse(text, start, stop, options); // NOPMD - ConstructorCallsOverridableMethod
     }
 
     /**

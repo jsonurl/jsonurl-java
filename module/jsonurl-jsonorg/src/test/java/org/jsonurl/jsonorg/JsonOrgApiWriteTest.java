@@ -31,6 +31,7 @@ import org.jsonurl.text.JsonTextBuilder;
  * @author David MacCormack
  * @since 2019-09-01
  */
+@SuppressWarnings("PMD.TestClassWithoutTestCases")
 public class JsonOrgApiWriteTest extends AbstractJsonApiWriteTest<
         Object,
         Object,
