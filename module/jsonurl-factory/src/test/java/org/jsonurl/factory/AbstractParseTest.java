@@ -618,13 +618,13 @@ public abstract class AbstractParseTest<
                     .parse(text),
                 text);
         }
-        
+
         @ParameterizedTest
         @NullSource
         @EnumSource(names = "AQF")
-        @DisplayName("testLiteral1: 1e+1")
-        void testLiteral1(JsonUrlOption option) throws IOException {
-            final String desc = "1e%2B1";
+        @DisplayName("testNumberLikeLiteral: 1e+1")
+        void testNumberLikeLiteral(JsonUrlOption option) throws IOException {
+            final String desc = "1e+1";
 
             // parse("1e+1") -> number(10)
             assertEquals(
@@ -634,7 +634,7 @@ public abstract class AbstractParseTest<
             
             // stringify("1e 1") -> string("1e+1")
             assertEquals(
-                "1e+1",
+                option == null ? "'1e+1'" : "!1e+1",
                 new JsonUrlStringBuilder(
                     newOptions(option)).add("1e 1").build(),
                 desc);
@@ -652,8 +652,8 @@ public abstract class AbstractParseTest<
         @ParameterizedTest
         @NullSource
         @EnumSource(names = "AQF")
-        @DisplayName("testLiteral2: 1e%2B1")
-        void testLiteral2(JsonUrlOption option) throws IOException {
+        @DisplayName("testNumberLikeStringLiteral: 1e%2B1")
+        void testNumberLikeStringLiteral(JsonUrlOption option) throws IOException {
             final String desc = "1e%2B1";
 
             if (option == JsonUrlOption.AQF) {
