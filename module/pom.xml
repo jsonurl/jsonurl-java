@@ -44,7 +44,7 @@
 
     <maven.compiler.plugin>3.11.0</maven.compiler.plugin>
     <maven.jar.plugin>3.2.0</maven.jar.plugin>
-    <maven.source.plugin>3.2.1</maven.source.plugin>
+    <maven.source.plugin>3.3.0</maven.source.plugin>
     <maven.surefire.plugin>3.2.3</maven.surefire.plugin>
     <maven.surefire.report.plugin>3.2.2</maven.surefire.report.plugin>
     <maven.javadoc.plugin>3.2.0</maven.javadoc.plugin>
