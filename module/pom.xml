@@ -50,7 +50,7 @@
     <maven.javadoc.plugin>3.2.0</maven.javadoc.plugin>
     <maven.checkstyle.plugin>3.3.0</maven.checkstyle.plugin>
     <maven.pmd.plugin>3.21.2</maven.pmd.plugin>
-    <maven.jacoco.plugin>0.8.5</maven.jacoco.plugin>
+    <maven.jacoco.plugin>0.8.11</maven.jacoco.plugin>
     <maven.gpg.plugin>1.6</maven.gpg.plugin>
     <maven.site.plugin>3.12.1</maven.site.plugin>
     <maven.doxia.plugin>[1.9,)</maven.doxia.plugin>
